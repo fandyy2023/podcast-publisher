@@ -253,8 +253,9 @@ menu.onclick = function(e) { e.stopPropagation(); };
             <a href="{{ url_for('edit_episode', show_id=show_id, ep_id=episode.id) }}" class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.9em;">Edit</a>
             <form action="{{ url_for('delete_episode', show_id=show_id, ep_id=episode.id) }}" method="post" onsubmit="return confirm('Вы уверены, что хотите удалить этот эпизод?');" style="margin:0;">
                 
-                    <img src="/assets/delete.svg" alt="Delete">
-                </button>
+                    <button type="submit" class="btn-danger" title="Удалить эпизод" style="background:none;border:none;padding:0;line-height:0;">
+                        <img src="/assets/delete.svg" alt="Delete">
+                    </button>
             </form>
         </div>
     </div>
@@ -270,6 +271,13 @@ menu.onclick = function(e) { e.stopPropagation(); };
             const containers = document.querySelectorAll('.episode-player-container');
 
             // --- Helper Functions ---
+            // Format seconds into mm:ss for tooltips
+            function formatDuration(totalSeconds) {
+                if (totalSeconds === undefined || totalSeconds === null) return 'N/A';
+                const mins = Math.floor(totalSeconds / 60);
+                const secs = Math.floor(totalSeconds % 60).toString().padStart(2, '0');
+                return mins + ':' + secs;
+            }
             function renderContent(container, data) {
                 let html = '';
                 const tooltip = container.closest('.episode-card').querySelector('.tooltip');
@@ -284,9 +292,23 @@ menu.onclick = function(e) { e.stopPropagation(); };
                                 </audio>
                             `;
                             tooltip.innerHTML = `
-                            <b>Файл:</b> ${data.filename || 'N/A'}<br>
-                            <b>Длительность:</b> ${data.duration ? (data.duration / 60).toFixed(1) + ' мин' : 'N/A'}<br>
-                            <b>Размер:</b> ${data.filesize ? (data.filesize / 1048576).toFixed(2) + ' МБ' : 'N/A'}
+                             ${(() => {
+                                 const filename = data.filename || 'N/A';
+                                 const duration = data.duration_seconds ? formatDuration(data.duration_seconds) : 'N/A';
+                                 const lines = [filename];
+                                 // Duration always second line
+                                 lines.push(duration);
+                                 if (data.bitrate) lines.push(data.bitrate);
+                                 if (data.samplerate) {
+                                     const khz = (parseInt(data.samplerate, 10) / 1000).toFixed(1).replace('.0', '');
+                                     lines.push(khz + ' kHz');
+                                 }
+                                 if (data.channels) {
+                                     const ch = parseInt(data.channels, 10);
+                                     lines.push(ch >= 2 ? 'Stereo' : 'Mono');
+                                 }
+                                 return lines.join('<br>');
+                             })() }
                             `;
                         } else {
                             html = `<div class="status-box status-failed">Аудиофайл не найден в метаданных.</div>`;

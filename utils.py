@@ -148,12 +148,37 @@ def get_audio_info(file_path: Path) -> dict:
             bit_rate_kbps = f"{int(int(audio_stream['bit_rate']) / 1000)} kbps"
 
         size_in_bytes = int(format_info.get("size", 0))
+        # Extract additional technical metadata
+        sample_rate_hz = None
+        channel_count = None
+        if audio_stream:
+            # sample_rate and channels may be strings, convert safely
+            sr_raw = audio_stream.get("sample_rate")
+            ch_raw = audio_stream.get("channels")
+            try:
+                sample_rate_hz = int(sr_raw) if sr_raw is not None else None
+            except (ValueError, TypeError):
+                sample_rate_hz = None
+            try:
+                channel_count = int(ch_raw) if ch_raw is not None else None
+            except (ValueError, TypeError):
+                channel_count = None
+
+        # Raw duration in seconds (as float) for easier maths on frontend
+        try:
+            duration_seconds = float(format_info.get("duration", "0"))
+        except (ValueError, TypeError):
+            duration_seconds = None
+
         info = {
             "filename": file_path.name,
             "bitrate": bit_rate_kbps,
             "size": format_size(size_in_bytes),
             "size_bytes": size_in_bytes,
             "duration": format_duration(format_info.get("duration", "0")),
+            "duration_seconds": duration_seconds,
+            "samplerate": sample_rate_hz,
+            "channels": channel_count,
             "format": format_info.get("format_name", "N/A"),
         }
         return info
