@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Podcast Shows</title>
+    <script src="/static/js/html2plaintext.js"></script>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <style>
+    .editable {
+        cursor: pointer;
+        transition: background 0.18s, box-shadow 0.18s;
+        border-radius: 5px;
+        padding: 2px 4px;
+    }
+    .inline-limit-alert {
+        font-size: 0.89em;
+        color: #b30000;
+        background: #fff6f6;
+        border-radius: 5px;
+        font-weight: 400;
+        padding: 2px 8px;
+        margin: 3px 0 0 0;
+        text-align: left;
+        max-width: 280px;
+        line-height: 1.25;
+        box-sizing: border-box;
+        display: none;
+    }
+    .editable:hover {
+        background: #f5f8ff;
+        box-shadow: 0 0 0 2px #c3d3f7;
+    }
+    
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f9f9fb; color: #222; margin: 0; }
+        .container { max-width: 800px; margin: 40px auto; background: #fff; border-radius: 14px; box-shadow: 0 2px 16px #0001; padding: 32px; }
+        h1 { color: #3a5fc8; }
+        .shows { display: flex; flex-wrap: wrap; gap: 32px; margin-top: 32px; }
+        .show-card { background: #f3f6fa; border-radius: 12px; box-shadow: 0 1px 8px #0001; padding: 24px; width: 320px; display: flex; flex-direction: column; align-items: center; }
+        .show-card img { width: 110px; height: 110px; object-fit: cover; border-radius: 9px; margin-bottom: 12px; }
+        .show-title { font-size: 1.25em; font-weight: 600; margin-bottom: 10px; text-align: center; }
+        .show-desc {
+    font-size: 1em;
+    color: #444;
+    margin-bottom: 18px;
+    text-align: center;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+    max-height: 4.7em;
+}
+        .show-actions { display: flex; gap: 12px; }
+        .show-link, .rss-link { padding: 7px 18px; border-radius: 6px; text-decoration: none; font-weight: 500; }
+        .show-link { background: #3a5fc8; color: #fff; }
+        .show-link:hover { background: #294b9b; }
+        .rss-link { background: #e9eefb; color: #3a5fc8; border: 1px solid #3a5fc8; }
+        .rss-link:hover { background: #d1e0fa; }
+        .add-btn { margin-top: 24px; display: inline-block; background: #2ecc40; color: #fff; padding: 10px 22px; border-radius: 7px; font-size: 1.1em; font-weight: 600; text-decoration: none; transition: background 0.2s; }
+        .add-btn:hover { background: #179b2e; }
+        .del-btn {
+            background: none;
+            border: none;
+            padding: 0 2px 0 10px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            transition: filter 0.15s;
+        }
+        .del-btn img {
+            width: 18px;
+            height: 18px;
+            vertical-align: middle;
+            filter: grayscale(0.2);
+            transition: filter 0.15s;
+        }
+        .del-btn:hover img {
+            filter: brightness(0.7) drop-shadow(0 0 2px #e74c3c33);
+        }
+        .cover-edit-container:hover .cover-edit-btn {
+            opacity: 1;
+        }
+        .cover-edit-btn {
+            opacity: 0;
+        }
+        .cover-edit-container:hover .show-cover-img {
+            filter: brightness(0.92);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Подкасты</h1>
+        <a class="add-btn" href="/shows/new">+ Добавить шоу</a>
+        <button id="toggle-view" style="margin-left:24px; padding:8px 18px; border-radius:7px; background:#eee; color:#3a5fc8; border:1px solid #3a5fc8; font-weight:600; cursor:pointer;">Переключить вид</button>
+        {% if languages %}
+        <div style="margin:22px 0 4px 0;">
+            <span style="font-size:1.07em;color:#444;margin-right:10px;">Язык:</span>
+            {% for lang in languages %}
+                <label style="margin-right:14px;font-weight:400;font-size:1em;">
+                    <input type="checkbox" class="lang-filter" value="{{ lang }}" style="vertical-align:middle;margin-right:4px;">{{ lang }}
+                </label>
+            {% endfor %}
+        </div>
+        {% endif %}
+        <div id="card-view" class="shows">
+            {% for show in shows %}
+            <div class="show-card" data-language="{{ show.language }}">
+                <div class="cover-edit-container" style="position:relative;display:inline-block;">
+                    <a href="/shows/{{ show.id }}/" style="display:block;"><img src="{{ show.image }}" alt="cover" class="show-cover-img" style="cursor:pointer;"></a>
+                    <button class="cover-edit-btn" title="Сменить обложку" style="position:absolute;bottom:8px;right:8px;background:rgba(255,255,255,0.85);border:none;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transition:opacity 0.2s;z-index:2;">
+                        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15.6 2.6a2.121 2.121 0 0 1 3 3l-9.7 9.7-4.1 1.1 1.1-4.1 9.7-9.7ZM17 0a4 4 0 0 0-2.8 1.2l-10 10A2 2 0 0 0 3.6 12.4l-1.1 4.1A2 2 0 0 0 5.5 19.5l4.1-1.1a2 2 0 0 0 1.2-1.2l10-10A4 4 0 0 0 17 0Z" fill="#3a5fc8"/></svg>
+                        <input type="file" class="cover-edit-input" accept="image/*" style="opacity:0;position:absolute;left:0;top:0;width:100%;height:100%;cursor:pointer;" title="Выбрать новую обложку">
+                    </button>
+                </div>
+                <div class="show-title"><span class="editable" data-field="title" data-showid="{{ show.id }}">{{ show.title }}</span></div>
+                <div class="show-desc"><span class="editable" data-field="description" data-showid="{{ show.id }}">{{ show.description | striptags }}</span></div>
+                <div class="show-actions">
+                    <a class="show-link" href="/shows/{{ show.id }}/">Подробнее</a>
+                    <a class="rss-link" href="/shows/{{ show.id }}/feed.xml" target="_blank">RSS</a>
+                    <button class="del-btn" data-showid="{{ show.id }}" aria-label="Удалить шоу"><img src="/assets/delete.svg" alt="Удалить"></button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <!-- Удалён неформатированный текстовый список, остались только карточки -->
+        <div id="list-view" style="display:none; margin-top:32px;">
+            <table style="width:100%; border-collapse:collapse;">
+                <thead>
+                    <tr style="background:#f3f6fa;">
+                        <th style="text-align:left; padding:10px 8px;">Название</th>
+                        <th style="text-align:left; padding:10px 8px;">Описание</th>
+                        <th style="text-align:left; padding:10px 8px;">Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for show in shows %}
+                    <tr style="border-bottom:1px solid #eee;" data-language="{{ show.language }}">
+                        <td style="padding:10px 8px; font-weight:600;"><span class="editable" data-field="title" data-showid="{{ show.id }}">{{ show.title }}</span></td>
+                        <td style="padding:10px 8px; color:#444;"><span class="editable" data-field="description" data-showid="{{ show.id }}">{{ show.description | striptags }}</span></td>
+                        <td style="padding:10px 8px;">
+                            <a class="show-link" style="padding:5px 14px;font-size:0.98em;" href="/shows/{{ show.id }}/">Подробнее</a>
+                            <a class="rss-link" style="padding:5px 14px;font-size:0.98em;" href="/shows/{{ show.id }}/feed.xml" target="_blank">RSS</a>
+                            <button class="del-btn" data-showid="{{ show.id }}" aria-label="Удалить шоу" style="background:none;border:none;padding:0 0.5em;cursor:pointer;vertical-align:middle;"><img src="/assets/delete.svg" alt="Удалить" width="20" height="20" style="vertical-align:middle;"></button>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- Modal for delete confirmation -->
+    <div id="modal-bg" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:#0007;z-index:9998;"></div>
+    <div id="modal" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;padding:32px 28px;border-radius:13px;box-shadow:0 2px 24px #0003;z-index:9999;max-width:90vw;">
+        <div style="font-size:1.2em;margin-bottom:18px;">Удалить шоу <span id="modal-show-name" style="font-weight:600;"></span>?</div>
+        <form id="del-form" method="post">
+            <button type="submit" style="background:#e74c3c;color:#fff;padding:10px 28px;border:none;border-radius:7px;font-size:1.1em;font-weight:600;">Удалить</button>
+            <button type="button" id="modal-cancel" style="background:#eee;color:#444;padding:10px 22px;border:none;border-radius:7px;font-size:1.1em;font-weight:500;margin-left:16px;">Отмена</button>
+        </form>
+    </div>
+    <script>
+    const toggleBtn = document.getElementById('toggle-view');
+    const cardView = document.getElementById('card-view');
+    const listView = document.getElementById('list-view');
+    let showCards = true;
+    toggleBtn.onclick = () => {
+        showCards = !showCards;
+        cardView.style.display = showCards ? '' : 'none';
+        listView.style.display = showCards ? 'none' : '';
+    };
+    // Modal logic
+    const modal = document.getElementById('modal');
+    const modalBg = document.getElementById('modal-bg');
+    const modalShowName = document.getElementById('modal-show-name');
+    const delForm = document.getElementById('del-form');
+    let delShowId = null;
+    function openModal(showId, showName) {
+        delShowId = showId;
+        modalShowName.textContent = showName;
+        delForm.action = `/shows/${showId}/delete`;
+        modal.style.display = '';
+        modalBg.style.display = '';
+    }
+    function closeModal() {
+        modal.style.display = 'none';
+        modalBg.style.display = 'none';
+        delShowId = null;
+    }
+    document.querySelectorAll('.del-btn').forEach(btn => {
+        btn.onclick = function() {
+            const showId = this.getAttribute('data-showid');
+            const card = this.closest('.show-card') || this.closest('tr');
+            let showName = '';
+            if (card) {
+                const titleEl = card.querySelector('.show-title') || card.querySelector('td');
+                if (titleEl) showName = titleEl.textContent.trim();
+            }
+            openModal(showId, showName);
+        };
+    });
+    document.getElementById('modal-cancel').onclick = closeModal;
+    modalBg.onclick = closeModal;
+        // --- Inline cover upload logic ---
+        document.querySelectorAll('.cover-edit-btn').forEach(function(btn) {
+            const input = btn.querySelector('.cover-edit-input');
+            const img = btn.closest('.cover-edit-container').querySelector('.show-cover-img');
+            const showCard = btn.closest('.show-card');
+            const showId = showCard && showCard.querySelector('a[href^="/shows/"]').getAttribute('href').split('/')[2];
+            input.addEventListener('change', function(e) {
+                if (!input.files || !input.files[0]) return;
+                const formData = new FormData();
+                formData.append('cover', input.files[0]);
+                btn.disabled = true;
+                fetch(`/shows/${showId}/cover-upload`, {
+                    method: 'POST',
+                    body: formData
+                }).then(resp => resp.json()).then(data => {
+                    if (data.image_url) {
+                        img.src = data.image_url;
+                    } else {
+                        alert(data.error || 'Ошибка загрузки');
+                    }
+                }).catch(() => alert('Ошибка загрузки')).finally(() => {
+                    btn.disabled = false;
+                    input.value = '';
+                });
+            });
+        });
+    </script>
+<script>
+// --- Inline edit logic for all show cards and table rows ---
+function makeEditable(span, saveUrl, field, origValue) {
+    // --- Лимиты ---
+    let limits = { title: 75, description: 600 };
+    let max = limits[field] || 600;
+    let input;
+    if (field === 'description') {
+        input = document.createElement('textarea');
+        input.rows = 3;
+        input.style.resize = 'vertical';
+    } else {
+        input = document.createElement('input');
+        input.type = 'text';
+    }
+    input.value = origValue;
+    input.className = 'inline-edit-input';
+    input.maxLength = max;
+    input.style.width = (span.offsetWidth+40) + 'px';
+    // --- Счётчик ---
+    const counter = document.createElement('div');
+    counter.className = 'inline-char-counter';
+    counter.style.fontSize = '0.94em';
+    counter.style.color = '#888';
+    counter.style.textAlign = 'right';
+    counter.style.marginTop = '2px';
+    counter.style.marginBottom = '-6px';
+    counter.textContent = input.value.length + '/' + max;
+    // --- Alert ---
+    const limitAlert = document.createElement('div');
+    limitAlert.className = 'inline-limit-alert';
+    limitAlert.style.display = 'none';
+    limitAlert.textContent = `Достигнут лимит. Максимум ${max} символов.`;
+    function updateCounter() {
+        counter.textContent = input.value.length + '/' + max;
+        if (input.value.length >= max) {
+            counter.style.color = '#e74c3c';
+            limitAlert.style.display = '';
+        } else {
+            counter.style.color = '#888';
+            limitAlert.style.display = 'none';
+        }
+    }
+    input.addEventListener('input', updateCounter);
+    updateCounter();
+    // --- Layout ---
+    const wrapper = document.createElement('div');
+    wrapper.style.display = 'flex';
+    wrapper.style.flexDirection = 'column';
+    wrapper.appendChild(input);
+    wrapper.appendChild(counter);
+    wrapper.appendChild(limitAlert);
+    span.replaceWith(wrapper);
+    input.focus();
+    let saving = false;
+    function save() {
+        if (saving) return;
+        saving = true;
+        input.disabled = true;
+        fetch(saveUrl, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ [field]: input.value })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data && data[field] !== undefined) {
+                const newSpan = document.createElement('span');
+                newSpan.className = 'editable';
+                newSpan.dataset.field = field;
+                newSpan.dataset.showid = span.dataset.showid;
+                let displayVal = data[field];
+                if (field === 'description') {
+                    if (window.htmlToPlainText) {
+                        displayVal = window.htmlToPlainText(displayVal);
+                    } else {
+                        displayVal = displayVal.replace(/<[^>]+>/g, '');
+                    }
+                }
+                newSpan.textContent = displayVal;
+                wrapper.replaceWith(newSpan);
+                attachInlineEdit(newSpan, saveUrl, field);
+            } else {
+                input.disabled = false;
+                alert(data.error || 'Ошибка сохранения');
+            }
+        })
+        .catch(()=>{ input.disabled = false; alert('Ошибка сохранения'); });
+    }
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && field !== 'description') {
+            e.preventDefault(); save();
+        } else if (e.key === 'Escape') {
+            wrapper.replaceWith(span); attachInlineEdit(span, saveUrl, field);
+        }
+    });
+    input.addEventListener('blur', save);
+}
+
+function attachInlineEdit(span, saveUrl, field) {
+    span.onclick = function(e) {
+        if (e.target !== span) return;
+        makeEditable(span, saveUrl, field, span.textContent);
+    };
+}
+document.querySelectorAll('.editable').forEach(function(span) {
+    const field = span.dataset.field;
+    const showid = span.dataset.showid;
+    if (!showid) return;
+    const saveUrl = `/shows/${showid}/inline-edit`;
+    attachInlineEdit(span, saveUrl, field);
+});
+</script>
+</body>
+<script>
+window.addEventListener('DOMContentLoaded', function() {
+    const langCheckboxes = document.querySelectorAll('.lang-filter');
+    function filterShows() {
+        const checked = Array.from(langCheckboxes).filter(c => c.checked).map(c => c.value);
+        // Карточки
+        document.querySelectorAll('.show-card').forEach(card => {
+            if (checked.length === 0 || checked.includes(card.dataset.language)) {
+                card.style.display = '';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+        // Табличный вид
+        document.querySelectorAll('tr[data-language]').forEach(row => {
+            if (checked.length === 0 || checked.includes(row.dataset.language)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+    langCheckboxes.forEach(cb => cb.addEventListener('change', filterShows));
+    const toggleBtn = document.getElementById('toggle-view');
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', () => {
+            setTimeout(filterShows, 0);
+        });
+    }
+    filterShows();
+});
+</script>
+</html>

@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeadForward Podcast</title>
+    <script src="/static/pt2html.js"></script>
+    <script src="/static/js/html2plaintext.js"></script>
+    <script src="/static/js/plaintext2html.js"></script>
+    <script>
+    function attachInlineEdit(span, saveUrl, field) {
+        span.contentEditable = 'true';
+        span.addEventListener('input', function() {
+            const plainText = html2plaintext(span.innerHTML);
+            const html = plaintext2html(plainText);
+            span.innerHTML = html;
+        });
+        span.addEventListener('blur', function() {
+            const plainText = html2plaintext(span.innerHTML);
+            const html = plaintext2html(plainText);
+            span.innerHTML = html;
+            fetch(saveUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ [field]: plainText }),
+            });
+        });
+    }
+    </script>
+    <link rel="icon" type="image/png" href="/assets/favicon.png">
+    <style>
+    .editable {
+        cursor: pointer;
+        transition: background 0.18s, box-shadow 0.18s;
+        border-radius: 5px;
+        padding: 2px 4px;
+    }
+    .editable:hover {
+        background: #f5f8ff;
+        box-shadow: 0 0 0 2px #c3d3f7;
+    }
+    
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f9f9fb; color: #222; margin: 0; }
+        .container { max-width: 700px; margin: 40px auto; background: #fff; border-radius: 14px; box-shadow: 0 2px 16px #0001; padding: 32px; }
+
+/* --- Truncate show description on main page --- */
+.container p > .editable[data-field=description] {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+    max-height: 4.7em;
+}
+
+/* --- Truncate episode description (main page, episodes list) --- */
+.episode > div:nth-child(6) {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+    max-height: 4.7em;
+}
+        h1 { color: #3a5fc8; }
+        .rss-link { display: inline-block; margin: 16px 0; padding: 8px 18px; background: #3a5fc8; color: #fff; border-radius: 6px; text-decoration: none; font-weight: 500; transition: background 0.2s; }
+        .rss-link:hover { background: #294b9b; }
+        .episodes { margin-top: 32px; }
+        .episode { margin-bottom: 20px; padding-bottom: 18px; border-bottom: 1px solid #eee; }
+        .episode audio { width: 100%; margin-top: 10px; }
+    .inline-limit-alert {
+        font-size: 0.89em;
+        color: #b30000;
+        background: #fff6f6;
+        border-radius: 5px;
+        font-weight: 400;
+        padding: 2px 8px;
+        margin: 3px 0 0 0;
+        text-align: left;
+        max-width: 280px;
+        line-height: 1.25;
+        box-sizing: border-box;
+        display: none;
+    }
+    </style>
+</head>
+<body>
+{% if show_id %}<script>window.show_id = '{{ show_id }}';</script>{% endif %}
+    <div class="container">
+        {% if show %}
+            <div style="display:flex;align-items:center;gap:30px;margin-bottom:18px;">
+                <a href="/" style="color:#3a5fc8;text-decoration:none;font-weight:600;font-size:1.1em;">← На главную</a>
+                <form method="get" id="show-switch-form" style="display:inline-block;">
+                    <label for="show-switch" style="font-size:1em;color:#444;margin-right:6px;">Перейти к шоу:</label>
+                    <select id="show-switch" name="show_id" style="font-size:1em;padding:4px 12px;border-radius:6px;border:1px solid #bbb;">
+                        {% for s in shows_list %}
+                        <option value="{{ s.id }}" {% if s.id == show_id %}selected{% endif %}>{{ s.title }}</option>
+                        {% endfor %}
+                    </select>
+                </form>
+            </div>
+            <h1><span class="editable" data-field="title">{{ show.title }}</span></h1>
+            <p><span class="editable" data-field="description">{{ show.description }}</span></p>
+            {% if cover %}<img src="{{ cover }}" alt="cover" style="width:120px; height:120px; object-fit:cover; border-radius:14px; margin-bottom:10px;"><br>{% endif %}
+            <a class="rss-link" href="/shows/{{ show_id }}/feed.xml" target="_blank">RSS Feed</a>
+            <button id="meta-edit-toggle" style="margin-left:18px;padding:7px 18px;background:#f6f7fa;color:#3a5fc8;border:1px solid #3a5fc8;border-radius:7px;font-size:1em;font-weight:500;cursor:pointer;">Редактировать метаданные RSS</button>
+            {% include '_metaedit.html' %}
+            {% if allow_delete %}
+                <button class="del-btn" data-showid="{{ show_id }}" aria-label="Удалить шоу" style="background:none;border:none;padding:0 0.5em;cursor:pointer;vertical-align:middle; margin-left:10px;"><img src="/assets/delete.svg" alt="Удалить" width="22" height="22" style="vertical-align:middle;"></button>
+            {% endif %}
+            <div style="margin: 18px 0 18px 0;">
+                <a href="/shows/{{ show_id }}/episodes/new" class="submit-btn" style="background:#2ecc40;color:#fff;padding:10px 22px;border-radius:7px;font-size:1.08em;font-weight:600;text-decoration:none;">+ Добавить эпизод</a>
+            </div>
+            <div class="episodes">
+                {% if episodes %}
+                    {% for ep in episodes %}
+                        <div class="episode" style="display:flex;align-items:center;justify-content:space-between;gap:18px;">
+                            <div style="flex:1;">
+                                {% if ep.episode_image %}
+                                    <a href="/shows/{{ show_id }}/episodes/{{ ep.id }}/">
+                                        <img src="{{ ep.episode_image }}" alt="Episode Cover" class="episode-cover" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px; margin-right: 15px; float: left;">
+                                    </a>
+                                {% endif %}
+                                <h3 style="margin-bottom:4px;">{{ ep.title }}</h3>
+                                <div><em>{{ ep.pubDate or '' }}</em></div>
+                                <div>{{ ep.description }}</div>
+                                {% if ep.audio_url %}
+                                <div style="display:flex;align-items:center;gap:8px;">
+                                    <audio controls>
+                                        <source src="{{ ep.audio_url }}" type="audio/mpeg">
+                                    </audio>
+                                    {% if ep.conversion_status == 'in_progress' %}
+                                        <span class="status-badge progress" title="Идет конвертация...">Конвертация...</span>
+                                    {% elif ep.conversion_status == 'failed' %}
+                                        <span class="status-badge failed" title="{{ ep.conversion_error }}">Ошибка</span>
+                                    {% elif ep.audio_info and not ep.audio_info.error %}
+                                        <span title="Файл: {{ ep.audio_info.filename }}
+Размер: {{ ep.audio_info.size }}
+Битрейт: {{ ep.audio_info.bitrate }}
+Длительность: {{ ep.audio_info.duration }}
+Формат: {{ ep.audio_info.format }}" style="cursor:help; font-size:1.2em;">ℹ️</span>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div style="flex-shrink:0;display:flex;align-items:center;gap:12px;">
+    <a href="/shows/{{ show_id }}/episodes/{{ ep.id }}/edit" class="submit-btn" style="background:#3a5fc8;color:#fff;padding:7px 18px;border-radius:7px;font-size:0.98em;font-weight:500;text-decoration:none;">Редактировать</a>
+    <button class="del-ep-btn" data-epid="{{ ep.id }}" data-eptitle="{{ ep.title }}" aria-label="Удалить эпизод" style="background:none;border:none;padding:0 0.5em;cursor:pointer;vertical-align:middle;"><img src="/assets/delete.svg" alt="Удалить" width="20" height="20" style="vertical-align:middle;"></button>
+</div>
+{% include 'delete_episode_modal.html' %}
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div>Нет эпизодов</div>
+                {% endif %}
+            </div>
+            <script>
+            document.getElementById('show-switch').onchange = function() {
+                if (this.value) window.location = '/shows/' + this.value + '/';
+            };
+            </script>
+        {% else %}
+            <h1>LeadForward Podcast</h1>
+            <p>Добро пожаловать в LeadForward — подкаст о лидерстве, предпринимательстве и росте!</p>
+            <a class="rss-link" href="/feed.xml" target="_blank">RSS Feed</a>
+            <div class="episodes">
+                <!-- Episodes will be dynamically inserted here -->
+            </div>
+            <script>
+            // Simple dynamic episode list (can be replaced with server-side rendering)
+            fetch('/feed.xml')
+              .then(r => r.text())
+              .then(xmlText => {
+                const parser = new DOMParser();
+                const xml = parser.parseFromString(xmlText, 'text/xml');
+                const items = xml.querySelectorAll('item');
+                const episodesDiv = document.querySelector('.episodes');
+                items.forEach(item => {
+                  const title = item.querySelector('title').textContent;
+                  const desc = item.querySelector('description').textContent;
+                  const audio = item.querySelector('enclosure')?.getAttribute('url');
+                  const pubDate = item.querySelector('pubDate')?.textContent;
+                  const html = `<div class="episode">
+                    <h3>${title}</h3>
+                    <div><em>${pubDate || ''}</em></div>
+                    <div>${desc}</div>
+                    ${audio ? `<audio controls src="${audio}"></audio>` : ''}
+                  </div>`;
+                  episodesDiv.insertAdjacentHTML('beforeend', html);
+                });
+              });
+            </script>
+        {% endif %}
+    </div>
+    <!-- Modal for delete confirmation (reused from main page) -->
+    <div id="modal-bg" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:#0007;z-index:9998;"></div>
+    <div id="modal" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;padding:32px 28px;border-radius:13px;box-shadow:0 2px 24px #0003;z-index:9999;max-width:90vw;">
+        <div style="font-size:1.2em;margin-bottom:18px;">Удалить шоу <span id="modal-show-name" style="font-weight:600;"></span>?</div>
+        <form id="del-form" method="post">
+            <button type="submit" style="background:#e74c3c;color:#fff;padding:10px 28px;border:none;border-radius:7px;font-size:1.1em;font-weight:600;">Удалить</button>
+            <button type="button" id="modal-cancel" style="background:#eee;color:#444;padding:10px 22px;border:none;border-radius:7px;font-size:1.1em;font-weight:500;margin-left:16px;">Отмена</button>
+        </form>
+    </div>
+    <script>
+    // Modal logic
+    const modal = document.getElementById('modal');
+    const modalBg = document.getElementById('modal-bg');
+    const modalShowName = document.getElementById('modal-show-name');
+    const delForm = document.getElementById('del-form');
+    let delShowId = null;
+    function openModal(showId, showName) {
+        delShowId = showId;
+        modalShowName.textContent = showName;
+        delForm.action = `/shows/${showId}/delete`;
+        modal.style.display = '';
+        modalBg.style.display = '';
+    }
+    function closeModal() {
+        modal.style.display = 'none';
+        modalBg.style.display = 'none';
+        delShowId = null;
+    }
+    document.querySelectorAll('.del-btn').forEach(btn => {
+        btn.onclick = function() {
+            const showId = this.getAttribute('data-showid');
+            let showName = '';
+            const titleEl = document.querySelector('h1');
+            if (titleEl) showName = titleEl.textContent.trim();
+            openModal(showId, showName);
+        };
+    });
+    document.getElementById('modal-cancel').onclick = closeModal;
+    modalBg.onclick = closeModal;
+    // Логика удаления эпизода
+const modalEp = document.getElementById('modal-ep');
+const modalEpBg = document.getElementById('modal-ep-bg');
+const modalEpName = document.getElementById('modal-ep-name');
+const delEpForm = document.getElementById('del-ep-form');
+let delEpId = null;
+document.querySelectorAll('.del-ep-btn').forEach(btn => {
+    btn.onclick = function() {
+        const epId = this.getAttribute('data-epid');
+        const epTitle = this.getAttribute('data-eptitle');
+        modalEpName.textContent = epTitle;
+        delEpForm.action = `/shows/${show_id}/episodes/${epId}/delete`;
+        modalEp.style.display = '';
+        modalEpBg.style.display = '';
+        delEpId = epId;
+    };
+});
+document.getElementById('modal-ep-cancel').onclick = function() {
+    modalEp.style.display = 'none';
+    modalEpBg.style.display = 'none';
+    delEpId = null;
+};
+modalEpBg.onclick = function() {
+    modalEp.style.display = 'none';
+    modalEpBg.style.display = 'none';
+    delEpId = null;
+};
+</script>
+<script>
+// --- Inline edit logic for show title/description (главная) ---
+function makeEditable(span, saveUrl, field, origValue) {
+    if (field === 'description') {
+        input.rows = 6;
+    } else {
+        input.type = 'text';
+    }
+    
+    // Для description: всегда преобразуем HTML в plain text
+    if (field === 'description') {
+        // Важно: нам нужен ТОЛЬКО plain text, без HTML-тегов
+        let plainText;
+        if (window.htmlToPlainText) {
+            plainText = window.htmlToPlainText(span.innerHTML);
+        } else {
+            // Fallback: простое удаление тегов
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = span.innerHTML;
+            plainText = tempDiv.textContent;
+        }
+        input.value = plainText;
+        
+        // Для отладки
+        console.log('Plain text extracted:', plainText);
+    } else {
+        input.value = span.textContent;
+    }
+    input.className = 'inline-edit-input';
+    input.maxLength = max;
+    input.style.width = (span.offsetWidth+40) + 'px';
+    // --- Счётчик ---
+    const counter = document.createElement('div');
+    counter.className = 'inline-char-counter';
+    counter.style.fontSize = '0.94em';
+    counter.style.color = '#888';
+    counter.style.textAlign = 'right';
+    counter.style.marginTop = '2px';
+    counter.style.marginBottom = '-6px';
+    counter.textContent = input.value.length + '/' + max;
+    // --- Alert ---
+    const limitAlert = document.createElement('div');
+    limitAlert.className = 'inline-limit-alert';
+    limitAlert.style.display = 'none';
+    limitAlert.textContent = `Достигнут лимит. Максимум ${max} символов.`;
+    function updateCounter() {
+        counter.textContent = input.value.length + '/' + max;
+        if (input.value.length >= max) {
+            counter.style.color = '#e74c3c';
+            limitAlert.style.display = '';
+        } else {
+            counter.style.color = '#888';
+            limitAlert.style.display = 'none';
+        }
+    }
+    input.addEventListener('input', updateCounter);
+    updateCounter();
+    // --- Layout ---
+    const wrapper = document.createElement('div');
+    wrapper.style.display = 'flex';
+    wrapper.style.flexDirection = 'column';
+    wrapper.appendChild(input);
+    wrapper.appendChild(counter);
+    wrapper.appendChild(limitAlert);
+    span.replaceWith(wrapper);
+    input.focus();
+    let saving = false;
+    function save() {
+        if (saving) return;
+        saving = true;
+        input.disabled = true;
+        
+        let valueToSave = input.value;
+        // Для отладки
+        if (field === 'description') {
+            console.log('Saving plain text:', valueToSave);
+        }
+        
+        fetch(saveUrl, {
+            method: 'PATCH', 
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ [field]: valueToSave })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data && data[field] !== undefined) {
+                const newSpan = document.createElement('span');
+                newSpan.className = 'editable';
+                newSpan.dataset.field = field;
+                
+                if (field === 'description') {
+                    // Важно сохранять plain text отдельно для дальнейшего использования
+                    const plainText = data[field];
+                    // Преобразуем plain text в HTML для отображения
+                    if (window.plainTextToHtml) {
+                        newSpan.innerHTML = window.plainTextToHtml(plainText);
+                        console.log('HTML для отображения:', newSpan.innerHTML);
+                    } else {
+                        newSpan.textContent = plainText;
+                    }
+                } else {
+                    newSpan.textContent = data[field];
+                }
+                wrapper.replaceWith(newSpan);
+                attachInlineEdit(newSpan, saveUrl, field);
+                // Повторно навесить desc-toggle (если есть)
+                if (field === 'description' && typeof window.initDescToggle === 'function') {
+                    window.initDescToggle();
+                }
+            } else {
+                input.disabled = false;
+                alert(data.error || 'Ошибка сохранения');
+            }
+        })
+        .catch(()=>{ input.disabled = false; alert('Ошибка сохранения'); });
+    }
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && field !== 'description') {
+            e.preventDefault(); save();
+        } else if (e.key === 'Escape') {
+            wrapper.replaceWith(span); attachInlineEdit(span, saveUrl, field);
+        }
+    });
+    input.addEventListener('blur', save);
+}
+
+function attachInlineEdit(span, saveUrl, field) {
+    // Убираем старый обработчик клика, если он был
+    span.onclick = function(e) {
+        if (!e.target.closest('.editable')) return;
+        
+        // Проверяем, что мы кликнули именно на этот элемент, а не вложенный
+        if (e.target !== span && !span.contains(e.target)) return;
+        
+        console.log('Click on editable:', field, span);
+        // Вызываем makeEditable только для текущего span
+        makeEditable(span, saveUrl, field);
+    };
+}
+// Для главной (show_id определён только если страница шоу)
+if (window.location.pathname.startsWith('/shows/') && window.show_id) {
+    document.querySelectorAll('.editable').forEach(function(span) {
+        const field = span.dataset.field;
+        const saveUrl = `/shows/${window.show_id}/inline-edit`;
+        attachInlineEdit(span, saveUrl, field);
+    });
+}
+</script>
+
+</body>
+</html>

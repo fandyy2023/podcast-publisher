@@ -1,0 +1,163 @@
+<!-- Секция для редактирования RSS-метаданных шоу (Apple Podcasts/Spotify) -->
+<div id="meta-edit-section" style="display:none; margin:32px 0 14px 0; padding:22px 18px; background:#f6f7fa; border-radius:11px; box-shadow:0 2px 8px #0001;">
+  <form method="post" id="meta-edit-form">
+    <div style="font-size:1.15em; font-weight:600; margin-bottom:14px;">Метаданные RSS (Apple Podcasts/Spotify)</div>
+    <div style="display:flex;gap:20px;">
+      <div style="flex:1;min-width:160px;">
+        <label for="title-input">Title</label>
+        <input id="title-input" name="title" maxlength="75" required value="{{ show.title|e }}" style="margin-top:7px;width:100%;padding:9px;border-radius:6px;border:1px solid #bbb;font-size:1em;outline:none;">
+        <div id="title-counter" style="font-size:0.97em;color:#888;margin-top:2px;"><span id="title-count">0</span>/75</div>
+      </div>
+      <div style="flex:1;min-width:160px;">
+        <label for="author-input">Автор</label>
+        <input id="author-input" name="author" maxlength="100" required value="{{ show.author|e }}" style="margin-top:7px;width:100%;padding:9px;border-radius:6px;border:1px solid #bbb;font-size:1em;outline:none;">
+      </div>
+    </div>
+    <div style="display:flex;gap:20px;">
+      <div style="flex:1;min-width:160px;">
+        <label for="owner-email-input">Email владельца</label>
+        <input id="owner-email-input" name="owner_email" maxlength="100" required value="{{ show.owner_email|e }}" style="margin-top:7px;width:100%;padding:9px;border-radius:6px;border:1px solid #bbb;font-size:1em;outline:none;">
+      </div>
+      <div style="flex:1;min-width:160px;">
+        <label for="owner-name-input">Имя владельца</label>
+        <input id="owner-name-input" name="owner_name" maxlength="100" required value="{{ show.owner_name|e }}" style="margin-top:7px;width:100%;padding:9px;border-radius:6px;border:1px solid #bbb;font-size:1em;outline:none;">
+      </div>
+      <div style="flex:1;min-width:160px;">
+        <label for="language-input">Язык</label>
+        <select id="language-input" name="language" required style="margin-top:7px;width:100%;padding:9px;border-radius:6px;border:1px solid #bbb;font-size:1em;outline:none;">
+          <option value="en-US" {% if show.language=="en-US" %}selected{% endif %}>English</option>
+          <option value="fr-FR" {% if show.language=="fr-FR" %}selected{% endif %}>Français</option>
+          <option value="it-IT" {% if show.language=="it-IT" %}selected{% endif %}>Italiano</option>
+          <option value="de-DE" {% if show.language=="de-DE" %}selected{% endif %}>Deutsch</option>
+          <option value="es-ES" {% if show.language=="es-ES" %}selected{% endif %}>Español</option>
+          <option value="ru-RU" {% if show.language=="ru-RU" %}selected{% endif %}>Русский</option>
+          <option value="uk-UA" {% if show.language=="uk-UA" %}selected{% endif %}>Українська</option>
+          <option value="ga-IE" {% if show.language=="ga-IE" %}selected{% endif %}>Gaeilge</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;gap:20px;">
+      <div style="flex:1;min-width:160px;">
+        <label for="category_main">Категория</label>
+<select id="category_main" name="category_main" required data-current="{{ show.category_main|e }}" style="margin-top:7px;width:100%;padding:9px;border-radius:6px;border:1px solid #bbb;font-size:1em;outline:none;"></select>
+<label for="category_sub">Подкатегория (опционально)</label>
+<select id="category_sub" name="category_sub" data-current="{{ show.category_sub|e }}" style="margin-top:7px;width:100%;padding:9px;border-radius:6px;border:1px solid #bbb;font-size:1em;outline:none;" disabled></select>
+
+      </div>
+      <div style="flex:1;min-width:160px;">
+        <label for="explicit-input">Explicit</label>
+        <select id="explicit-input" name="explicit" required style="margin-top:7px;width:100%;padding:9px;border-radius:6px;border:1px solid #bbb;font-size:1em;outline:none;">
+          <option value="no" {% if show.explicit=="no" %}selected{% endif %}>Нет</option>
+          <option value="yes" {% if show.explicit=="yes" %}selected{% endif %}>Да</option>
+        </select>
+        <label for="type-input" style="margin-top:10px;">Тип шоу</label>
+        <select id="type-input" name="type" required style="margin-top:7px;width:100%;padding:9px;border-radius:6px;border:1px solid #bbb;font-size:1em;outline:none;">
+          <option value="episodic" {% if show.type=="episodic" %}selected{% endif %}>Обычный (episodic)</option>
+          <option value="serial" {% if show.type=="serial" %}selected{% endif %}>Сериал (serial)</option>
+        </select>
+      </div>
+    </div>
+    <label for="description-input" style="margin-top:16px;">Описание (description, длинное, для Apple/Spotify)</label>
+    <textarea id="description-input" name="description" maxlength="600" style="margin-top:7px;width:100%;padding:9px;border-radius:6px;border:1px solid #bbb;font-size:1em;outline:none;overflow-y:hidden;resize:none;min-height:60px;" placeholder="Полное описание шоу (до 600 символов)">{{ show.description|e }}</textarea>
+    <div id="description-counter" style="font-size:0.97em;color:#888;margin-top:2px;"><span id="description-count">0</span>/600</div>
+    <label for="summary-input" style="margin-top:16px;">Summary (опционально, для каталогов Apple/Spotify)</label>
+    <textarea id="summary-input" name="summary" maxlength="600" style="margin-top:7px;width:100%;padding:9px;border-radius:6px;border:1px solid #bbb;font-size:1em;outline:none;overflow-y:hidden;resize:none;min-height:60px;" placeholder="Краткое описание для каталогов (до 600 символов)">{{ show.summary|e }}</textarea>
+    <div id="summary-counter" style="font-size:0.97em;color:#888;margin-top:2px;"><span id="summary-count">0</span>/600</div>
+        <label for="copyright-input">Copyright (опционально)</label>
+    <input id="copyright-input" name="copyright" maxlength="200" value="{{ show.copyright|e }}" placeholder=" 2025 Pool" style="margin-top:7px;width:100%;padding:9px;border-radius:6px;border:1px solid #bbb;font-size:1em;outline:none;">
+        <label for="subtitle-input">Подзаголовок (itunes:subtitle, до 255 символов, опционально)</label>
+    <input id="subtitle-input" name="subtitle" maxlength="255" value="{{ show.subtitle|e }}" placeholder="Краткий подзаголовок для каталогов" style="margin-top:7px;width:100%;padding:9px;border-radius:6px;border:1px solid #bbb;font-size:1em;outline:none;">
+        <label for="ttl-input">TTL (частота обновления, минут, опционально)</label>
+    <input id="ttl-input" name="ttl" type="number" min="5" max="1440" value="{{ show.ttl|e }}" placeholder="60" style="margin-top:7px;width:100%;padding:9px;border-radius:6px;border:1px solid #bbb;font-size:1em;outline:none;">
+    <button type="submit" id="meta-save-btn" style="margin-top:22px;padding:10px 28px;background:#3a5fc8;color:#fff;border:none;border-radius:7px;font-size:1.1em;font-weight:600;cursor:pointer;">Сохранить</button>
+    <button type="button" id="meta-cancel" style="margin-top:22px;margin-left:16px;padding:10px 22px;background:#eee;color:#444;border:none;border-radius:7px;font-size:1.1em;font-weight:500;">Отмена</button>
+    <style>
+      #meta-save-btn:disabled {
+        background: #b7c7f4 !important;
+        color: #fff !important;
+        cursor: not-allowed !important;
+      }
+    </style>
+  </form>
+</div>
+<script>
+  // Кнопка открытия/закрытия секции
+  document.getElementById('meta-edit-toggle').onclick = function() {
+    const section = document.getElementById('meta-edit-section');
+    section.style.display = (section.style.display === 'none') ? '' : 'none';
+  };
+  document.getElementById('meta-cancel').onclick = function() {
+    document.getElementById('meta-edit-section').style.display = 'none';
+  };
+  // Live count & validation for summary
+  const descriptionInput = document.getElementById('description-input');
+  const descriptionCount = document.getElementById('description-count');
+  const summaryInput = document.getElementById('summary-input');
+  const summaryCount = document.getElementById('summary-count');
+  const titleInput = document.getElementById('title-input');
+  const titleCount = document.getElementById('title-count');
+  const metaForm = document.getElementById('meta-edit-form');
+  const saveBtn = document.getElementById('meta-save-btn');
+  const titleCounter = document.getElementById('title-counter');
+  const summaryCounter = document.getElementById('summary-counter');
+  const descriptionCounter = document.getElementById('description-counter');
+  function updateTitleCount() {
+    const len = titleInput.value.length;
+    titleCount.textContent = len;
+    if (len >= 75) {
+      titleInput.style.borderColor = '#e74c3c';
+      titleCounter.style.color = '#e74c3c';
+    } else {
+      titleInput.style.borderColor = '#bbb';
+      titleCounter.style.color = '#888';
+    }
+  }
+  function updateSummaryCount() {
+    const len = summaryInput.value.length;
+    summaryCount.textContent = len;
+    if (len >= 600) {
+      summaryInput.style.borderColor = '#e74c3c';
+      summaryCounter.style.color = '#e74c3c';
+    } else {
+      summaryInput.style.borderColor = '#bbb';
+      summaryCounter.style.color = '#888';
+    }
+  }
+  function updateDescriptionCount() {
+    const len = descriptionInput.value.length;
+    descriptionCount.textContent = len;
+    if (len >= 600) {
+      descriptionInput.style.borderColor = '#e74c3c';
+      descriptionCounter.style.color = '#e74c3c';
+    } else {
+      descriptionInput.style.borderColor = '#bbb';
+      descriptionCounter.style.color = '#888';
+    }
+  }
+  function updateSaveBtn() {
+    saveBtn.disabled = (titleInput.value.length >= 75 || summaryInput.value.length >= 600 || descriptionInput.value.length >= 600);
+  }
+  function updateAll() {
+    updateTitleCount();
+    updateSummaryCount();
+    updateDescriptionCount();
+    updateSaveBtn();
+  }
+  function autoGrow(el) {
+    el.style.height = 'auto';
+    el.style.height = (el.scrollHeight) + 'px';
+  }
+  titleInput.addEventListener('input', updateAll);
+  summaryInput.addEventListener('input', function() { updateAll(); autoGrow(summaryInput); });
+  descriptionInput.addEventListener('input', function() { updateAll(); autoGrow(descriptionInput); });
+  // Проверка при вставке
+  titleInput.addEventListener('paste', function() { setTimeout(updateAll, 0); });
+  summaryInput.addEventListener('paste', function() { setTimeout(function(){ updateAll(); autoGrow(summaryInput); }, 0); });
+  descriptionInput.addEventListener('paste', function() { setTimeout(function(){ updateAll(); autoGrow(descriptionInput); }, 0); });
+  // Первичная инициализация авто-роста
+  autoGrow(summaryInput);
+  autoGrow(descriptionInput);
+  updateAll();
+</script>
+<script src="/static/js/apple_categories.js"></script>
+<script src="/static/js/category_dropdown.js"></script>

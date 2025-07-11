@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<rss xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0">
+  <channel>
+    <title>LeadForward: Entrepreneurship, Management &amp; Leadership</title>
+    <link>https://podcast.ecowool.online/feed.xml</link>
+    <description>Welcome to LeadForward, the podcast for ambitious minds charting the course from bold startup visions to boardroom breakthroughs. Each week, we unpack the strategies, stories, and tactics that power today’s most dynamic entrepreneurs, managers, and leaders.
+
+From navigating in business to building resilient teams and mastering chaos, our expert guests share real-world insights to help you future-proof your organization and drive unstoppable growth.
+
+Subscribe now and join the journey to lead with confidence!</description>
+    <atom:link href="https://podcast.ecowool.online/feed.xml" rel="self"/>
+    <docs>http://www.rssboard.org/rss-specification</docs>
+    <generator>python-feedgen</generator>
+    <language>en-US</language>
+    <lastBuildDate>Mon, 07 Jul 2025 21:42:29 +0000</lastBuildDate>
+    <ttl>60</ttl>
+    <itunes:category text="Leadership"/>
+    <itunes:image href="assets/show_cover.png"/>
+    <itunes:explicit>no</itunes:explicit>
+    <item>
+      <title>Episode 1: Introduction</title>
+      <description>First episode introduction.</description>
+      <guid isPermaLink="false">85b6a477-f7a5-4b32-aefe-6cd10f4f8a7b</guid>
+      <enclosure url="https://podcast.ecowool.online/episodes/ep001/audio.wav" length="21397050" type="audio/wav"/>
+      <pubDate>Tue, 01 Jul 2025 12:00:00 +0000</pubDate>
+      <itunes:duration>00:10:00</itunes:duration>
+      <itunes:explicit>no</itunes:explicit>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,22 @@
+{
+  "show": {
+    "title": "LeadForward: Entrepreneurship, Management & Leadership",
+    "description": "Welcome to LeadForward, the podcast for ambitious minds charting the course from bold startup visions to boardroom breakthroughs. Each week, we unpack the strategies, stories, and tactics that power today’s most dynamic entrepreneurs, managers, and leaders.
+
+From navigating in business to building resilient teams and mastering chaos, our expert guests share real-world insights to help you future-proof your organization and drive unstoppable growth.
+
+Subscribe now and join the journey to lead with confidence!",
+    "link": "https://podcast.example.com/",
+    "language": "en-US",
+    "category": ["Management", "Leadership"],
+    "image": "assets/show_cover.png",
+    "explicit": "no"
+  },
+  "rss": {
+    "feed_url": "https://abcd.ngrok.io/feed.xml",
+    "ttl": 60
+  },
+  "options": {
+    "force_transcode": false
+  }
+}

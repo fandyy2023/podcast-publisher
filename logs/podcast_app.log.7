@@ -1,0 +1,77 @@
+2025-07-11 01:21:25,514 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:39]
+2025-07-11 01:50:07,830 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:39]
+2025-07-11 01:51:02,868 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:39]
+2025-07-11 01:58:52,405 ERROR: 404 Not Found: GET http://podcast.ecowool.online/shows/leadforward/episodes/09084c28/41.png args={} form={} [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:927]
+[2025-07-11 01:58:52,405] ERROR in app: 404 Not Found: GET http://podcast.ecowool.online/shows/leadforward/episodes/09084c28/41.png args={} form={}
+2025-07-11 07:59:26,662 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:39]
+2025-07-11 13:30:07,893 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:39]
+2025-07-11 14:56:36,710 ERROR: 404 Not Found: GET http://localhost:5050/apple-touch-icon.png args={} form={} [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:927]
+[2025-07-11 14:56:36,710] ERROR in app: 404 Not Found: GET http://localhost:5050/apple-touch-icon.png args={} form={}
+2025-07-11 14:56:36,712 ERROR: 404 Not Found: GET http://localhost:5050/apple-touch-icon-precomposed.png args={} form={} [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:927]
+[2025-07-11 14:56:36,712] ERROR in app: 404 Not Found: GET http://localhost:5050/apple-touch-icon-precomposed.png args={} form={}
+2025-07-11 15:10:50,043 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:39]
+2025-07-11 15:20:21,706 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:39]
+2025-07-11 15:32:06,765 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:39]
+2025-07-11 16:38:13,683 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:39]
+2025-07-11 16:40:47,482 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:39]
+2025-07-11 16:41:38,279 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:39]
+2025-07-11 17:09:22,657 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:39]
+2025-07-11 17:24:51,064 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:39]
+2025-07-11 17:50:21,878 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:39]
+2025-07-11 18:35:10,202 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:39]
+2025-07-11 18:35:53,138 ERROR: Exception on /shows/22/episodes/c160631c/edit [POST] [in /Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py:875]
+Traceback (most recent call last):
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/app.py", line 868, in edit_episode
+    "description": sanitize_html_for_rss(plain_text_to_html(description)),
+                                         ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/utils.py", line 207, in plain_text_to_html
+    num, spaces, content = num_match.groups()
+    ^^^^^^^^^^^^^^^^^^^^
+ValueError: not enough values to unpack (expected 3, got 2)
+[2025-07-11 18:35:53,138] ERROR in app: Exception on /shows/22/episodes/c160631c/edit [POST]
+Traceback (most recent call last):
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/app.py", line 868, in edit_episode
+    "description": sanitize_html_for_rss(plain_text_to_html(description)),
+                                         ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/utils.py", line 207, in plain_text_to_html
+    num, spaces, content = num_match.groups()
+    ^^^^^^^^^^^^^^^^^^^^
+ValueError: not enough values to unpack (expected 3, got 2)
+[2025-07-11 18:35:53,146] ERROR in app: 500 Internal Error: POST http://podcast.ecowool.online/shows/22/episodes/c160631c/edit args={} form={'title': '2 The Tipping Podint: How Little Things Can Make a Big Difference By Malcolm Gladwell What’s It About? TheTipping Poins', 'language': 'de-DE', 'description': 'The Tipping Point: How Little Things Can Make a Big Difference\r\nBy Malcolm Gladwell\r\nWhat’s It About?\r\nThe Tipping Point explores why certain ideas, behaviors, and products suddenly explode in popularity—spreading through society like an epidemic. Malcolm Gladwell investigates the subtle forces and social dynamics that drive these rapid changes, showing how small actions or influences can trigger massive, seemingly unstoppable trends.\r\nKey Concepts\r\n1. Epidemics of Ideas and Trends\r\n\t•\tGladwell draws a parallel between the spread of infectious diseases and the way ideas, fashions, and behaviors propagate through society.\r\n\t•\tInitially, only a handful of people are “infected” by a new idea or product. Then, seemingly all at once, it catches fire—reaching a “tipping point” where it spreads rapidly and widely.\r\n2. The Tipping Point\r\n\t•\tThe “tipping point” is the critical threshold at which an idea, product, or behavior crosses from being a rare phenomenon to a mainstream epidemic.\r\n\t•\tAfter this point, the spread becomes self-sustaining and very difficult to stop.', 'explicit': 'no', 'category_main': 'Arts', 'category_sub': '', 'summary': 'The Tipping Point: How Little Things Can Make a Big Difference\r\n\r\nBy Malcolm Gladwell\r\n\r\nWhat’s It About?\r\n\r\nThe Tipping Point explores why certain ideas, behaviors, and products suddenly explode in popularity—spreading through society like an epidemic. Malcolm Gladwell investigates the subtle forces and social dynamics that drive these rapid changes, showing how small actions or influences can trigger massive, seemingly unstoppable trends.\r\n\r\nKey Concepts\r\n\r\n• Epidemics of Ideas and Trends\r\n\r\n• Gladwell draws a parallel between the spread of infectious diseases and the way ideas, fashions, and behaviors propagate through society.\r\n\r\n• Initially, only a handful of people are “infected” by a new idea or product. Then, seemingly all at once, it catches fire—reaching a “tipping point” where it spreads rapidly and widely.\r\n\r\n• The Tipping Point\r\n\r\n• The “tipping point” is the critical threshold at which an idea, product, or behavior crosses from being a rare phenomenon to a mainstream epidemic.\r\n\r\n• After this point, the spread becomes self-sustaining and very difficult to stop.\r\n\r\n• The Hush Puppies Example\r\n\r\n• In the mid-1990s, Hush Puppies shoes went from being nearly obsolete to a must-have fashion item.\r\n\r\n• The sudden surge in popularity wasn’t due to a marketing campaign, but rather a small group of trendsetters in Manhattan who began wearing them, sparking a chain reaction.\r\n\r\n• Sales skyrocketed from 30,000 to 430,000 pairs in a year, and then to two million pairs the following year.The Tipping Point: How Little Things Can Make a Big Difference\r\n\r\nBy Malcolm Gladwell\r\n\r\nWhat’s It About?\r\n\r\nThe Tipping Point explores why certain ideas, behaviors, and products suddenly explode in popularity—spreading through society like an epidemic. Malcolm Gladwell investigates the subtle forces and social dynamics that drive these rapid changes, showing how small actions or influences can trigger massive, seemingly unstoppable trends.\r\n\r\nKey Concepts\r\n\r\n• Epidemics of Ideas and Trends\r\n\r\n• Gladwell draws a parallel between the spread of infectious diseases and the way ideas, fashions, and behaviors propagate through society.\r\n\r\n• Initially, only a handful of people are “infected” by a new idea or product. Then, seemingly all at once, it catches fire—reaching a “tipping point” where it spreads rapidly and widely.\r\n\r\n• The Tipping Point\r\n\r\n• The “tipping point” is the critical threshold at which an idea, product, or behavior crosses from being a rare phenomenon to a mainstream epidemic.\r\n\r\n• After this point, the spread becomes self-sustaining and very difficult to stop.\r\n\r\n• The Hush Puppies Example\r\n\r\n• In the mid-1990s, Hush Puppies shoes went from being nearly obsolete to a must-have fashion item.\r\n\r\n• The sudden surge in popularity wasn’t due to a marketing campaign, but rather a small group of trendsetters in Manhattan who began wearing them, sparking a chain reaction.\r\n\r\n• Sales skyrocketed from 30,000 to 430,000 pairs in a year, and then to two million pairs the following year.', 'duration': '43:13'}
+Traceback:
+Traceback (most recent call last):
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/app.py", line 868, in edit_episode
+    "description": sanitize_html_for_rss(plain_text_to_html(description)),
+                                         ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/utils.py", line 207, in plain_text_to_html
+    num, spaces, content = num_match.groups()
+    ^^^^^^^^^^^^^^^^^^^^
+ValueError: not enough values to unpack (expected 3, got 2)
+

@@ -1,0 +1,164 @@
+2025-07-11 01:20:08,497 ERROR: Exception on /shows/22/ [GET] [in /Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py:875]
+Traceback (most recent call last):
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/app.py", line 310, in show_page
+    return render_template("show.html", show=cfg, episodes=episodes, cover=cover_image_url, show_id=show_id, shows_list=shows_list)
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/templating.py", line 150, in render_template
+    return _render(app, template, context)
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/templating.py", line 131, in _render
+    rv = template.render(context)
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/templates/show.html", line 239, in top-level template code
+    <div class="episode-desc editable" data-field="description" data-html-content="{{ episode.description|e('html_attr') }}">{{ episode.description|safe }}</div>
+    ^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: escape() takes 1 positional argument but 2 were given
+2025-07-11 01:20:08,507 ERROR: 500 Internal Error: GET http://podcast.ecowool.online/shows/22/ args={} form={}
+Traceback:
+Traceback (most recent call last):
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/app.py", line 310, in show_page
+    return render_template("show.html", show=cfg, episodes=episodes, cover=cover_image_url, show_id=show_id, shows_list=shows_list)
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/templating.py", line 150, in render_template
+    return _render(app, template, context)
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/templating.py", line 131, in _render
+    rv = template.render(context)
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/templates/show.html", line 239, in top-level template code
+    <div class="episode-desc editable" data-field="description" data-html-content="{{ episode.description|e('html_attr') }}">{{ episode.description|safe }}</div>
+    ^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: escape() takes 1 positional argument but 2 were given
+ [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:933]
+2025-07-11 01:20:20,979 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:39]
+2025-07-11 01:20:28,526 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:39]
+2025-07-11 01:20:30,735 ERROR: Exception on /shows/22/ [GET] [in /Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py:875]
+Traceback (most recent call last):
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/app.py", line 310, in show_page
+    return render_template("show.html", show=cfg, episodes=episodes, cover=cover_image_url, show_id=show_id, shows_list=shows_list)
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/templating.py", line 150, in render_template
+    return _render(app, template, context)
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/templating.py", line 131, in _render
+    rv = template.render(context)
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/templates/show.html", line 239, in top-level template code
+    <div class="episode-desc editable" data-field="description" data-html-content="{{ episode.description|e('html_attr') }}">{{ episode.description|safe }}</div>
+    ^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: escape() takes 1 positional argument but 2 were given
+[2025-07-11 01:20:30,735] ERROR in app: Exception on /shows/22/ [GET]
+Traceback (most recent call last):
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/app.py", line 310, in show_page
+    return render_template("show.html", show=cfg, episodes=episodes, cover=cover_image_url, show_id=show_id, shows_list=shows_list)
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/templating.py", line 150, in render_template
+    return _render(app, template, context)
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/templating.py", line 131, in _render
+    rv = template.render(context)
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/templates/show.html", line 239, in top-level template code
+    <div class="episode-desc editable" data-field="description" data-html-content="{{ episode.description|e('html_attr') }}">{{ episode.description|safe }}</div>
+    ^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: escape() takes 1 positional argument but 2 were given
+2025-07-11 01:20:30,740 ERROR: 500 Internal Error: GET http://podcast.ecowool.online/shows/22/ args={} form={}
+Traceback:
+Traceback (most recent call last):
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/app.py", line 310, in show_page
+    return render_template("show.html", show=cfg, episodes=episodes, cover=cover_image_url, show_id=show_id, shows_list=shows_list)
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/templating.py", line 150, in render_template
+    return _render(app, template, context)
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/templating.py", line 131, in _render
+    rv = template.render(context)
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/templates/show.html", line 239, in top-level template code
+    <div class="episode-desc editable" data-field="description" data-html-content="{{ episode.description|e('html_attr') }}">{{ episode.description|safe }}</div>
+    ^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: escape() takes 1 positional argument but 2 were given
+ [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:933]
+[2025-07-11 01:20:30,740] ERROR in app: 500 Internal Error: GET http://podcast.ecowool.online/shows/22/ args={} form={}
+Traceback:
+Traceback (most recent call last):
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/app.py", line 310, in show_page
+    return render_template("show.html", show=cfg, episodes=episodes, cover=cover_image_url, show_id=show_id, shows_list=shows_list)
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/templating.py", line 150, in render_template
+    return _render(app, template, context)
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/templating.py", line 131, in _render
+    rv = template.render(context)
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/Users/poolpooly/CascadeProjects/podcast-publisher/templates/show.html", line 239, in top-level template code
+    <div class="episode-desc editable" data-field="description" data-html-content="{{ episode.description|e('html_attr') }}">{{ episode.description|safe }}</div>
+    ^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: escape() takes 1 positional argument but 2 were given
+

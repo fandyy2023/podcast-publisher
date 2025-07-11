@@ -1,0 +1,9 @@
+<!-- Модальное окно для подтверждения удаления эпизода -->
+<div id="modal-ep-bg" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:#0007;z-index:9998;"></div>
+<div id="modal-ep" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;padding:32px 28px;border-radius:13px;box-shadow:0 2px 24px #0003;z-index:9999;max-width:90vw;">
+    <div style="font-size:1.2em;margin-bottom:18px;">Удалить эпизод <span id="modal-ep-name" style="font-weight:600;"></span>?</div>
+    <form id="del-ep-form" method="post">
+        <button type="submit" style="background:#e74c3c;color:#fff;padding:10px 28px;border:none;border-radius:7px;font-size:1.1em;font-weight:600;">Удалить</button>
+        <button type="button" id="modal-ep-cancel" style="background:#eee;color:#444;padding:10px 22px;border:none;border-radius:7px;font-size:1.1em;font-weight:500;margin-left:16px;">Отмена</button>
+    </form>
+</div>

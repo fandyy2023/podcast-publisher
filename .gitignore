@@ -1,0 +1,26 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+venv/
+.venv/
+
+# Environment & config
+.env*
+*.env
+
+# Logs
+*.log
+
+# macOS metadata
+.DS_Store
+
+# Media and large project data (kept locally, not in GitHub)
+shows/
+*.mp3
+*.wav
+
+# Node and frontend build artifacts (if any)
+node_modules/
+build/

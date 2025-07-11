@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>500 Internal Server Error</title>
+    <style>
+        body { font-family: sans-serif; background: #fff8f8; color: #444; }
+        .center { max-width: 600px; margin: 80px auto; background: #fff; padding: 32px 24px; border-radius: 10px; box-shadow: 0 2px 12px #0001; text-align: center; }
+        h1 { font-size: 3em; color: #d00; }
+        .url { color: #888; font-size: 0.95em; margin-top: 1em; }
+        pre { white-space: pre-wrap; text-align: left; background: #f7eaea; padding: 12px; border-radius: 8px; font-size: 0.95em; overflow-x: auto; }
+        a { color: #0074d9; }
+    </style>
+</head>
+<body>
+    <div class="center">
+        <h1>500</h1>
+        <p>Внутренняя ошибка сервера</p>
+        <div class="url">{{ method }} {{ url }}</div>
+        <p><a href="/">На главную</a></p>
+        {% if tb %}
+        <h3>Traceback:</h3>
+        <pre>{{ tb }}</pre>
+        {% endif %}
+    </div>
+</body>
+</html>

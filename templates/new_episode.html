@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Добавить эпизод</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f9f9fb; color: #222; margin: 0; }
+        .container { max-width: 480px; margin: 40px auto; background: #fff; border-radius: 14px; box-shadow: 0 2px 16px #0001; padding: 32px; }
+        h1 { color: #3a5fc8; }
+        label { display: block; margin-top: 20px; font-weight: 500; }
+        input, textarea, select { width: 100%; padding: 9px; margin-top: 7px; border-radius: 6px; border: 1px solid #bbb; font-size: 1em; outline: none; transition: border-color 0.15s, box-shadow 0.15s; }
+        textarea { min-height: 70px; }
+        .field-error { border-color: #e74c3c !important; box-shadow: 0 0 0 2px #f8d7da !important; }
+        .actions { margin-top: 28px; display: flex; gap: 16px; }
+        .submit-btn { background: #2ecc40; color: #fff; padding: 10px 22px; border-radius: 7px; font-size: 1.1em; font-weight: 600; border: none; cursor: pointer; }
+        .submit-btn:hover { background: #179b2e; }
+        .submit-btn:disabled { background: #b7eec4; color: #fff; cursor: not-allowed; }
+        .cancel-btn { background: #eee; color: #444; border: none; padding: 10px 22px; border-radius: 7px; font-size: 1.1em; font-weight: 500; cursor: pointer; }
+        .cancel-btn:hover { background: #ddd; }
+        .msg { margin-top: 16px; color: #e74c3c; }
+        .readonly { background: #f3f3f3; color: #888; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Новый эпизод</h1>
+        <form method="post" enctype="multipart/form-data">
+            <label for="title">Название эпизода</label>
+            <input type="text" id="title" name="title" maxlength="120" required>
+            <div id="title-counter" style="font-size:0.97em;color:#888;margin-top:2px;">
+                <span id="title-count">0</span>/120
+            </div>
+
+            <label for="language">Язык</label>
+            <select id="language" name="language" required>
+                <option value="en-US">English</option>
+                <option value="fr-FR">Français</option>
+                <option value="it-IT">Italiano</option>
+                <option value="de-DE">Deutsch</option>
+                <option value="es-ES">Español</option>
+                <option value="ru-RU">Русский</option>
+                <option value="uk-UA">Українська</option>
+                <option value="ga-IE">Gaeilge</option>
+            </select>
+
+            <label for="description">Описание</label>
+            <textarea id="description" name="description" maxlength="4000" required style="overflow-y:hidden;resize:none;min-height:70px;"></textarea>
+            <div id="desc-counter" style="font-size:0.97em;color:#888;margin-top:2px;">
+                <span id="desc-count">0</span>/4000
+            </div>
+            <div class="preview-toggle"><span class="arrow">▼</span>Предпросмотр (как увидит Spotify/Apple)</div>
+            <div class="preview-collapsible">
+                <div class="preview-collapsible-inner">
+                    <div class="preview-box" id="desc-preview"></div>
+                </div>
+            </div>
+
+            <label for="explicit">Explicit</label>
+            <select id="explicit" name="explicit" required>
+                <option value="no">Нет</option>
+                <option value="yes">Да</option>
+            </select>
+
+            <label for="category_main">Категория</label>
+            <select id="category_main" name="category_main" required data-current=""></select>
+            <label for="category_sub">Подкатегория (опционально)</label>
+            <select id="category_sub" name="category_sub" data-current="" disabled></select>
+
+            <label for="summary">Summary (опционально, для каталогов Apple/Spotify)</label>
+            <textarea id="summary" name="summary" maxlength="4000" placeholder="Краткое описание для каталогов (до 4000 символов)" style="overflow-y:hidden;resize:none;min-height:70px;"></textarea>
+            <div id="summary-counter" style="font-size:0.97em;color:#888;margin-top:2px;">
+                <span id="summary-count">0</span>/4000
+            </div>
+            <div class="preview-toggle"><span class="arrow">▼</span>Предпросмотр (как увидит Spotify/Apple)</div>
+            <div class="preview-collapsible">
+                <div class="preview-collapsible-inner">
+                    <div class="preview-box" id="summary-preview"></div>
+                </div>
+            </div>
+
+            <label for="episode_image">Обложка эпизода (jpg/png/webp, опционально)</label>
+            <input type="file" id="episode_image" name="episode_image" accept="image/*">
+
+            <label for="audio">Аудиофайл (mp3/wav/m4a/ogg...)</label>
+            <input type="file" id="audio" name="audio" accept="audio/*" required>
+
+            <label for="duration">Длительность</label>
+            <input type="text" id="duration" name="duration" class="readonly" readonly placeholder="Будет заполнено автоматически">
+
+            <div class="actions">
+                <button class="submit-btn" type="submit">Создать эпизод</button>
+                <a class="cancel-btn" href="/">Отмена</a>
+            </div>
+        </form>
+        {% if msg %}
+        <div class="msg">{{ msg }}</div>
+        {% endif %}
+    </div>
+<script src="/static/js/apple_categories.js"></script>
+<script src="/static/js/category_dropdown.js"></script>
+<script src="/static/js/preview_sanitize.js"></script>
+<link rel="stylesheet" href="/static/css/preview_collapsible.css">
+<script src="/static/js/preview_collapsible.js"></script>
+<script>
+  // Инициализация предпросмотра
+  document.addEventListener('DOMContentLoaded', function() {
+    setupLivePreview('description', 'desc-preview');
+    setupLivePreview('summary', 'summary-preview');
+  });
+  
+  const titleInput = document.getElementById('title');
+  const titleCount = document.getElementById('title-count');
+  const descInput = document.getElementById('description');
+  const descCount = document.getElementById('desc-count');
+  const submitBtn = document.querySelector('.submit-btn');
+  const titleCounter = document.getElementById('title-counter');
+  const descCounter = document.getElementById('desc-counter');
+  const summaryInput = document.getElementById('summary');
+  const summaryCount = document.getElementById('summary-count');
+  const summaryCounter = document.getElementById('summary-counter');
+  function updateTitleCount() {
+    const len = titleInput.value.length;
+    titleCount.textContent = len;
+    if (len >= 120) {
+      titleInput.classList.add('field-error');
+      titleCounter.style.color = '#e74c3c';
+    } else {
+      titleInput.classList.remove('field-error');
+      titleCounter.style.color = '#888';
+    }
+  }
+  function updateDescCount() {
+    const len = descInput.value.length;
+    descCount.textContent = len;
+    if (len >= 4000) {
+      descInput.classList.add('field-error');
+      descCounter.style.color = '#e74c3c';
+    } else {
+      descInput.classList.remove('field-error');
+      descCounter.style.color = '#888';
+    }
+  }
+  function updateSummaryCount() {
+    const len = summaryInput.value.length;
+    summaryCount.textContent = len;
+    if (len >= 4000) {
+      summaryInput.classList.add('field-error');
+      summaryCounter.style.color = '#e74c3c';
+    } else {
+      summaryInput.classList.remove('field-error');
+      summaryCounter.style.color = '#888';
+    }
+  }
+  function updateSubmitBtn() {
+    const titleLen = titleInput.value.length;
+    const descLen = descInput.value.length;
+    const summaryLen = summaryInput.value.length;
+    submitBtn.disabled = (titleLen > 120 || descLen > 4000 || summaryLen > 4000);
+  }
+  function updateAll() {
+    updateTitleCount();
+    updateDescCount();
+    updateSummaryCount();
+    updateSubmitBtn();
+  }
+  function autoGrow(el) {
+    el.style.height = 'auto';
+    el.style.height = (el.scrollHeight) + 'px';
+  }
+  titleInput.addEventListener('input', updateAll);
+  descInput.addEventListener('input', function() { updateAll(); autoGrow(descInput); });
+  summaryInput.addEventListener('input', function() { updateAll(); autoGrow(summaryInput); });
+  titleInput.addEventListener('paste', function() { setTimeout(updateAll, 0); });
+  descInput.addEventListener('paste', function() { setTimeout(function(){ updateAll(); autoGrow(descInput); }, 0); });
+  summaryInput.addEventListener('paste', function() { setTimeout(function(){ updateAll(); autoGrow(summaryInput); }, 0); });
+  // Первичная инициализация авто-роста
+  autoGrow(descInput);
+  autoGrow(summaryInput);
+  updateAll();
+</script>
+<script src="/static/js/episode_duration.js"></script>
+</body>
+</html>

@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ show.title }}</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f9f9fb; color: #222; margin: 0; }
+        .container { max-width: 900px; margin: 40px auto; padding: 0 20px; }
+        .show-header { display: flex; align-items: flex-start; gap: 30px; margin-bottom: 40px; }
+        .show-cover { width: 180px; height: 180px; border-radius: 12px; object-fit: cover; box-shadow: 0 2px 12px #0002; }
+        .show-info h1 { font-size: 2.5em; margin: 0 0 10px; color: #3a5fc8; }
+        .show-info p {
+    font-size: 1.1em;
+    color: #555;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+    max-height: 4.7em;
+}
+        .actions { margin-top: 20px; display: flex; gap: 15px; }
+        .btn { padding: 10px 20px; border-radius: 7px; text-decoration: none; font-weight: 600; transition: background 0.2s; border: none; cursor: pointer; font-size: 1em; }
+        .btn-primary { background: #3a5fc8; color: #fff; }
+        .btn-primary:hover { background: #294b9b; }
+        .btn-secondary { background: #e9eefb; color: #3a5fc8; border: 1px solid #3a5fc8; }
+        .btn-secondary:hover { background: #d1e0fa; }
+        .btn-success { background: #2ecc40; color: #fff; }
+        .btn-success:hover { background: #179b2e; }
+        h2 { border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px; color: #333; }
+        .episode-list { display: flex; flex-direction: column; gap: 20px; }
+        .inline-limit-alert {
+            font-size: 0.89em;
+            color: #b30000;
+            background: #fff6f6;
+            border-radius: 5px;
+            font-weight: 400;
+            padding: 2px 8px;
+            margin: 3px 0 0 0;
+            text-align: left;
+            max-width: 280px;
+            line-height: 1.25;
+            box-sizing: border-box;
+            display: none;
+        }
+        .episode-card { background: #fff; border-radius: 10px; box-shadow: 0 1px 8px #0001; padding: 20px; display: flex; gap: 20px; align-items: center; }
+        .episode-cover { width: 80px; height: 80px; border-radius: 8px; object-fit: cover; }
+        .episode-details { flex-grow: 1; }
+        .episode-title { font-size: 1.3em; font-weight: 600; margin: 0 0 5px; }
+        .desc-container { position:relative; }
+        .episode-desc { color:#222; margin:0 0 15px; display:-webkit-box; line-clamp:3; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; text-overflow:ellipsis; white-space:normal; max-height:4.7em; cursor:pointer; position:relative; z-index:1; background:transparent; transition:background 0.2s; }
+        .episode-desc.expanded { display:block; line-clamp:unset; -webkit-line-clamp:unset; max-height:unset; overflow:visible; background:transparent; }
+        .desc-edit-overlay { position:absolute; top:0; left:0; width:100%; height:100%; z-index:10; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity 0.2s; background:rgba(58,95,200,0.08); color:#3a5fc8; font-weight:500; border-radius:6px; pointer-events:none; cursor:pointer; }
+        .desc-container:hover .desc-edit-overlay { opacity:1; }
+        /* скрываем overlay, редактирование по клику */
+        .desc-edit-overlay { display:none!important; }
+        .desc-container.editing .desc-edit-overlay, .desc-container.editing .desc-toggle { display:none!important; }
+        .inline-edit-textarea { width:100%; min-height:100px; max-height:350px; overflow:auto; resize:vertical; font-size:1em; border:2px solid #3a5fc8; border-radius:8px; padding:10px; margin:0; background:#f6f8ff; position:static; }
+        .desc-toggle { cursor:pointer; background:none; border:none; color:#3a5fc8; text-decoration:underline; position:absolute; bottom:0; right:0; z-index:11; font-size:1em; padding:2px 8px; }
+
+        .status-box { padding: 8px 12px; border-radius: 6px; font-weight: 500; text-align: center; }
+        .status-in-progress { background-color: #fef3c7; color: #92400e; border: 1px solid #fbbF24; }
+        .status-failed { background-color: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+                .episode-actions { display: flex; align-items: center; gap: 15px; margin-left: auto; padding-left: 20px; }
+        .info-icon { display: inline-block; width: 20px; height: 20px; background-image: url('/assets/info.svg'); background-size: contain; background-repeat: no-repeat; background-position: center; cursor: pointer !important; vertical-align: middle; position: relative; }
+        .btn-danger { background: none; border: none; padding: 0; cursor: pointer; line-height: 0; }
+        .btn-danger img { width: 20px; height: 20px; vertical-align: middle; }
+        .tooltip { visibility: hidden; width: 220px; background-color: #333; color: #fff; text-align: left; border-radius: 6px; padding: 8px; position: absolute; z-index: 1002; opacity: 0; transition: opacity 0.3s; font-size: 0.9em; line-height: 1.4; word-break: break-all; white-space: pre-line; }
+.modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100vw; height: 100vh; overflow: auto; background: rgba(0,0,0,0.3); }
+.modal-content { background: #fff; margin: 60px auto; padding: 30px 30px 10px 30px; border-radius: 12px; width: 90%; max-width: 500px; box-shadow: 0 6px 32px #0004; position: relative; }
+.modal .close { position: absolute; right: 18px; top: 12px; font-size: 2em; color: #333; cursor: pointer; }
+        .info-icon:hover .tooltip { visibility: visible; opacity: 1; }
+        .cover-edit-container:hover .cover-edit-btn {
+    opacity: 1;
+}
+.cover-edit-btn {
+    opacity: 0;
+    z-index: 10 !important;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.cover-edit-btn input[type="file"] {
+    pointer-events: auto;
+}
+.editable {
+    cursor: pointer;
+    transition: background 0.18s, box-shadow 0.18s;
+    border-radius: 5px;
+    padding: 2px 4px;
+}
+.editable:hover {
+    background: #f5f8ff;
+    box-shadow: 0 0 0 2px #c3d3f7;
+}
+.edit-btn svg {
+    opacity: 0.6;
+    transition: opacity 0.18s;
+}
+.edit-btn:hover svg {
+    opacity: 1;
+}
+.cover-edit-container:hover .cover-edit-btn {
+    opacity: 1;
+}
+.cover-edit-container:hover .show-cover-img,
+.cover-edit-container:hover .episode-cover-img {
+    filter: brightness(0.92);
+}
+.cover-edit-container {
+    position: relative;
+    display: inline-block;
+}
+.cover-edit-btn input[type="file"] {
+    position: absolute;
+    left: 0; top: 0; width: 100%; height: 100%;
+    opacity: 0;
+    z-index: 15;
+    cursor: pointer;
+}
+    </style>
+    <script src="/static/js/html2plaintext.js"></script>
+    <script src="/static/js/plaintext2html.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="show-header">
+            <div class="cover-edit-container" style="position:relative;display:inline-block;">
+                <img src="{{ cover }}" alt="cover" class="show-cover show-cover-img">
+                <button class="cover-edit-btn" title="Сменить обложку" style="position:absolute;bottom:8px;right:8px;background:rgba(255,255,255,0.85);border:none;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;">
+                    <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15.6 2.6a2.121 2.121 0 0 1 3 3l-9.7 9.7-4.1 1.1 1.1-4.1 9.7-9.7ZM17 0a4 4 0 0 0-2.8 1.2l-10 10A2 2 0 0 0 3.6 12.4l-1.1 4.1A2 2 0 0 0 5.5 19.5l4.1-1.1a2 2 0 0 0 1.2-1.2l10-10A4 4 0 0 0 17 0Z" fill="#3a5fc8"/></svg>
+                    <input type="file" class="cover-edit-input" accept="image/*" style="opacity:0;position:absolute;left:0;top:0;width:100%;height:100%;cursor:pointer;" title="Выбрать новую обложку">
+                </button>
+            </div>
+            <div class="show-info">
+                <h1><span class="editable" data-field="title">{{ show.title }}</span></h1>
+<div class="desc-container">
+    <span class="episode-desc editable" data-field="description" data-html-content="{{ show.description }}">{{ show.description|safe }}</span>
+    <div class="desc-edit-overlay">Редактировать</div>
+</div>
+                <div class="actions">
+                    <a href="{{ url_for('new_episode', show_id=show_id) }}" class="btn btn-success">+ Новый эпизод</a>
+                    <a href="{{ url_for('edit_show', show_id=show_id) }}" class="btn btn-secondary">Редактировать шоу</a>
+<style>
+  .dropdown { position: relative; display: inline-block; }
+  .dropdown-toggle { background: #e9eefb; color: #3a5fc8; border: 1px solid #3a5fc8; border-radius: 8px; padding: 10px 24px; font-weight: 600; font-size: 1.07em; cursor: pointer; transition: background 0.18s; outline: none; }
+  .dropdown-toggle:hover, .dropdown-toggle:focus { background: #d1e0fa; }
+  .dropdown-menu {
+    display: none;
+    position: absolute;
+    left: 0;
+    top: 110%;
+    min-width: 220px;
+    max-width: 340px;
+    max-height: 320px;
+    background: #fff;
+    box-shadow: 0 6px 32px #0002;
+    border-radius: 11px;
+    z-index: 1002;
+    overflow-y: auto;
+    padding: 8px 0;
+    margin-top: 4px;
+    border: 1px solid #e2e6f4;
+  }
+  .dropdown.open .dropdown-menu { display: block; }
+  .dropdown-item {
+    display: block;
+    padding: 11px 24px 11px 20px;
+    color: #294b9b;
+    font-size: 1.06em;
+    text-decoration: none;
+    border: none;
+    background: none;
+    transition: background 0.15s, color 0.15s;
+    border-radius: 7px;
+    margin: 0 6px;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  .dropdown-item:hover, .dropdown-item:focus {
+    background: #e9eefb;
+    color: #3a5fc8;
+    text-decoration: none;
+  }
+</style>
+<div class="dropdown" id="showDropdownContainer">
+  <button class="dropdown-toggle" type="button" id="showDropdown">Выбрать шоу</button>
+  <div class="dropdown-menu" aria-labelledby="showDropdown">
+    {% for s in shows_list %}
+  {% if s.id != show_id %}
+    <a class="dropdown-item" href="/shows/{{ s.id }}/">
+      <img src="{{ s.image if s.image and s.image.startswith('/shows/') else '/assets/default_cover.png' }}"
+           alt="cover" style="width:36px;height:36px;object-fit:cover;border-radius:50%;vertical-align:middle;margin-right:12px;box-shadow:0 1px 6px #0001;" title="{{ s.image }}">{{ s.title }}
+    </a>
+  {% endif %}
+{% endfor %}
+  </div>
+</div>
+<script>
+const btn = document.getElementById('showDropdown');
+const menu = btn.nextElementSibling;
+const container = document.getElementById('showDropdownContainer');
+btn.onclick = function(e) {
+  e.stopPropagation();
+  container.classList.toggle('open');
+};
+document.body.addEventListener('click', function() {
+  container.classList.remove('open');
+});
+menu.onclick = function(e) { e.stopPropagation(); };
+</script>
+<a href="{{ url_for('show_feed_xml', show_id=show_id) }}" class="btn btn-secondary" target="_blank" rel="noopener noreferrer">RSS фид</a> <button onclick="navigator.clipboard.writeText('{{ request.url_root.rstrip('/') }}/shows/{{ show_id }}/feed.xml');this.innerHTML='<img src=\'/assets/copy.svg\' style=\'width:18px;vertical-align:middle;\' alt=\'Copy\' />'; setTimeout(()=>this.innerHTML='<img src=\'/assets/copy.svg\' style=\'width:18px;vertical-align:middle;\' alt=\'Copy\' />', 1500);" class="btn btn-secondary" style="padding:0 10px;"><img src="/assets/copy.svg" style="width:18px;vertical-align:middle;" alt="Copy" /></button>
+<a href="{{ url_for('index') }}" class="btn btn-secondary">К списку шоу</a>
+                </div>
+            </div>
+        </div>
+
+        <h2>Эпизоды</h2>
+        <div class="episode-list">
+    {% for episode in episodes %}
+    <div class="episode-card">
+        <div class="cover-edit-container" style="position:relative;display:inline-block;">
+            <img src="{{ episode.image }}" alt="cover" class="episode-cover-img" style="width:64px;height:64px;object-fit:cover;border-radius:50%;box-shadow:0 1px 6px #0001;" title="{{ episode.image }}">
+            <button class="cover-edit-btn" title="Сменить обложку" style="position:absolute;bottom:2px;right:2px;background:rgba(255,255,255,0.85);border:none;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;">
+                <svg width="13" height="13" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15.6 2.6a2.121 2.121 0 0 1 3 3l-9.7 9.7-4.1 1.1 1.1-4.1 9.7-9.7ZM17 0a4 4 0 0 0-2.8 1.2l-10 10A2 2 0 0 0 3.6 12.4l-1.1 4.1A2 2 0 0 0 5.5 19.5l4.1-1.1a2 2 0 0 0 1.2-1.2l10-10A4 4 0 0 0 17 0Z" fill="#3a5fc8"/></svg>
+                <input type="file" class="cover-edit-input" accept="image/*" style="opacity:0;position:absolute;left:0;top:0;width:100%;height:100%;cursor:pointer;" title="Выбрать новую обложку">
+            </button>
+        </div>
+        <div class="episode-details">
+            <h3 class="episode-title"><span class="editable" data-field="title">{{ episode.title }}</span></h3>
+            <div class="desc-container" style="position:relative;">
+  <div class="episode-desc editable" data-field="description" data-html-content="{{ episode.description|e }}">{{ episode.description|safe }}</div>
+  <div class="desc-edit-overlay" style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:10;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s;cursor:pointer;">Редактировать</div>
+  
+</div>
+            <div style="display: flex; align-items: center; gap: 15px; margin-top: 10px;">
+    <div class="episode-player-container" data-show-id="{{ show_id }}" data-episode-id="{{ episode.id }}" style="flex-grow: 1;"><div class="status-box status-loading">Загрузка плеера...</div></div><div class="info-icon"><div class="tooltip">Загрузка данных...</div></div>
+</div>
+        </div>
+        <div class="episode-actions">
+            <a href="{{ url_for('edit_episode', show_id=show_id, ep_id=episode.id) }}" class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.9em;">Edit</a>
+            <form action="{{ url_for('delete_episode', show_id=show_id, ep_id=episode.id) }}" method="post" onsubmit="return confirm('Вы уверены, что хотите удалить этот эпизод?');" style="margin:0;">
+                
+                    <img src="/assets/delete.svg" alt="Delete">
+                </button>
+            </form>
+        </div>
+    </div>
+    {% else %}
+    <p>У этого шоу пока нет эпизодов.</p>
+    {% endfor %}
+</div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const containers = document.querySelectorAll('.episode-player-container');
+
+            // --- Helper Functions ---
+            function renderContent(container, data) {
+                let html = '';
+                const tooltip = container.closest('.episode-card').querySelector('.tooltip');
+
+                switch(data.conversion_status) {
+                    case 'success':
+                        if (data.audio_url) {
+                            html = `
+                                <audio controls preload="none" style="width: 100%;">
+                                    <source src="${data.audio_url}" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            `;
+                            tooltip.innerHTML = `
+                            <b>Файл:</b> ${data.filename || 'N/A'}<br>
+                            <b>Длительность:</b> ${data.duration ? (data.duration / 60).toFixed(1) + ' мин' : 'N/A'}<br>
+                            <b>Размер:</b> ${data.filesize ? (data.filesize / 1048576).toFixed(2) + ' МБ' : 'N/A'}
+                            `;
+                        } else {
+                            html = `<div class="status-box status-failed">Аудиофайл не найден в метаданных.</div>`;
+                        }
+                        break;
+                    case 'processing':
+                    case 'in_progress':
+                        html = `<div class="status-box status-in-progress">Идет конвертация...</div>`;
+                        // Повторный запрос через 10 секунд
+                        setTimeout(() => fetchEpisodeInfo(container), 10000);
+                        break;
+                    case 'failed':
+                        html = `<div class="status-box status-failed">Ошибка: ${data.conversion_error || 'Неизвестная ошибка'}</div>`;
+                        tooltip.innerHTML = `<b>Ошибка конвертации.</b><br>Подробности в логах сервера.`;
+                        break;
+                    default:
+                        html = `<div class="status-box status-failed">Неизвестный статус: ${data.conversion_status}</div>`;
+                        break;
+                }
+                container.innerHTML = html;
+            }
+
+            function fetchEpisodeInfo(container) {
+                const showId = container.dataset.showId;
+                const episodeId = container.dataset.episodeId;
+
+                fetch(`/api/episode_info/${showId}/${episodeId}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        renderContent(container, data);
+                    })
+                    .catch(error => {
+                        console.error('Fetch error:', error);
+                        container.innerHTML = `<div class="status-box status-failed">Не удалось загрузить информацию.</div>`;
+                    });
+            }
+
+            // --- Initial Load ---
+            containers.forEach(fetchEpisodeInfo);
+        });
+
+
+
+        // --- Inline show cover upload logic ---
+        (function() {
+            var btn = document.querySelector('.show-header .cover-edit-btn');
+            if (!btn) return;
+            var input = btn.querySelector('.cover-edit-input');
+            var img = btn.closest('.cover-edit-container').querySelector('.show-cover-img');
+            var showId = '{{ show_id }}';
+            input.addEventListener('change', function(e) {
+                if (!input.files || !input.files[0]) return;
+                var formData = new FormData();
+                formData.append('cover', input.files[0]);
+                btn.disabled = true;
+                fetch(`/shows/${showId}/cover-upload`, {
+                    method: 'POST',
+                    body: formData
+                }).then(resp => resp.json()).then(data => {
+                    if (data.image_url) {
+                        img.src = data.image_url;
+                    } else {
+                        alert(data.error || 'Ошибка загрузки');
+                    }
+                }).catch(() => alert('Ошибка загрузки')).finally(() => {
+                    btn.disabled = false;
+                    input.value = '';
+                });
+            });
+        })();
+        // --- Inline episode cover upload logic ---
+        document.querySelectorAll('.episode-card .cover-edit-btn').forEach(function(btn) {
+            const input = btn.querySelector('.cover-edit-input');
+            const img = btn.closest('.cover-edit-container').querySelector('.episode-cover-img');
+            const episodeCard = btn.closest('.episode-card');
+            const showId = '{{ show_id }}';
+            const episodeId = episodeCard && episodeCard.querySelector('.episode-player-container').dataset.episodeId;
+            input.addEventListener('change', function(e) {
+                if (!input.files || !input.files[0]) return;
+                const formData = new FormData();
+                formData.append('cover', input.files[0]);
+                btn.disabled = true;
+                fetch(`/shows/${showId}/episodes/${episodeId}/cover-upload`, {
+                    method: 'POST',
+                    body: formData
+                }).then(resp => resp.json()).then(data => {
+                    if (data.image_url) {
+                        img.src = data.image_url;
+                    } else {
+                        alert(data.error || 'Ошибка загрузки');
+                    }
+                }).catch(() => alert('Ошибка загрузки')).finally(() => {
+                    btn.disabled = false;
+                    input.value = '';
+                });
+            });
+        });
+        // --- Inline edit logic for show title/description ---
+        function makeEditable(span, saveUrl, field, origValue) {
+    const container = span.closest('.desc-container');
+            // --- Лимиты ---
+            let limits = { title: 75, description: 600, ep_title: 120, ep_description: 4000 };
+            let isEpisode = span.closest('.episode-details') !== null;
+            let max = 600;
+            if (isEpisode) {
+                max = field === 'title' ? 120 : 4000;
+            } else {
+                max = field === 'title' ? 75 : 600;
+            }
+            
+            // Создаем input или textarea
+            let input;
+            if (field === 'description') {
+                input = document.createElement('textarea');
+                input.rows = 3;
+                input.style.resize = 'vertical';
+            } else {
+                input = document.createElement('input');
+                input.type = 'text';
+            }
+            
+            // Получаем оригинальный HTML-контент из data-атрибута, если он есть
+            let htmlContent = span.dataset.htmlContent || '';
+            
+            // Преобразуем HTML в plain text для редактирования
+            let plainText = origValue;
+            if (window.htmlToPlainText && (field === 'description' || field === 'summary') && (htmlContent || origValue.includes('<'))) {
+                console.log('Converting HTML to plain text for editing');
+                plainText = window.htmlToPlainText(htmlContent || origValue);
+                console.log('Converted to plain text:', plainText);
+            }
+            
+            input.value = plainText;
+            if (field === 'description') {
+    input.className = 'inline-edit-textarea';
+} else {
+    input.className = 'inline-edit-input';
+}
+            input.maxLength = max;
+            if (field !== 'description') {
+    input.style.width = (span.offsetWidth+40) + 'px';
+}
+            input.style.padding = '8px';
+            input.style.borderRadius = '6px';
+            input.style.border = '1px solid #bbb';
+            input.style.fontSize = '1em';
+            input.style.fontFamily = 'inherit';
+            if (field === 'description') {
+                input.style.minHeight = '100px';
+            }
+            const counter = document.createElement('div');
+            counter.className = 'inline-char-counter';
+            counter.style.fontSize = '0.85em';
+            counter.style.color = '#aaa';
+            counter.style.fontWeight = '400';
+            counter.style.textAlign = 'right';
+            counter.style.marginTop = '2px';
+            counter.style.marginBottom = '-4px';
+            counter.textContent = input.value.length + '/' + max;
+            // --- Alert ---
+            const limitAlert = document.createElement('div');
+            limitAlert.className = 'inline-limit-alert';
+            limitAlert.style.display = 'none';
+            limitAlert.textContent = `Достигнут лимит. Максимум ${max} символов.`;
+            function updateCounter() {
+                counter.textContent = input.value.length + '/' + max;
+                if (input.value.length >= max) {
+                    counter.style.color = '#e74c3c';
+                    limitAlert.style.display = '';
+                } else {
+                    counter.style.color = '#aaa';
+                    limitAlert.style.display = 'none';
+                }
+            }
+            input.addEventListener('input', updateCounter);
+            updateCounter();
+            // --- Layout ---
+            const wrapper = document.createElement('div');
+            wrapper.style.display = 'flex';
+            wrapper.style.flexDirection = 'column';
+            wrapper.appendChild(input);
+            wrapper.appendChild(counter);
+            wrapper.appendChild(limitAlert);
+            span.replaceWith(wrapper);
+            input.focus();
+    if (container) container.classList.add('editing');
+            let saving = false;
+            function save() {
+                if (saving) return;
+                // Если без изменений, отменяем редактирование
+                if (input.value === plainText) {
+                    wrapper.replaceWith(span);
+                    if (container) container.classList.remove('editing');
+                    attachInlineEdit(span, saveUrl, field);
+                    return;
+                }
+                saving = true;
+                input.disabled = true;
+                
+                console.log('DEBUG: save вызван для', field);
+                
+                // Преобразуем plain text в HTML перед сохранением
+                let valueToSave = input.value;
+                if ((field === 'description' || field === 'summary')) {
+                    console.log('DEBUG: До преобразования plaintext->HTML:', valueToSave);
+                    valueToSave = window.plaintext2html ? window.plaintext2html(valueToSave) : valueToSave;
+                    console.log('DEBUG: После преобразования plaintext->HTML:', valueToSave);
+                }
+                
+                fetch(saveUrl, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ [field]: valueToSave })
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data && data[field] !== undefined) {
+                        const newSpan = document.createElement('span');
+                        newSpan.className = 'editable';
+                        if (field === 'description') newSpan.classList.add('episode-desc');
+                        newSpan.dataset.field = field;
+                        
+                        // Сохраняем оригинальный HTML в data-атрибуте
+                        if (field === 'description' || field === 'summary') {
+                            console.log('DEBUG: Сохраняем в data-htmlContent:', valueToSave);
+                            newSpan.dataset.htmlContent = valueToSave;
+                            // Отображаем HTML-контент безопасно
+                            newSpan.innerHTML = valueToSave;
+                            console.log('DEBUG: После установки innerHTML:', newSpan.innerHTML);
+                            
+                            // Убедимся, что описание свернуто по умолчанию
+                            if (field === 'description') {
+                                newSpan.classList.remove('expanded');
+                                
+                                // Проверяем наличие кнопки "Показать полностью" и обновляем её текст
+                                const container = newSpan.closest('.desc-container');
+                                if (container) {
+                                    const toggleBtn = container.querySelector('.desc-toggle');
+                                    if (toggleBtn) {
+                                        toggleBtn.textContent = 'Показать полностью';
+                                    }
+                                }
+                            }
+                        } else {
+                            newSpan.textContent = data[field];
+                        }
+                        
+                        wrapper.replaceWith(newSpan);
+                        attachInlineEdit(newSpan, saveUrl, field);
+                        if (container) container.classList.remove('editing');
+                    } else {
+                        input.disabled = false;
+                        alert(data.error || 'Ошибка сохранения');
+                    }
+                })
+                .catch(()=>{ input.disabled = false; alert('Ошибка сохранения'); });
+            }
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && field !== 'description') {
+                    e.preventDefault(); save();
+                } else if (e.key === 'Escape') {
+                    wrapper.replaceWith(span);
+                    if (container) container.classList.remove('editing');
+                    attachInlineEdit(span, saveUrl, field);
+                }
+            });
+            input.addEventListener('blur', save);
+        }
+        function attachInlineEdit(span, saveUrl, field) {
+            console.log('DEBUG: attachInlineEdit вызван для', field);
+            if (field === 'description' || field === 'summary') {
+                console.log('DEBUG: data-htmlContent:', span.dataset.htmlContent);
+            }
+            
+            // Удаляем предыдущий обработчик, если он был
+            if (span.onclick) {
+                span.onclick = null;
+            }
+            
+            // Добавляем новый обработчик
+    // Специальная обработка для описания шоу: первый клик — развернуть, второй клик — редактировать
+    if (field === 'description' && !span.closest('.episode-details')) {
+        span.onclick = function(e) {
+            e.stopPropagation();
+            if (!span.classList.contains('expanded')) {
+                span.classList.add('expanded');
+            } else {
+                const content = span.dataset.htmlContent ? span.dataset.htmlContent : span.textContent;
+                makeEditable(span, saveUrl, field, content);
+            }
+        };
+        return;
+    }
+    // Специальная обработка для описания эпизода: первый клик — развернуть, второй клик — редактировать
+    if (field === 'description' && span.closest('.episode-details')) {
+        span.onclick = function(e) {
+            e.stopPropagation();
+            if (!span.classList.contains('expanded')) {
+                span.classList.add('expanded');
+            } else {
+                const content = span.dataset.htmlContent ? span.dataset.htmlContent : span.textContent;
+                makeEditable(span, saveUrl, field, content);
+            }
+        };
+        return;
+    }
+    // Добавляем новый обработчик
+        if (!span.closest('.episode-details')) {
+            span.onclick = function(e) {
+                e.stopPropagation();
+                if (!span.classList.contains('expanded')) {
+                    span.classList.add('expanded');
+                } else {
+                    const content = span.dataset.htmlContent ? span.dataset.htmlContent : span.textContent;
+                    makeEditable(span, saveUrl, field, content);
+                }
+            };
+        }
+    // Добавляем новый обработчик
+            // Обработчик для описания с оверлеем
+            if (field === 'description' && span.classList.contains('episode-desc')) {
+                const container = span.closest('.desc-container');
+                if (container) {
+                    const overlay = container.querySelector('.desc-edit-overlay');
+                    if (overlay) {
+                        overlay.onclick = function(e) {
+                            e.stopPropagation();
+                            console.log('DEBUG: overlay.onclick сработал для', field);
+                            
+                            // Используем HTML из data-атрибута, если он есть, иначе используем textContent
+                            const content = span.dataset.htmlContent ? 
+                                span.dataset.htmlContent : span.textContent;
+                                
+                            console.log('DEBUG: Контент для редактирования (оверлей):', 
+                                'hasDataHtml:', !!span.dataset.htmlContent,
+                                'dataHtml:', span.dataset.htmlContent ? span.dataset.htmlContent.substring(0, 50) + '...' : null,
+                                'textContent:', span.textContent.substring(0, 50) + '...',
+                                'finalContent:', content.substring(0, 50) + '...'
+                            );
+                            
+                            makeEditable(span, saveUrl, field, content);
+                        };
+                    }
+                }
+            } else {
+                // Стандартный обработчик для других полей
+                span.onclick = function(e) {
+                    console.log('DEBUG: span.onclick сработал для', field);
+                    
+                    // Используем HTML из data-атрибута, если он есть, иначе используем textContent
+                    const content = (field === 'description' || field === 'summary') && span.dataset.htmlContent ? 
+                        span.dataset.htmlContent : span.textContent;
+                        
+                    console.log('DEBUG: Контент для редактирования:', 
+                        'hasDataHtml:', !!span.dataset.htmlContent,
+                        'dataHtml:', span.dataset.htmlContent ? span.dataset.htmlContent.substring(0, 50) + '...' : null,
+                        'textContent:', span.textContent.substring(0, 50) + '...',
+                        'finalContent:', content.substring(0, 50) + '...'
+                    );
+                    
+                    makeEditable(span, saveUrl, field, content);
+                };
+            }
+            
+            const btn = span.parentElement.querySelector('.edit-btn');
+            if (btn) {
+                if (btn.onclick) {
+                    btn.onclick = null;
+                }
+                btn.onclick = function(e) {
+                    e.preventDefault();
+                    console.log('DEBUG: btn.onclick сработал для', field);
+                    
+                    // Используем HTML из data-атрибута, если он есть, иначе используем textContent
+                    const content = (field === 'description' || field === 'summary') && span.dataset.htmlContent ? 
+                        span.dataset.htmlContent : span.textContent;
+                        
+                    console.log('DEBUG: Контент для редактирования (кнопка):',
+                        'hasDataHtml:', !!span.dataset.htmlContent,
+                        'dataHtml:', span.dataset.htmlContent ? span.dataset.htmlContent.substring(0, 50) + '...' : null,
+                        'textContent:', span.textContent.substring(0, 50) + '...',
+                        'finalContent:', content.substring(0, 50) + '...'
+                    );
+                    
+                    makeEditable(span, saveUrl, field, content);
+                };
+            }
+        }
+        // Для шоу
+        document.querySelectorAll('.show-info .editable').forEach(function(span) {
+            const field = span.dataset.field;
+            const saveUrl = `/shows/${window.location.pathname.split('/')[2]}/inline-edit`;
+            attachInlineEdit(span, saveUrl, field);
+        });
+        // Для эпизодов
+document.querySelectorAll('.episode-details .editable').forEach(function(span) {
+            const field = span.dataset.field;
+            const epCard = span.closest('.episode-card');
+            const epId = epCard && epCard.querySelector('.episode-player-container').dataset.episodeId;
+            const showId = '{{ show_id }}';
+            const saveUrl = `/shows/${showId}/episodes/${epId}/inline-edit`;
+            
+            console.log('DEBUG: Инициализация редактирования для эпизода:', 
+                'field:', field, 
+                'epId:', epId,
+                'classList:', span.className,
+                'hasDataHtml:', !!span.dataset.htmlContent,
+                'dataHtml:', span.dataset.htmlContent ? span.dataset.htmlContent.substring(0, 50) + '...' : null,
+                'textContent:', span.textContent.substring(0, 50) + '...',
+                'innerHTML:', span.innerHTML.substring(0, 50) + '...'
+            );
+            
+            attachInlineEdit(span, saveUrl, field);
+            
+            // Инициализация кнопки "Показать полностью" для описаний
+            if (field === 'description') {
+                const desc = span;
+                const container = desc.closest('.desc-container');
+                if (container) {
+                    const toggleBtn = container.querySelector('.desc-toggle');
+                    if (toggleBtn) {
+                        // Принудительно сворачиваем описание
+                        desc.classList.remove('expanded');
+                        
+                        // Проверяем, нужна ли кнопка "Показать полностью"
+                        setTimeout(() => {
+                            const isOverflowing = desc.scrollHeight > desc.clientHeight || desc.scrollWidth > desc.clientWidth;
+                            console.log('DEBUG: Проверка переполнения:', { isOverflowing, scrollHeight: desc.scrollHeight, clientHeight: desc.clientHeight });
+                            
+                            if (isOverflowing) {
+                                toggleBtn.style.display = 'inline-block';
+                                toggleBtn.addEventListener('click', function(e) {
+                                    e.stopPropagation(); // Предотвращаем всплытие события клика
+                                    if (desc.classList.contains('expanded')) {
+                                        desc.classList.remove('expanded');
+                                        toggleBtn.textContent = 'Показать полностью';
+                                    } else {
+                                        desc.classList.add('expanded');
+                                        toggleBtn.textContent = 'Свернуть';
+                                    }
+                                });
+                            }
+                        }, 100); // Небольшая задержка для корректного расчета размеров
+                    }
+                }
+            }
+        });
+    // Custom click-to-expand and second-click-to-edit logic for episode descriptions
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.episode-details .episode-desc').forEach(function(desc) {
+            desc.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (!desc.classList.contains('expanded')) {
+                    desc.classList.add('expanded');
+                } else {
+                    const field = desc.dataset.field;
+                    const epCard = desc.closest('.episode-card');
+                    const epId = epCard && epCard.querySelector('.episode-player-container').dataset.episodeId;
+                    const showId = '{{ show_id }}';
+                    const saveUrl = `/shows/${showId}/episodes/${epId}/inline-edit`;
+                    const content = desc.dataset.htmlContent || desc.textContent;
+                    makeEditable(desc, saveUrl, field, content);
+                }
+            });
+        });
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.desc-container')) {
+                document.querySelectorAll('.episode-details .episode-desc.expanded').forEach(function(d) {
+                    d.classList.remove('expanded');
+                });
+            }
+        });
+    });
+    </script>
+</body>
+</html>

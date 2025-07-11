@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ episode.title or episode_id }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f9f9fb; color: #222; margin: 0; }
+        .container { max-width: 540px; margin: 40px auto; background: #fff; border-radius: 14px; box-shadow: 0 2px 16px #0001; padding: 32px; }
+        h1 { color: #3a5fc8; }
+        .cover { width: 120px; height: 120px; object-fit: cover; border-radius: 14px; margin-bottom: 16px; }
+        .audio-block { margin: 24px 0; }
+        .meta { color: #666; font-size: 0.98em; margin-bottom: 18px; }
+        .back-link { display: inline-block; margin-bottom: 18px; color: #3a5fc8; text-decoration: none; font-size: 1em; }
+        .back-link:hover { text-decoration: underline; }
+
+        .audio-player-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px; /* Расстояние между плеером и иконкой */
+        }
+
+        .info-icon-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .info-icon {
+            cursor: pointer;
+            color: #888;
+        }
+
+        .tooltip-content {
+            display: none;
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            border-radius: 6px;
+            z-index: 1;
+            width: max-content;
+            margin-bottom: 5px; /* Отступ от иконки */
+        }
+
+        .info-icon-container:hover .tooltip-content {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a class="back-link" href="/shows/{{ show_id }}/">← Назад к шоу</a>
+        <h1>{{ episode.title or episode_id }}</h1>
+        {% if episode.image_url %}
+        <img class="cover" src="{{ episode.image_url }}" alt="cover">
+        {% endif %}
+        <div class="meta">
+            <span>Дата публикации: {{ episode.pubdate or '—' }}</span><br>
+            {% if episode.duration %}<span>Длительность: {{ episode.duration }}</span><br>{% endif %}
+            {% if episode.explicit %}<span>Explicit: {{ episode.explicit }}</span><br>{% endif %}
+        </div>
+        {% if episode.audio_url %}
+        <div class="audio-player-container">
+            <audio controls preload="metadata" style="width:100%">
+                <source src="{{ episode.audio_url }}">
+                Ваш браузер не поддерживает аудио.
+            </audio>
+            <div class="info-icon-container">
+                <i class="fas fa-info-circle info-icon"></i>
+                <div class="tooltip-content">
+                    <strong>Аудиофайл:</strong> {{ audio_info.filename or 'N/A' }}<br>
+                    <strong>Битрейт:</strong> {{ audio_info.bitrate or 'N/A' }}<br>
+                    <strong>Размер:</strong> {{ audio_info.size or 'N/A' }}<br>
+                    <strong>Длительность:</strong> {{ audio_info.duration or 'N/A' }}<br>
+                    <strong>Формат:</strong> {{ audio_info.format or 'N/A' }}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        <div class="desc">
+            {% if episode.description and ('<' in episode.description and '>' in episode.description) %}
+  <p>{{ episode.description|safe }}</p>
+{% else %}
+  {% set clean_desc = episode.description|striptags %}
+  {{ clean_desc.replace('\n', '</p><p>')|safe }}
+{% endif %}
+        </div>
+    </div>
+</body>
+</html>

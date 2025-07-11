@@ -1,0 +1,6 @@
+feedgen>=0.9.0
+requests>=2.32.0
+flask>=3.0.0
+python-dotenv>=1.0.0
+pydub>=0.25.0  # используется только если включён force_transcode
+bleach>=6.0.0
