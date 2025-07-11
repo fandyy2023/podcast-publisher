@@ -58,7 +58,10 @@
         .desc-edit-overlay { position:absolute; top:0; left:0; width:100%; height:100%; z-index:10; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity 0.2s; background:rgba(58,95,200,0.08); color:#3a5fc8; font-weight:500; border-radius:6px; pointer-events:none; cursor:pointer; }
         .desc-container:hover .desc-edit-overlay { opacity:1; }
         /* скрываем overlay, редактирование по клику */
-        .desc-edit-overlay { display:none!important; }
+        .desc-edit-overlay {
+            /* Make overlay visible but non-interactive so description below can still receive clicks */
+            pointer-events: none;
+        }
         .desc-container.editing .desc-edit-overlay, .desc-container.editing .desc-toggle { display:none!important; }
         .inline-edit-textarea { width:100%; min-height:100px; max-height:350px; overflow:auto; resize:vertical; font-size:1em; border:2px solid #3a5fc8; border-radius:8px; padding:10px; margin:0; background:#f6f8ff; position:static; }
         .desc-toggle { cursor:pointer; background:none; border:none; color:#3a5fc8; text-decoration:underline; position:absolute; bottom:0; right:0; z-index:11; font-size:1em; padding:2px 8px; }
@@ -285,11 +288,19 @@ menu.onclick = function(e) { e.stopPropagation(); };
                 switch(data.conversion_status) {
                     case 'success':
                         if (data.audio_url) {
+                            const showId = container.dataset.showId;
+                            const episodeId = container.dataset.episodeId;
+                            const folderUrl = `/shows/${showId}/episodes/${episodeId}/browse`;
                             html = `
                                 <audio controls preload="none" style="width: 100%;">
                                     <source src="${data.audio_url}" type="audio/mpeg">
                                     Your browser does not support the audio element.
                                 </audio>
+                                <div class="audio-links" style="margin-top:6px;font-size:0.95em;">
+                                    <a href="${data.audio_url}" target="_blank" style="text-decoration:underline;color:#3a5fc8;">${data.filename || 'Download'}</a>
+                                    &nbsp;
+                                    <a href="${folderUrl}" target="_blank" title="Открыть папку" style="text-decoration:none;font-size:1.2em;">📂</a>
+                                </div>
                             `;
                             tooltip.innerHTML = `
                              ${(() => {
@@ -304,9 +315,10 @@ menu.onclick = function(e) { e.stopPropagation(); };
                                      lines.push(khz + ' kHz');
                                  }
                                  if (data.channels) {
-                                     const ch = parseInt(data.channels, 10);
-                                     lines.push(ch >= 2 ? 'Stereo' : 'Mono');
-                                 }
+                                      const ch = parseInt(data.channels, 10);
+                                      lines.push(ch >= 2 ? 'Stereo' : 'Mono');
+                                  }
+                                  if (data.size) lines.push(data.size);
                                  return lines.join('<br>');
                              })() }
                             `;

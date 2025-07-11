@@ -13,7 +13,15 @@ import math
 import shutil
 import threading
 import subprocess
-from utils import transcode_audio_to_mp3, get_audio_info, sanitize_html_for_rss, plain_text_to_html, html_to_plain_text
+from utils import (
+    transcode_audio_to_mp3,
+    get_audio_info,
+    sanitize_html_for_rss,
+    plain_text_to_html,
+    html_to_plain_text,
+    select_mp3_bitrate,
+    MIN_PODCAST_BITRATE,
+)
 
 # Initialize Flask app
 app = Flask(__name__, static_folder="static", template_folder="templates")
@@ -64,6 +72,30 @@ def episode_file(show_id: str, ep_id: str, filename: str):
     if filename.lower().endswith('.mp3'):
         mimetype = 'audio/mpeg'
     return send_from_directory(ep_dir, filename, mimetype=mimetype, conditional=True)
+
+
+@app.route("/shows/<show_id>/episodes/<ep_id>/browse")
+def browse_episode_files(show_id: str, ep_id: str):
+    """Simple directory listing for episode files."""
+    ep_dir = SHOWS_DIR / show_id / "episodes" / ep_id
+    if not ep_dir.exists():
+        abort(404, "Episode directory not found")
+
+    file_links = []
+    for file in sorted(ep_dir.iterdir()):
+        if file.is_file():
+            link = url_for('episode_file', show_id=show_id, ep_id=ep_id, filename=file.name)
+            file_links.append((file.name, link))
+
+    # Build minimal HTML response
+    html_parts = [
+        f"<h2>Files for episode {ep_id}</h2>",
+        "<ul style='font-family:Segoe UI,Arial,sans-serif;'>"
+    ]
+    for name, link in file_links:
+        html_parts.append(f"<li><a href='{link}' target='_blank' rel='noopener noreferrer'>{name}</a></li>")
+    html_parts.append("</ul>")
+    return "\n".join(html_parts)
 
 
 @app.route("/assets/<path:filename>")
@@ -331,7 +363,9 @@ def get_episode_info_api(show_id, episode_id):
         'channels': meta.get('channels'),
         'duration_seconds': meta.get('duration_seconds'),
         'samplerate': meta.get('samplerate'),
-        'filename': Path(meta.get('audio', '')).name
+        'filename': Path(meta.get('audio', '')).name,
+        'size': meta.get('size'),
+        'size_bytes': meta.get('size_bytes')
     }
 
     return jsonify(response_data)
@@ -684,7 +718,7 @@ def check_transcoding_needed(audio_path: Path) -> (bool, str):
     # Проверяем битрейт (извлекаем число из строки '192 kbps')
     try:
         bitrate_kbps = int(info.get("bitrate", "0").split()[0])
-        if bitrate_kbps < 128:
+        if bitrate_kbps < MIN_PODCAST_BITRATE:
             return True, f"Битрейт слишком низкий ({bitrate_kbps} kbps)"
     except (ValueError, IndexError):
         return True, "Не удалось определить битрейт"
@@ -716,8 +750,15 @@ def process_audio_background(audio_path_str, show_id, ep_id):
                 app.logger.info(f"[BG] No transcoding needed.")
                 final_audio_path = audio_path
             else:
-                app.logger.info(f"[BG] Transcoding required for {audio_path.name}.")
-                new_path_str = transcode_audio_to_mp3(audio_path)
+                app.logger.info(f"[BG] Transcoding required for {audio_path.name}. Determining optimal bitrate…")
+                src_info = get_audio_info(audio_path)
+                try:
+                    src_br_kbps = int(str(src_info.get("bitrate", "0").split()[0]))
+                except (ValueError, IndexError, TypeError):
+                    src_br_kbps = None
+                target_bitrate = select_mp3_bitrate(src_br_kbps) if src_br_kbps else "192k"
+                app.logger.info(f"[BG] Selected target bitrate: {target_bitrate}")
+                new_path_str = transcode_audio_to_mp3(audio_path, bitrate=target_bitrate)
                 if new_path_str:
                     final_audio_path = Path(new_path_str)
                     app.logger.info(f"[BG] Transcoding successful. New file: {final_audio_path}")
