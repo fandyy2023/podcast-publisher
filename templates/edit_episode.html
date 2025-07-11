@@ -20,11 +20,14 @@
         .cancel-btn { background: #eee; color: #444; border: none; padding: 10px 22px; border-radius: 7px; font-size: 1.1em; font-weight: 500; cursor: pointer; }
         .cancel-btn:hover { background: #ddd; }
         .msg { margin-top: 16px; color: #e74c3c; }
+        .back-link { display:inline-block; margin-bottom:16px; color:#3a5fc8; text-decoration:none; font-weight:500; }
+        .back-link:hover { text-decoration:underline; }
         .readonly { background: #f3f3f3; color: #888; }
     </style>
 </head>
 <body>
     <div class="container">
+        <a href="javascript:history.back()" class="back-link">← Назад</a>
         <h1>Редактировать эпизод</h1>
         <form method="post" enctype="multipart/form-data">
             <label for="title">Название эпизода</label>
@@ -95,6 +98,11 @@ document.addEventListener('DOMContentLoaded', function() {
             <input type="file" id="episode_image" name="episode_image" accept="image/*">
 
             <label for="audio">Аудиофайл (mp3/wav/m4a/ogg...)</label>
+            {% if episode.audio %}
+            <p style="margin:6px 0 0 0;font-size:0.95em;color:#555;">
+                Текущий файл: <a href="{{ episode.audio }}" target="_blank">{{ episode.audio.rsplit('/', 1)[-1] }}</a>
+            </p>
+            {% endif %}
             <input type="file" id="audio" name="audio" accept="audio/*">
 
             <label for="duration">Длительность</label>

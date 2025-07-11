@@ -54,6 +54,7 @@
     max-height: 4.7em;
 }
         .show-actions { display: flex; gap: 12px; }
+        .table-desc { display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; text-overflow:ellipsis; white-space:normal; max-height:3.2em; }
         .show-link, .rss-link { padding: 7px 18px; border-radius: 6px; text-decoration: none; font-weight: 500; }
         .show-link { background: #3a5fc8; color: #fff; }
         .show-link:hover { background: #294b9b; }
@@ -131,6 +132,7 @@
             <table style="width:100%; border-collapse:collapse;">
                 <thead>
                     <tr style="background:#f3f6fa;">
+                        <th style="padding:10px 8px;"></th>
                         <th style="text-align:left; padding:10px 8px;">Название</th>
                         <th style="text-align:left; padding:10px 8px;">Описание</th>
                         <th style="text-align:left; padding:10px 8px;">Действия</th>
@@ -139,14 +141,15 @@
                 <tbody>
                 {% for show in shows %}
                     <tr style="border-bottom:1px solid #eee;" data-language="{{ show.language }}">
-                        <td style="padding:10px 8px; font-weight:600;"><span class="editable" data-field="title" data-showid="{{ show.id }}">{{ show.title }}</span></td>
-                        <td style="padding:10px 8px; color:#444;"><span class="editable" data-field="description" data-showid="{{ show.id }}">{{ show.description | striptags }}</span></td>
-                        <td style="padding:10px 8px;">
-                            <a class="show-link" style="padding:5px 14px;font-size:0.98em;" href="/shows/{{ show.id }}/">Подробнее</a>
-                            <a class="rss-link" style="padding:5px 14px;font-size:0.98em;" href="/shows/{{ show.id }}/feed.xml" target="_blank">RSS</a>
-                            <button class="del-btn" data-showid="{{ show.id }}" aria-label="Удалить шоу" style="background:none;border:none;padding:0 0.5em;cursor:pointer;vertical-align:middle;"><img src="/assets/delete.svg" alt="Удалить" width="20" height="20" style="vertical-align:middle;"></button>
-                        </td>
-                    </tr>
+                         <td style="padding:8px;"><a href="/shows/{{ show.id }}/"><img src="{{ show.image }}" alt="cover" style="width:45px;height:45px;object-fit:cover;border-radius:6px;cursor:pointer;"></a></td>
+                         <td style="padding:10px 8px; font-weight:600;"><span class="editable" data-field="title" data-showid="{{ show.id }}">{{ show.title }}</span></td>
+                         <td style="padding:10px 8px; color:#444;"><span class="editable table-desc" data-field="description" data-showid="{{ show.id }}">{{ show.description | striptags }}</span></td>
+                         <td style="padding:10px 8px; display:flex; align-items:center; gap:8px;">
+                             <a class="show-link" style="padding:5px 14px;font-size:0.98em;" href="/shows/{{ show.id }}/">Подробнее</a>
+                             <a class="rss-link" style="padding:5px 14px;font-size:0.98em;" href="/shows/{{ show.id }}/feed.xml" target="_blank">RSS</a>
+                             <button class="del-btn" data-showid="{{ show.id }}" aria-label="Удалить шоу" style="background:none;border:none;padding:0 0.5em;cursor:pointer;vertical-align:middle;"><img src="/assets/delete.svg" alt="Удалить" width="20" height="20" style="vertical-align:middle;"></button>
+                         </td>
+                     </tr>
                 {% endfor %}
                 </tbody>
             </table>
