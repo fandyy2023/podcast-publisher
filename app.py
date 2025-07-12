@@ -22,6 +22,8 @@ from utils import (
     select_mp3_bitrate,
     MIN_PODCAST_BITRATE,
     resize_cover_image,
+    has_id3v2_tags,
+    embed_id3_metadata_mp3,
 )
 
 # Initialize Flask app
@@ -499,10 +501,14 @@ def show_feed_xml(show_id):
 
     # Helper functions
     def normalize_explicit(val):
+        """Return iTunes-valid explicit flag.
+        Apple accepts: "explicit", "clean" or legacy "yes"/"no".
+        PSP-1 prefers "explicit" / "clean". We map truthy values → "explicit", else → "clean".
+        """
         v = str(val).strip().lower()
         if v in ("yes", "true", "explicit", "да", "y", "1"):
-            return "yes"
-        return "no"
+            return "true"
+        return "false"
 
     def cdata_or_escape(text):
         if not text:
@@ -512,6 +518,17 @@ def show_feed_xml(show_id):
         return html.escape(text)
 
     items = []
+    # Determine show-level cover image URL (used as fallback for episode images)
+    show_cover_url = None
+    image_exts = (".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp")
+    img_candidate = cfg.get('image')
+    if img_candidate and (show_dir / img_candidate).exists():
+        show_cover_url = f"{base_url}{url_for('show_file', show_id=show_id, filename=img_candidate)}"
+    if not show_cover_url:
+        for f in show_dir.iterdir():
+            if f.is_file() and f.suffix.lower() in image_exts:
+                show_cover_url = f"{base_url}{url_for('show_file', show_id=show_id, filename=f.name)}"
+                break
 
     episodes_dir = show_dir / "episodes"
     if episodes_dir.exists():
@@ -546,15 +563,37 @@ def show_feed_xml(show_id):
 
             duration_str = meta.get('duration', '')
             enclosure_length = meta.get('size_bytes', 0)
-            audio_url = f"{base_url}{url_for('show_file', show_id=show_id, filename=f'episodes/{ep_dir.name}/{audio_file.name}')}"
+            # Determine cache-busting version from latest modification time of relevant files
+            version_ts = int(audio_file.stat().st_mtime)
+            try:
+                # Include metadata.json modification time
+                version_ts = max(version_ts, int(meta_path.stat().st_mtime))
+                # Include episode image mtime if present
+                # Also include any image files in episode directory (covers may change without metadata update)
+                image_exts = (".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp")
+                for f in ep_dir.iterdir():
+                    if f.is_file() and f.suffix.lower() in image_exts and f.name != audio_file.name:
+                        version_ts = max(version_ts, int(f.stat().st_mtime))
+            except Exception:
+                pass  # Fall back to audio file mtime
+            audio_url = f"{base_url}{url_for('show_file', show_id=show_id, filename=f'episodes/{ep_dir.name}/{audio_file.name}')}?v={version_ts}"
             episode_link = f"{base_url}{url_for('edit_episode', show_id=show_id, ep_id=ep_dir.name)}"
             
             ep_image_url = None
             if meta.get("episode_image"):
                 img_name = Path(meta["episode_image"]).name
                 ep_image_url = f"{base_url}{url_for('show_file', show_id=show_id, filename=f'episodes/{ep_dir.name}/{img_name}')}"
+            # Fallback to show-level cover if episode image is missing
+            if not ep_image_url:
+                ep_image_url = show_cover_url
 
             ep_summary = meta.get("summary", description)
+            # Transcript URL (recommended PSP-1 element)
+            transcript_url = meta.get("transcript")
+            if not transcript_url:
+                # Fallback to the public episode page if no dedicated transcript is available
+                transcript_url = episode_link
+            transcript_type = "text/html"
             mime, _ = mimetypes.guess_type(str(audio_file))
             guid_val = f"{show_id}_{ep_dir.name}"
 
@@ -569,6 +608,7 @@ def show_feed_xml(show_id):
             <pubDate>{pubdate}</pubDate>
             {f'<itunes:image href="{ep_image_url}" />' if ep_image_url else ''}
             {f'<itunes:summary>{cdata_or_escape(ep_summary)}</itunes:summary>' if ep_summary else ''}
+            {f'<podcast:transcript url="{html.escape(transcript_url)}" type="{transcript_type}" />' if transcript_url else ''}
             {f'<itunes:duration>{duration_str}</itunes:duration>' if duration_str else ''}
             <itunes:explicit>{normalize_explicit(meta.get("explicit"))}</itunes:explicit>
         </item>''')
@@ -616,6 +656,11 @@ def show_feed_xml(show_id):
     now_gmt = datetime.datetime.utcnow().strftime("%a, %d %b %Y %H:%M:%S GMT")
     copyright_val = cfg.get('copyright', f" 2025 {itunes_author or cfg.get('title')}")
     itunes_subtitle = cfg.get('subtitle', '')
+
+    # PSP-1 requires at least one element from the "podcast" namespace; we include <podcast:locked>
+    podcast_locked = ''
+    if itunes_owner_email:
+        podcast_locked = f'<podcast:locked owner="{html.escape(itunes_owner_email)}">no</podcast:locked>'
     
     # Categories
     cat_main = cfg.get('category_main', '')
@@ -630,17 +675,14 @@ def show_feed_xml(show_id):
     # Image block
     image_block = ''
     if cover_url:
-        image_block = f'''
-    <image>
-      <url>{cover_url}</url>
-      <title>{cdata_or_escape(cfg.get('title', show_id))}</title>
-      <link>{channel_link}</link>
-    </image>
-    <itunes:image href="{cover_url}" />'''
+        image_block = f"<image>\n      <url>{html.escape(cover_url)}</url>\n      <title>{html.escape(cfg.get('title'))}</title>\n      <link>{html.escape(base_url + url_for('show_page', show_id=show_id))}</link>\n    </image>\n    <itunes:image href=\"{html.escape(cover_url)}\" />"
+
+    # Recommended PSP-1 channel-level GUID
+    podcast_guid_tag = f"<podcast:guid>{html.escape(cfg.get('guid', show_id))}</podcast:guid>"
 
     # Final RSS assembly
     rss = f'''<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:atom="http://www.w3.org/2005/Atom">
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:podcast="https://podcastindex.org/namespace/1.0">
 <channel>
     <title>{cdata_or_escape(cfg.get('title', show_id))}</title>
     <link>{channel_link}</link>
@@ -655,7 +697,9 @@ def show_feed_xml(show_id):
     <itunes:explicit>{itunes_explicit}</itunes:explicit>
     {itunes_cat}
     {image_block}
+    {podcast_guid_tag}
     {''.join(items)}
+    {podcast_locked}
 </channel>
 </rss>'''
     return Response(rss, mimetype="application/rss+xml")
@@ -774,8 +818,47 @@ def process_audio_background(audio_path_str, show_id, ep_id):
             needs_transcoding, reason = check_transcoding_needed(audio_path)
             app.logger.info(f"[BG] Checking transcoding for {audio_path.name}: needs_transcoding={needs_transcoding}, reason='{reason}'")
 
+            # Pre-build ID3 metadata for both transcoding and direct tagging paths
+            import datetime as _dt
+            metadata_dict = {}
+            try:
+                with (SHOWS_DIR / show_id / "config.json").open("r", encoding="utf-8") as _fcfg:
+                    show_cfg = json.load(_fcfg)
+            except Exception:
+                show_cfg = {}
+
+            metadata_dict["title"] = meta.get("title") or ep_id
+            metadata_dict["artist"] = show_cfg.get("author") or show_cfg.get("title") or show_id
+            metadata_dict["album"] = show_cfg.get("title") or show_id
+            metadata_dict["date"] = _dt.datetime.utcnow().strftime("%Y")
+            explicit_flag = str(meta.get("explicit", "")).strip().lower()
+            metadata_dict["ITUNESADVISORY"] = "1" if explicit_flag in ("yes", "true", "explicit", "y", "да", "1") else "0"
+
+            # Attempt to locate a cover image for the episode
+            cover_path_val = None
+            if meta.get("image"):
+                candidate = ep_dir / Path(meta["image"]).name
+                if candidate.exists():
+                    cover_path_val = candidate
+            if cover_path_val is None:
+                for _img in ep_dir.iterdir():
+                    if _img.suffix.lower() in (".png", ".jpg", ".jpeg", ".webp"):
+                        cover_path_val = _img
+                        break
+
             if not needs_transcoding:
                 app.logger.info(f"[BG] No transcoding needed.")
+                # Ensure ID3v2 tags are present; embed if missing
+                if audio_path.suffix.lower() == '.mp3' and not has_id3v2_tags(audio_path):
+                    app.logger.info(f"[BG] Embedding ID3 tags into {audio_path.name} …")
+                    try:
+                        embed_id3_metadata_mp3(
+                            audio_path,
+                            metadata=metadata_dict,
+                            cover_path=cover_path_val,
+                        )
+                    except Exception as tag_exc:
+                        app.logger.warning(f"[BG] Failed to embed ID3 tags: {tag_exc}")
                 final_audio_path = audio_path
             else:
                 app.logger.info(f"[BG] Transcoding required for {audio_path.name}. Determining optimal bitrate…")

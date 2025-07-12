@@ -1,77 +1,62 @@
-2025-07-11 18:51:39,521 ERROR: 500 Internal Error: POST http://podcast.ecowool.online/shows/22/episodes/c160631c/edit args={} form={'title': '2 The Tipping Podint: How Little Things Can Make a Big Difference By Malcolm Gladwell What’s It About? TheTipping Poins', 'language': 'de-DE', 'description': 'The Tipping Point: How Little Things Can Make a Big Difference\r\nBy Malcolm Gladwell\r\nWhat’s It About?\r\nThe Tipping Point explores why certain ideas, behaviors, and products suddenly explode in popularity—spreading through society like an epidemic. Malcolm Gladwell investigates the subtle forces and social dynamics that drive these rapid changes, showing how small actions or influences can trigger massive, seemingly unstoppable trends.\r\nKey Concepts\r\n1. Epidemics of Ideas and Trends\r\n\t•\tGladwell draws a parallel between the spread of infectious diseases and the way ideas, fashions, and behaviors propagate through society.\r\n\t•\tInitially, only a handful of people are “infected” by a new idea or product. Then, seemingly all at once, it catches fire—reaching a “tipping point” where it spreads rapidly and widely.\r\n2. The Tipping Point\r\n\t•\tThe “tipping point” is the critical threshold at which an idea, product, or behavior crosses from being a rare phenomenon to a mainstream epidemic.\r\n\t•\tAfter this point, the spread becomes self-sustaining and very difficult to stop.', 'explicit': 'no', 'category_main': 'Arts', 'category_sub': '', 'summary': 'The Tipping Point: How Little Things Can Make a Big Difference\r\n\r\nBy Malcolm Gladwell\r\n\r\nWhat’s It About?\r\n\r\nThe Tipping Point explores why certain ideas, behaviors, and products suddenly explode in popularity—spreading through society like an epidemic. Malcolm Gladwell investigates the subtle forces and social dynamics that drive these rapid changes, showing how small actions or influences can trigger massive, seemingly unstoppable trends.\r\n\r\nKey Concepts\r\n\r\n• Epidemics of Ideas and Trends\r\n\r\n• Gladwell draws a parallel between the spread of infectious diseases and the way ideas, fashions, and behaviors propagate through society.\r\n\r\n• Initially, only a handful of people are “infected” by a new idea or product. Then, seemingly all at once, it catches fire—reaching a “tipping point” where it spreads rapidly and widely.\r\n\r\n• The Tipping Point\r\n\r\n• The “tipping point” is the critical threshold at which an idea, product, or behavior crosses from being a rare phenomenon to a mainstream epidemic.\r\n\r\n• After this point, the spread becomes self-sustaining and very difficult to stop.\r\n\r\n• The Hush Puppies Example\r\n\r\n• In the mid-1990s, Hush Puppies shoes went from being nearly obsolete to a must-have fashion item.\r\n\r\n• The sudden surge in popularity wasn’t due to a marketing campaign, but rather a small group of trendsetters in Manhattan who began wearing them, sparking a chain reaction.\r\n\r\n• Sales skyrocketed from 30,000 to 430,000 pairs in a year, and then to two million pairs the following year.The Tipping Point: How Little Things Can Make a Big Difference\r\n\r\nBy Malcolm Gladwell\r\n\r\nWhat’s It About?\r\n\r\nThe Tipping Point explores why certain ideas, behaviors, and products suddenly explode in popularity—spreading through society like an epidemic. Malcolm Gladwell investigates the subtle forces and social dynamics that drive these rapid changes, showing how small actions or influences can trigger massive, seemingly unstoppable trends.\r\n\r\nKey Concepts\r\n\r\n• Epidemics of Ideas and Trends\r\n\r\n• Gladwell draws a parallel between the spread of infectious diseases and the way ideas, fashions, and behaviors propagate through society.\r\n\r\n• Initially, only a handful of people are “infected” by a new idea or product. Then, seemingly all at once, it catches fire—reaching a “tipping point” where it spreads rapidly and widely.\r\n\r\n• The Tipping Point\r\n\r\n• The “tipping point” is the critical threshold at which an idea, product, or behavior crosses from being a rare phenomenon to a mainstream epidemic.\r\n\r\n• After this point, the spread becomes self-sustaining and very difficult to stop.\r\n\r\n• The Hush Puppies Example\r\n\r\n• In the mid-1990s, Hush Puppies shoes went from being nearly obsolete to a must-have fashion item.\r\n\r\n• The sudden surge in popularity wasn’t due to a marketing campaign, but rather a small group of trendsetters in Manhattan who began wearing them, sparking a chain reaction.\r\n\r\n• Sales skyrocketed from 30,000 to 430,000 pairs in a year, and then to two million pairs the following year.', 'duration': '43:13'}
-Traceback:
-Traceback (most recent call last):
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
-    response = self.full_dispatch_request()
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
-    rv = self.handle_user_exception(e)
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
-    rv = self.dispatch_request()
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
-    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
-           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/app.py", line 868, in edit_episode
-    "description": sanitize_html_for_rss(plain_text_to_html(description)),
-                                         ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/utils.py", line 247, in plain_text_to_html
-    spaces, bullet_content = bullet_match.groups()
-    ^^^^^^^^^^^^^^^^^^^^^^
-ValueError: not enough values to unpack (expected 2, got 1)
- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:932]
-2025-07-11 18:55:08,555 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:39]
-2025-07-11 18:55:52,324 ERROR: Exception on /shows/22/episodes/c160631c/edit [POST] [in /Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py:875]
-Traceback (most recent call last):
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
-    response = self.full_dispatch_request()
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
-    rv = self.handle_user_exception(e)
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
-    rv = self.dispatch_request()
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
-    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
-           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/app.py", line 868, in edit_episode
-    "description": sanitize_html_for_rss(plain_text_to_html(description)),
-                                         ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/utils.py", line 247, in plain_text_to_html
-    _, bullet_content = bullet_match.groups()
-    ^^^^^^^^^^^^^^^^^
-ValueError: not enough values to unpack (expected 2, got 1)
-[2025-07-11 18:55:52,324] ERROR in app: Exception on /shows/22/episodes/c160631c/edit [POST]
-Traceback (most recent call last):
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
-    response = self.full_dispatch_request()
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
-    rv = self.handle_user_exception(e)
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
-    rv = self.dispatch_request()
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
-    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
-           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/app.py", line 868, in edit_episode
-    "description": sanitize_html_for_rss(plain_text_to_html(description)),
-                                         ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/utils.py", line 247, in plain_text_to_html
-    _, bullet_content = bullet_match.groups()
-    ^^^^^^^^^^^^^^^^^
-ValueError: not enough values to unpack (expected 2, got 1)
-[2025-07-11 18:55:52,332] ERROR in app: 500 Internal Error: POST http://podcast.ecowool.online/shows/22/episodes/c160631c/edit args={} form={'title': '2 The Tipping Podint: How Little Things Can Make a Big Difference By Malcolm Gladwell What’s It About? TheTipping Poins', 'language': 'de-DE', 'description': 'The Tipping Point: How Little Things Can Make a Big Difference\r\nBy Malcolm Gladwell\r\nWhat’s It About?\r\nThe Tipping Point explores why certain ideas, behaviors, and products suddenly explode in popularity—spreading through society like an epidemic. Malcolm Gladwell investigates the subtle forces and social dynamics that drive these rapid changes, showing how small actions or influences can trigger massive, seemingly unstoppable trends.\r\nKey Concepts\r\n1. Epidemics of Ideas and Trends\r\n\t•\tGladwell draws a parallel between the spread of infectious diseases and the way ideas, fashions, and behaviors propagate through society.\r\n\t•\tInitially, only a handful of people are “infected” by a new idea or product. Then, seemingly all at once, it catches fire—reaching a “tipping point” where it spreads rapidly and widely.\r\n2. The Tipping Point\r\n\t•\tThe “tipping point” is the critical threshold at which an idea, product, or behavior crosses from being a rare phenomenon to a mainstream epidemic.\r\n\t•\tAfter this point, the spread becomes self-sustaining and very difficult to stop.', 'explicit': 'no', 'category_main': 'Arts', 'category_sub': '', 'summary': 'The Tipping Point: How Little Things Can Make a Big Difference\r\n\r\nBy Malcolm Gladwell\r\n\r\nWhat’s It About?\r\n\r\nThe Tipping Point explores why certain ideas, behaviors, and products suddenly explode in popularity—spreading through society like an epidemic. Malcolm Gladwell investigates the subtle forces and social dynamics that drive these rapid changes, showing how small actions or influences can trigger massive, seemingly unstoppable trends.\r\n\r\nKey Concepts\r\n\r\n• Epidemics of Ideas and Trends\r\n\r\n• Gladwell draws a parallel between the spread of infectious diseases and the way ideas, fashions, and behaviors propagate through society.\r\n\r\n• Initially, only a handful of people are “infected” by a new idea or product. Then, seemingly all at once, it catches fire—reaching a “tipping point” where it spreads rapidly and widely.\r\n\r\n• The Tipping Point\r\n\r\n• The “tipping point” is the critical threshold at which an idea, product, or behavior crosses from being a rare phenomenon to a mainstream epidemic.\r\n\r\n• After this point, the spread becomes self-sustaining and very difficult to stop.\r\n\r\n• The Hush Puppies Example\r\n\r\n• In the mid-1990s, Hush Puppies shoes went from being nearly obsolete to a must-have fashion item.\r\n\r\n• The sudden surge in popularity wasn’t due to a marketing campaign, but rather a small group of trendsetters in Manhattan who began wearing them, sparking a chain reaction.\r\n\r\n• Sales skyrocketed from 30,000 to 430,000 pairs in a year, and then to two million pairs the following year.The Tipping Point: How Little Things Can Make a Big Difference\r\n\r\nBy Malcolm Gladwell\r\n\r\nWhat’s It About?\r\n\r\nThe Tipping Point explores why certain ideas, behaviors, and products suddenly explode in popularity—spreading through society like an epidemic. Malcolm Gladwell investigates the subtle forces and social dynamics that drive these rapid changes, showing how small actions or influences can trigger massive, seemingly unstoppable trends.\r\n\r\nKey Concepts\r\n\r\n• Epidemics of Ideas and Trends\r\n\r\n• Gladwell draws a parallel between the spread of infectious diseases and the way ideas, fashions, and behaviors propagate through society.\r\n\r\n• Initially, only a handful of people are “infected” by a new idea or product. Then, seemingly all at once, it catches fire—reaching a “tipping point” where it spreads rapidly and widely.\r\n\r\n• The Tipping Point\r\n\r\n• The “tipping point” is the critical threshold at which an idea, product, or behavior crosses from being a rare phenomenon to a mainstream epidemic.\r\n\r\n• After this point, the spread becomes self-sustaining and very difficult to stop.\r\n\r\n• The Hush Puppies Example\r\n\r\n• In the mid-1990s, Hush Puppies shoes went from being nearly obsolete to a must-have fashion item.\r\n\r\n• The sudden surge in popularity wasn’t due to a marketing campaign, but rather a small group of trendsetters in Manhattan who began wearing them, sparking a chain reaction.\r\n\r\n• Sales skyrocketed from 30,000 to 430,000 pairs in a year, and then to two million pairs the following year.', 'duration': '43:13'}
-Traceback:
-Traceback (most recent call last):
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
-    response = self.full_dispatch_request()
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
-    rv = self.handle_user_exception(e)
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
-    rv = self.dispatch_request()
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
-    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
-           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/app.py", line 868, in edit_episode
-    "description": sanitize_html_for_rss(plain_text_to_html(description)),
-                                         ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/utils.py", line 247, in plain_text_to_html
-    _, bullet_content = bullet_match.groups()
-    ^^^^^^^^^^^^^^^^^
-ValueError: not enough values to unpack (expected 2, got 1)
-
+2025-07-12 02:42:22,844 INFO: [BG] Audio info obtained and updated in metadata. [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:804]
+2025-07-12 02:42:22,848 INFO: [BG] Metadata saved for episode e5dee8b8 with final status: success [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:820]
+2025-07-12 02:42:22,848 INFO: --- BG PROCESS END for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/e5dee8b8/232.wav --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:823]
+2025-07-12 02:45:18,541 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:48]
+2025-07-12 02:53:47,273 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:48]
+2025-07-12 02:55:39,522 INFO: --- BG PROCESS START for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/849c50c5/Becoming_the_Boss__Modern_Leadership_for_the_Next_Generation.wav --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:761]
+[2025-07-12 02:55:39,522] INFO in app: --- BG PROCESS START for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/849c50c5/Becoming_the_Boss__Modern_Leadership_for_the_Next_Generation.wav ---
+2025-07-12 02:55:39,524 INFO: [BG] Loading metadata from /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/849c50c5/metadata.json [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:770]
+[2025-07-12 02:55:39,524] INFO in app: [BG] Loading metadata from /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/849c50c5/metadata.json
+2025-07-12 02:55:39,955 INFO: [BG] Checking transcoding for Becoming_the_Boss__Modern_Leadership_for_the_Next_Generation.wav: needs_transcoding=True, reason='Файл не в формате MP3 (.wav)' [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:775]
+[2025-07-12 02:55:39,955] INFO in app: [BG] Checking transcoding for Becoming_the_Boss__Modern_Leadership_for_the_Next_Generation.wav: needs_transcoding=True, reason='Файл не в формате MP3 (.wav)'
+2025-07-12 02:55:39,955 INFO: [BG] Transcoding required for Becoming_the_Boss__Modern_Leadership_for_the_Next_Generation.wav. Determining optimal bitrate… [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:781]
+[2025-07-12 02:55:39,955] INFO in app: [BG] Transcoding required for Becoming_the_Boss__Modern_Leadership_for_the_Next_Generation.wav. Determining optimal bitrate…
+2025-07-12 02:55:40,020 INFO: [BG] Selected target bitrate: 320k [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:788]
+[2025-07-12 02:55:40,020] INFO in app: [BG] Selected target bitrate: 320k
+2025-07-12 02:57:00,010 INFO: [BG] Transcoding successful. New file: /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/849c50c5/Becoming_the_Boss__Modern_Leadership_for_the_Next_Generation.mp3 [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:792]
+[2025-07-12 02:57:00,010] INFO in app: [BG] Transcoding successful. New file: /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/849c50c5/Becoming_the_Boss__Modern_Leadership_for_the_Next_Generation.mp3
+2025-07-12 02:57:00,010 INFO: [BG] Getting audio info for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/849c50c5/Becoming_the_Boss__Modern_Leadership_for_the_Next_Generation.mp3 [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:799]
+[2025-07-12 02:57:00,010] INFO in app: [BG] Getting audio info for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/849c50c5/Becoming_the_Boss__Modern_Leadership_for_the_Next_Generation.mp3
+2025-07-12 02:57:00,155 INFO: [BG] Audio info obtained and updated in metadata. [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:804]
+[2025-07-12 02:57:00,155] INFO in app: [BG] Audio info obtained and updated in metadata.
+2025-07-12 02:57:00,156 INFO: [BG] Metadata saved for episode 849c50c5 with final status: success [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:820]
+[2025-07-12 02:57:00,156] INFO in app: [BG] Metadata saved for episode 849c50c5 with final status: success
+2025-07-12 02:57:00,156 INFO: --- BG PROCESS END for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/849c50c5/Becoming_the_Boss__Modern_Leadership_for_the_Next_Generation.wav --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:823]
+[2025-07-12 02:57:00,156] INFO in app: --- BG PROCESS END for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/849c50c5/Becoming_the_Boss__Modern_Leadership_for_the_Next_Generation.wav ---
+2025-07-12 03:05:18,478 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:48]
+2025-07-12 08:25:18,447 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:48]
+2025-07-12 08:26:38,497 INFO: --- BG PROCESS START for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/441074fc/45_How_to_Human__Connect_See_and_Free_Others.wav --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:761]
+[2025-07-12 08:26:38,497] INFO in app: --- BG PROCESS START for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/441074fc/45_How_to_Human__Connect_See_and_Free_Others.wav ---
+2025-07-12 08:26:38,500 INFO: [BG] Loading metadata from /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/441074fc/metadata.json [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:770]
+[2025-07-12 08:26:38,500] INFO in app: [BG] Loading metadata from /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/441074fc/metadata.json
+2025-07-12 08:26:39,044 INFO: [BG] Checking transcoding for 45_How_to_Human__Connect_See_and_Free_Others.wav: needs_transcoding=True, reason='Файл не в формате MP3 (.wav)' [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:775]
+[2025-07-12 08:26:39,044] INFO in app: [BG] Checking transcoding for 45_How_to_Human__Connect_See_and_Free_Others.wav: needs_transcoding=True, reason='Файл не в формате MP3 (.wav)'
+2025-07-12 08:26:39,044 INFO: [BG] Transcoding required for 45_How_to_Human__Connect_See_and_Free_Others.wav. Determining optimal bitrate… [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:781]
+[2025-07-12 08:26:39,044] INFO in app: [BG] Transcoding required for 45_How_to_Human__Connect_See_and_Free_Others.wav. Determining optimal bitrate…
+2025-07-12 08:26:39,099 INFO: [BG] Selected target bitrate: 320k [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:788]
+[2025-07-12 08:26:39,099] INFO in app: [BG] Selected target bitrate: 320k
+2025-07-12 08:27:42,957 INFO: [BG] Transcoding successful. New file: /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/441074fc/45_How_to_Human__Connect_See_and_Free_Others.mp3 [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:827]
+[2025-07-12 08:27:42,957] INFO in app: [BG] Transcoding successful. New file: /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/441074fc/45_How_to_Human__Connect_See_and_Free_Others.mp3
+2025-07-12 08:27:42,958 INFO: [BG] Getting audio info for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/441074fc/45_How_to_Human__Connect_See_and_Free_Others.mp3 [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:834]
+[2025-07-12 08:27:42,958] INFO in app: [BG] Getting audio info for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/441074fc/45_How_to_Human__Connect_See_and_Free_Others.mp3
+2025-07-12 08:27:43,114 INFO: [BG] Audio info obtained and updated in metadata. [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:839]
+[2025-07-12 08:27:43,114] INFO in app: [BG] Audio info obtained and updated in metadata.
+2025-07-12 08:27:43,115 INFO: [BG] Metadata saved for episode 441074fc with final status: success [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:855]
+[2025-07-12 08:27:43,115] INFO in app: [BG] Metadata saved for episode 441074fc with final status: success
+2025-07-12 08:27:43,115 INFO: --- BG PROCESS END for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/441074fc/45_How_to_Human__Connect_See_and_Free_Others.wav --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:858]
+[2025-07-12 08:27:43,115] INFO in app: --- BG PROCESS END for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/441074fc/45_How_to_Human__Connect_See_and_Free_Others.wav ---
+2025-07-12 08:31:36,025 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:48]
+2025-07-12 08:32:19,198 INFO: --- BG PROCESS START for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/441074fc/48_A_Guide_to_Personal_Philosophy__Living_a_Good_Life.wav --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:761]
+[2025-07-12 08:32:19,198] INFO in app: --- BG PROCESS START for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/441074fc/48_A_Guide_to_Personal_Philosophy__Living_a_Good_Life.wav ---
+2025-07-12 08:32:19,200 INFO: [BG] Loading metadata from /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/441074fc/metadata.json [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:770]
+[2025-07-12 08:32:19,200] INFO in app: [BG] Loading metadata from /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/441074fc/metadata.json
+2025-07-12 08:32:19,514 INFO: [BG] Checking transcoding for 48_A_Guide_to_Personal_Philosophy__Living_a_Good_Life.wav: needs_transcoding=True, reason='Файл не в формате MP3 (.wav)' [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:775]
+[2025-07-12 08:32:19,514] INFO in app: [BG] Checking transcoding for 48_A_Guide_to_Personal_Philosophy__Living_a_Good_Life.wav: needs_transcoding=True, reason='Файл не в формате MP3 (.wav)'
+2025-07-12 08:32:19,514 INFO: [BG] Transcoding required for 48_A_Guide_to_Personal_Philosophy__Living_a_Good_Life.wav. Determining optimal bitrate… [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:781]
+[2025-07-12 08:32:19,514] INFO in app: [BG] Transcoding required for 48_A_Guide_to_Personal_Philosophy__Living_a_Good_Life.wav. Determining optimal bitrate…
+[2025-07-12 08:32:19,570] INFO in app: [BG] Selected target bitrate: 320k
+[2025-07-12 08:33:32,348] INFO in app: [BG] Transcoding successful. New file: /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/441074fc/48_A_Guide_to_Personal_Philosophy__Living_a_Good_Life.mp3
+[2025-07-12 08:33:32,349] INFO in app: [BG] Getting audio info for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/441074fc/48_A_Guide_to_Personal_Philosophy__Living_a_Good_Life.mp3
+[2025-07-12 08:33:32,503] INFO in app: [BG] Audio info obtained and updated in metadata.
+[2025-07-12 08:33:32,504] INFO in app: [BG] Metadata saved for episode 441074fc with final status: success
+[2025-07-12 08:33:32,504] INFO in app: --- BG PROCESS END for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/441074fc/48_A_Guide_to_Personal_Philosophy__Living_a_Good_Life.wav ---

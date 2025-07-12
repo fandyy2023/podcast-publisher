@@ -24,14 +24,42 @@
     white-space: normal;
     max-height: 4.7em;
 }
-        .actions { margin-top: 20px; display: flex; gap: 15px; }
-        .btn { padding: 10px 20px; border-radius: 7px; text-decoration: none; font-weight: 600; transition: background 0.2s; border: none; cursor: pointer; font-size: 1em; }
+        .actions {
+            margin-top: 24px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .btn {
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            padding: 9px 18px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background 0.18s, box-shadow 0.18s;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95em;
+        }
         .btn-primary { background: #3a5fc8; color: #fff; }
-        .btn-primary:hover { background: #294b9b; }
-        .btn-secondary { background: #e9eefb; color: #3a5fc8; border: 1px solid #3a5fc8; }
-        .btn-secondary:hover { background: #d1e0fa; }
-        .btn-success { background: #2ecc40; color: #fff; }
-        .btn-success:hover { background: #179b2e; }
+        .btn-primary:hover { background:#294b9b; }
+        
+        .btn-secondary {
+            background: #ffffff;
+            color: #3a5fc8;
+            border: 1px solid #ccd6ff;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+        }
+        .btn-secondary:hover {
+            background:#f1f4ff;
+        }
+        
+        .btn-success { background: #28c741; color: #fff; }
+        .btn-success:hover { background:#1e9b32; }
+        
         h2 { border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px; color: #333; }
         .episode-list { display: flex; flex-direction: column; gap: 20px; }
         .inline-limit-alert {
@@ -73,6 +101,9 @@
         .info-icon { display: inline-block; width: 20px; height: 20px; background-image: url('/assets/info.svg'); background-size: contain; background-repeat: no-repeat; background-position: center; cursor: pointer !important; vertical-align: middle; position: relative; }
         .btn-danger { background: none; border: none; padding: 0; cursor: pointer; line-height: 0; }
         .btn-danger img { width: 20px; height: 20px; vertical-align: middle; }
+        .icon-link { display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; color:#3a5fc8; text-decoration:none; transition:color 0.15s; }
+        .icon-link:hover { color:#294b9b; }
+        .icon-link svg, .icon-link img { width:20px; height:20px; }
         .tooltip { visibility: hidden; width: 220px; background-color: #333; color: #fff; text-align: left; border-radius: 6px; padding: 8px; position: absolute; z-index: 1002; opacity: 0; transition: opacity 0.3s; font-size: 0.9em; line-height: 1.4; word-break: break-all; white-space: pre-line; }
 .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100vw; height: 100vh; overflow: auto; background: rgba(0,0,0,0.3); }
 .modal-content { background: #fff; margin: 60px auto; padding: 30px 30px 10px 30px; border-radius: 12px; width: 90%; max-width: 500px; box-shadow: 0 6px 32px #0004; position: relative; }
@@ -253,10 +284,12 @@ menu.onclick = function(e) { e.stopPropagation(); };
 </div>
         </div>
         <div class="episode-actions">
-            <a href="{{ url_for('edit_episode', show_id=show_id, ep_id=episode.id) }}" class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.9em;">Edit</a>
+            <a href="{{ url_for('edit_episode', show_id=show_id, ep_id=episode.id) }}" class="icon-link" title="Редактировать">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M15.6 2.6a2.121 2.121 0 0 1 3 3l-9.7 9.7-4.1 1.1 1.1-4.1 9.7-9.7ZM17 0a4 4 0 0 0-2.8 1.2l-10 10A2 2 0 0 0 3.6 12.4l-1.1 4.1A2 2 0 0 0 5.5 19.5l4.1-1.1a2 2 0 0 0 1.2-1.2l10-10A4 4 0 0 0 17 0Z"/></svg>
+                    </a>
             <form action="{{ url_for('delete_episode', show_id=show_id, ep_id=episode.id) }}" method="post" onsubmit="return confirm('Вы уверены, что хотите удалить этот эпизод?');" style="margin:0;">
                 
-                    <button type="submit" class="btn-danger" title="Удалить эпизод" style="background:none;border:none;padding:0;line-height:0;">
+                    <button type="submit" class="icon-link btn-danger" title="Удалить эпизод" style="background:none;border:none;padding:0;line-height:0;">
                         <img src="/assets/delete.svg" alt="Delete">
                     </button>
             </form>
@@ -296,11 +329,7 @@ menu.onclick = function(e) { e.stopPropagation(); };
                                     <source src="${data.audio_url}" type="audio/mpeg">
                                     Your browser does not support the audio element.
                                 </audio>
-                                <div class="audio-links" style="margin-top:6px;font-size:0.95em;">
-                                    <a href="${data.audio_url}" target="_blank" style="text-decoration:underline;color:#3a5fc8;">${data.filename || 'Download'}</a>
-                                    &nbsp;
-                                    <a href="${folderUrl}" target="_blank" title="Открыть папку" style="text-decoration:none;font-size:1.2em;">📂</a>
-                                </div>
+                                <a href="${folderUrl}" target="_blank" title="Открыть папку" class="icon-link" style="margin-top:4px;">📂</a>
                             `;
                             tooltip.innerHTML = `
                              ${(() => {

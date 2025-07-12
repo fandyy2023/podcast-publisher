@@ -95,5 +95,26 @@ git pull origin main   # fetch latest changes before starting work
 * If `git push` is rejected due to large files (>100 MB), either add them to `.gitignore` or use Git LFS.
 * Ensure you’re inside the correct project directory before running git commands.
 
+
+## 5. Audio Transcoding Logic
+
+The server guarantees published audio meets podcast-platform recommendations (≥160 kbps stereo MP3):
+
+* **Constant** `MIN_PODCAST_BITRATE = 160` kbps – the absolute floor.
+* **select_mp3_bitrate(src_kbps)**
+  * Validates `src_kbps`.
+  * `effective_src = max(src_kbps, MIN_PODCAST_BITRATE)` so we never choose below the floor.
+  * Picks the first value from `[32,40,48,56,64,80,96,112,128,160,192,224,256,320]` that is ≥ `effective_src`.
+  * Caps at **320 k**.
+* **check_transcoding_needed(path)**
+  1. If the file is not MP3 → convert.
+  2. If MP3 *and* bitrate < `MIN_PODCAST_BITRATE` → convert.
+  3. Otherwise keep the original.
+* **process_audio_background()**
+  * Runs in a thread after upload.
+  * Calls `check_transcoding_needed`.
+  * If conversion required → uses `select_mp3_bitrate` → `transcode_audio_to_mp3` (ffmpeg, stereo, 44.1 kHz).
+  * Updates `metadata.json` accordingly and deletes the original file.
+
 ---
 _Last update: 2025-07-11_

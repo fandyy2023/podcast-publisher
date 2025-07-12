@@ -7,6 +7,7 @@ import subprocess
 import uuid
 from pathlib import Path
 from typing import Optional
+from PIL import Image
 
 from dotenv import load_dotenv
 
@@ -28,8 +29,152 @@ def generate_guid() -> str:
     return str(uuid.uuid4())
 
 
-def transcode_audio_to_mp3(source: Path, bitrate: str = "192k") -> Path:
-    """Convert any audio file to MP3 using ffmpeg directly. Deletes source, returns path to new file."""
+MIN_PODCAST_BITRATE = 160  # kbps – minimum recommended for podcast platforms
+
+
+def resize_cover_image(image_path: Path, min_size: int = 1400, max_size: int = 3000, background_color: tuple[int, int, int] = (0, 0, 0)) -> Path:
+    """Resize an image in-place so it complies with Apple/Spotify podcast cover requirements.
+
+    The function ensures:
+    1. The image is square (1:1). If not, the shorter side is padded with
+       *background_color* so that the result is square.
+    2. The resulting side length is between *min_size* and *max_size* pixels.
+       If the image is larger than *max_size* it is down-scaled; if smaller than
+       *min_size* it is up-scaled (though platforms discourage up-scaling, it is
+       sometimes unavoidable for legacy artwork).
+
+    The image is saved back to *image_path* with high-quality settings. The file
+    extension dictates the output format (PNG for .png, JPEG otherwise).
+    Returns the same *image_path* for convenience.
+    """
+
+    try:
+        with Image.open(image_path) as img:
+            # Convert to RGB to drop any alpha for JPEG; keep transparency only for PNG.
+            if img.mode not in ("RGB", "RGBA"):
+                img = img.convert("RGB")
+
+            width, height = img.size
+
+            # Step 1: pad to square if needed
+            if width != height:
+                side = max(width, height)
+                square = Image.new("RGB", (side, side), background_color)
+                paste_x = (side - width) // 2
+                paste_y = (side - height) // 2
+                square.paste(img, (paste_x, paste_y))
+                img = square
+                width = height = side
+
+            # Step 2: scale to fit min/max bounds
+            target_side = width  # currently equals height
+            if target_side > max_size:
+                target_side = max_size
+            elif target_side < min_size:
+                target_side = min_size
+
+            if target_side != width:
+                img = img.resize((target_side, target_side), Image.LANCZOS)
+
+            # Step 3: primary save (PNG keeps PNG, others → JPEG)
+            ext = image_path.suffix.lower()
+            # Prefer JPEG for podcast artwork to keep size low
+            target_ext = ".jpg" if ext in (".png", ".webp") else ext
+            save_path = image_path if target_ext == ext else image_path.with_suffix(".jpg")
+
+            # Initial save
+            if target_ext == ".jpg":
+                img.save(save_path, format="JPEG", quality=95, optimize=True, progressive=True)
+            else:
+                img.save(save_path, format="PNG", optimize=True)
+
+            # If file is still larger than 512 KB, iteratively lower JPEG quality
+            if save_path.stat().st_size > 512_000:
+                if target_ext != ".jpg":
+                    # Convert PNG → JPEG first (quality 90) to drastically reduce size
+                    save_path = image_path.with_suffix(".jpg")
+                    img.save(save_path, format="JPEG", quality=90, optimize=True, progressive=True)
+                # Now ensure ≤512 KB by reducing quality in 5-step decrements
+                quality = 90
+                while save_path.stat().st_size > 512_000 and quality >= 65:
+                    quality -= 5
+                    img.save(save_path, format="JPEG", quality=quality, optimize=True, progressive=True)
+
+            # Remove original file if we changed extension
+            if save_path != image_path:
+                try:
+                    image_path.unlink(missing_ok=True)  # py>=3.8
+                except Exception:
+                    pass
+                image_path = save_path
+
+        logger.info("Resized cover image %s → %dx%d px, size %d KB", image_path.name, target_side, target_side, image_path.stat().st_size // 1024)
+    except Exception as exc:
+        logger.error("Failed to resize cover %s: %s", image_path, exc)
+        raise
+
+    return image_path
+
+def select_mp3_bitrate(source_bitrate_kbps: int) -> str:
+    """Return an MP3 CBR bitrate string (e.g. "192k") that is not lower than
+    the source bitrate and does not exceed 320 kbps.
+
+    The bitrate is rounded up to the next standard LAME step so that we never
+    downgrade quality.  Falls back to the default "192k" if the source bitrate
+    is unknown or unreasonable.
+    """
+    # Standard CBR presets supported by LAME/ffmpeg (kbps)
+    standard_rates = [32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320]
+
+    # Basic validation
+    try:
+        src = int(source_bitrate_kbps)
+    except (ValueError, TypeError):
+        return "192k"
+
+    if src <= 0:
+        return f"{MIN_PODCAST_BITRATE}k"  # Fallback to minimum recommended bitrate
+
+    # Ensure we never choose below the platform minimum
+    effective_src = max(src, MIN_PODCAST_BITRATE)
+
+    # Pick the first standard rate that is >= effective source bitrate
+    for rate in standard_rates:
+        if effective_src <= rate:
+            return f"{rate}k"
+
+    # If higher than the max supported value, cap at 320 kbps
+    return "320k"
+
+
+def transcode_audio_to_mp3(
+    source: Path,
+    bitrate: str = "192k",
+    *,
+    metadata: Optional[dict[str, str]] = None,
+    cover_path: Optional[Path] = None,
+) -> Path:
+    """Convert an audio *source* file to MP3 (CBR) using **ffmpeg** and embed full
+ID3v2.3 metadata.
+
+Parameters
+----------
+source : Path
+    Input audio file (any container supported by ffmpeg).
+bitrate : str, default "192k"
+    Target CBR bitrate string recognised by ffmpeg (e.g. "192k").
+metadata : dict[str, str] | None
+    Optional mapping of ID3 keys → values (e.g. {"title": "…", "artist": "…"}).
+    Arbitrary keys are accepted because ffmpeg writes unknown keys either as
+    standard frames (if recognised) or as TXXX frames.
+cover_path : Path | None
+    Optional image to embed as *front cover* (`APIC`) – must be PNG/JPEG.
+
+Returns
+-------
+Path
+    Path to the generated MP3 file; *source* is removed on success.
+"""
     import subprocess
 
     target = source.with_suffix(".mp3")
@@ -42,17 +187,39 @@ def transcode_audio_to_mp3(source: Path, bitrate: str = "192k") -> Path:
 
     command = [
         ffmpeg_path,
-        '-v', 'quiet',             # Работать в тихом режиме, чтобы избежать зависания
-        '-i', str(source),          # Input file
-        '-ac', '2',                # Принудительно стерео
-        '-ar', '44100',            # Принудительно 44.1 кГц (CD-quality)
-        '-c:a', 'libmp3lame',     # Explicitly use the LAME encoder
-        '-b:a', bitrate,            # Используем вычисленный битрейт
-        '-compression_level', '0', # Минимальное сжатие
-        '-abr', 'false',           # Отключить ABR, только CBR
-        '-y',
-        str(target)                 # Output file
+        '-v', 'quiet',  # Work quietly – we log ourselves
+        '-i', str(source),  # Audio input
+        # Optional 2-nd input (cover art)
+]
+    if cover_path is not None and cover_path.exists():
+        command += ['-i', str(cover_path)]
+
+    # Audio encoding options
+    command += [
+        '-ac', '2',  # Stereo
+        '-ar', '44100',  # 44.1 kHz (CD-quality)
+        '-c:a', 'libmp3lame',
+        '-b:a', bitrate,
+        '-compression_level', '0',  # Fastest CBR
+        '-abr', 'false',
     ]
+
+    # If we provided a cover we need correct mapping
+    if cover_path is not None and cover_path.exists():
+        command += ['-map', '0:a', '-map', '1:v', '-c:v', 'copy']
+
+    # Embed metadata frames
+    if metadata:
+        for k, v in metadata.items():
+            if v is None:
+                continue
+            command += ['-metadata', f'{k}={v}']
+
+    # Tagging options – force ID3v2.3 + keep legacy ID3v1
+    command += ['-id3v2_version', '3', '-write_id3v1', '1']
+
+    # Overwrite output if exists and specify destination
+    command += ['-y', str(target)]
 
     try:
         # Запускаем ffmpeg
@@ -82,6 +249,70 @@ def transcode_audio_to_mp3(source: Path, bitrate: str = "192k") -> Path:
     except Exception as e:
         logger.error("An unexpected error occurred during transcoding: %s", e, exc_info=True)
         raise RuntimeError(f"Неожиданная ошибка во время конвертации: {e}")
+
+
+def has_id3v2_tags(file_path: Path) -> bool:
+    """Check whether a file starts with an ID3v2 header (first 3 bytes == 'ID3')."""
+    try:
+        with open(file_path, "rb") as f:
+            return f.read(3) == b"ID3"
+    except Exception as exc:
+        logger.warning("Failed to read file for ID3 check: %s", exc)
+        return False
+
+
+def embed_id3_metadata_mp3(
+    source: Path,
+    *,
+    metadata: Optional[dict[str, str]] = None,
+    cover_path: Optional[Path] = None,
+) -> Path:
+    """Embed ID3v2.3 metadata and optional cover art into an existing MP3 without re-encoding.
+
+    The function performs a *stream copy* so the audio content is preserved bit-for-bit.
+    A temporary file is created next to *source* and atomically replaces it upon
+    success.
+    """
+    if source.suffix.lower() != ".mp3":
+        raise ValueError("embed_id3_metadata_mp3 expects an MP3 file")
+
+    ffmpeg_path = "/opt/homebrew/bin/ffmpeg"
+    tmp_target = source.with_name(source.stem + "_id3tmp.mp3")
+
+    command = [ffmpeg_path, "-v", "quiet", "-i", str(source)]
+
+    if cover_path and cover_path.exists():
+        command += ["-i", str(cover_path), "-map", "0:a", "-map", "1:v", "-c:v", "copy"]
+    else:
+        command += ["-map", "0:a"]
+
+    command += ["-c:a", "copy"]  # Stream-copy audio without re-encoding
+
+    # Embed metadata frames
+    if metadata:
+        for k, v in metadata.items():
+            if v is None:
+                continue
+            command += ["-metadata", f"{k}={v}"]
+
+    command += ["-id3v2_version", "3", "-write_id3v1", "1", "-y", str(tmp_target)]
+
+    try:
+        subprocess.run(command, check=True, capture_output=True, text=True, timeout=120)
+        # Replace original atomically
+        os.replace(tmp_target, source)
+        logger.info("Embedded ID3 metadata into %s", source.name)
+        return source
+    except subprocess.CalledProcessError as e:
+        logger.error("ffmpeg failed while embedding tags: %s", e.stderr)
+        if tmp_target.exists():
+            tmp_target.unlink(missing_ok=True)
+        raise RuntimeError("Не удалось добавить ID3-теги в файл MP3") from e
+    except Exception as exc:
+        logger.error("Unexpected error while embedding ID3: %s", exc, exc_info=True)
+        if tmp_target.exists():
+            tmp_target.unlink(missing_ok=True)
+        raise
 
 
 import json
