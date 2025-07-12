@@ -572,22 +572,66 @@ def html_to_plain_text(html: str) -> str:
     return text.strip()
 
 def sanitize_html_for_rss(html: str) -> str:
+    """Return a UTF-8/validator-friendly HTML snippet for RSS descriptions.
+
+    • Keeps only a safe subset of tags (`<p>`, `<ul>`, `<ol>`, `<li>`, `<a href>`).
+    • Removes style / class / id attributes and any disallowed markup via **bleach**.
+    • Strips ASCII control characters (0x00-0x1F except \t,\n,\r) that some
+      validators flag as *non-UTF-8* even though they are technically valid bytes.
+    • Normalises Unicode to NFC and converts problematic whitespace (non-breaking
+      space, narrow nbsp, zero-width space) to ordinary spaces or nothing.
+    • Replaces common typographic quotes with plain counterparts so feeds render
+      identically across podcast apps.
     """
-    Очищает HTML-описание для RSS/подкастов, оставляя только <p>, <ul>, <li>, <a>.
-    Удаляет/экранирует все остальные теги и спецсимволы.
-    """
-    allowed_tags = ['p', 'ul', 'ol', 'li', 'a']
-    allowed_attrs = {'a': ['href']}
-    # Удаляем все стили, классы, id и т.д.
+    if not html:
+        return ""
+
+    import unicodedata
+    import re
+
+    # 1. Unicode normalisation – combine composed characters consistently
+    html = unicodedata.normalize("NFC", str(html))
+
+    # 2. Replace problematic invisible / whitespace code-points *before* bleaching
+    # NBSPs → space, zero-width → removed, line/paragraph separators → newline
+    transl_map = {
+        "\u00A0": " ",   # NO-BREAK SPACE
+        "\u202F": " ",   # NARROW NBSP
+        "\u200B": "",    # ZERO WIDTH SPACE
+        "\u2028": "\n", # LINE SEPARATOR
+        "\u2029": "\n", # PARAGRAPH SEPARATOR
+        "\uFEFF": "",    # ZERO WIDTH NO-BREAK SPACE / BOM
+        "\u2018": "'", "\u2019": "'",  # left/right single quotes
+        "\u201C": '"', "\u201D": '"',  # left/right double quotes
+        "\u201A": ',',  "\u201E": '"',  # single low-9 quote etc.
+    }
+    for bad, good in transl_map.items():
+        html = html.replace(bad, good)
+
+    # 3. Strip ASCII control chars except the allowed whitespace (TAB/CR/LF)
+    html = re.sub(r"[\x00-\x08\x0B\x0C\x0E-\x1F]", "", html)
+
+    # 4. Clean with bleach – allow only safe tags/attrs
+    allowed_tags = ["p", "ul", "ol", "li", "a"]
+    allowed_attrs = {"a": ["href"]}
     cleaned = bleach.clean(
         html,
         tags=allowed_tags,
         attributes=allowed_attrs,
-        strip=True
+        strip=True,
     )
-    # bleach уже экранирует спецсимволы, но заменим типовые кавычки на стандартные
-    cleaned = cleaned.replace('&rsquo;', "'").replace('&lsquo;', "'")
-    cleaned = cleaned.replace('&ldquo;', '"').replace('&rdquo;', '"')
+
+    # 5. Post-processing tweaks – decouple leftover HTML entities, smart quotes
+    cleaned = (
+        cleaned.replace("&nbsp;", " ")
+               .replace("&rsquo;", "'")
+               .replace("&lsquo;", "'")
+               .replace("&ldquo;", '"')
+               .replace("&rdquo;", '"')
+    )
+
+    # 6. Final normalise and strip extraneous whitespace
+    cleaned = unicodedata.normalize("NFC", cleaned).strip()
     return cleaned
 
 def send_email(subject: str, body: str) -> None:
