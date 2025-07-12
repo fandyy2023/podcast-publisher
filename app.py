@@ -21,6 +21,7 @@ from utils import (
     html_to_plain_text,
     select_mp3_bitrate,
     MIN_PODCAST_BITRATE,
+    resize_cover_image,
 )
 
 # Initialize Flask app
@@ -572,12 +573,36 @@ def show_feed_xml(show_id):
             <itunes:explicit>{normalize_explicit(meta.get("explicit"))}</itunes:explicit>
         </item>''')
 
-    # Find show cover
+    # Find show cover – first look at explicit config, otherwise discover automatically
     cover_url = None
-    if cfg.get('image'):
-        img_path = show_dir / cfg['image']
-        if img_path.exists():
-            cover_url = f"{base_url}{url_for('show_file', show_id=show_id, filename=cfg['image'])}"
+    img_name = cfg.get('image')
+    image_exts = ('.png', '.jpg', '.jpeg', '.webp', '.gif', '.bmp')
+
+    if img_name:
+        img_path = show_dir / img_name
+        if not img_path.exists():
+            img_name = None  # fall back to auto-discovery
+
+    # Auto-discover any image file in the show directory if not defined
+    if not img_name:
+        for f in show_dir.iterdir():
+            if f.is_file() and f.suffix.lower() in image_exts:
+                img_name = f.name
+                break
+        # Persist discovery so we do not have to search again next time
+        if img_name:
+            try:
+                with (show_dir / 'config.json').open('r+', encoding='utf-8') as fc:
+                    auto_cfg = json.load(fc)
+                    auto_cfg['image'] = img_name
+                    fc.seek(0)
+                    json.dump(auto_cfg, fc, ensure_ascii=False, indent=2)
+                    fc.truncate()
+            except Exception:
+                pass  # not critical
+
+    if img_name:
+        cover_url = f"{base_url}{url_for('show_file', show_id=show_id, filename=img_name)}"
 
     # Assemble channel-level info
     channel_link = f"{base_url}{url_for('show_page', show_id=show_id)}"
@@ -669,21 +694,24 @@ def show_feed_xml(show_id):
 
 @app.route("/shows/<show_id>/<path:filename>")
 def show_file(show_id, filename):
-    # Если filename содержит '/', это файл эпизода: <episode_id>/<audio_filename>
-    if '/' in filename:
-        episode_id, audio_filename = filename.split('/', 1)
-        episode_dir = SHOWS_DIR / show_id / 'episodes' / episode_id
-        file_path = episode_dir / audio_filename
-        if not file_path.exists() or not file_path.is_file():
-            abort(404)
-        return send_from_directory(episode_dir, audio_filename)
-    else:
-        # Это файл шоу (например, cover.png)
-        show_dir = SHOWS_DIR / show_id
-        file_path = show_dir / filename
-        if not file_path.exists() or not file_path.is_file():
-            abort(404)
-        return send_from_directory(show_dir, filename)
+    """Serve any file that belongs to a show (cover image, episode assets, etc.).
+    The <path:filename> may contain nested segments like ``episodes/<ep_id>/cover.png``.
+
+    We resolve the requested path relative to the show's root directory and
+    additionally guard against directory-traversal attempts.
+    """
+    show_dir = (SHOWS_DIR / show_id).resolve()
+    target_path = (show_dir / filename).resolve()
+
+    # Disallow path traversal outside the show directory
+    if not str(target_path).startswith(str(show_dir)):
+        abort(403)
+
+    if not target_path.exists() or not target_path.is_file():
+        abort(404)
+
+    # ``send_from_directory`` requires directory & filename separately
+    return send_from_directory(str(target_path.parent), target_path.name)
 
 
 @app.route("/favicon.ico")
@@ -758,7 +786,42 @@ def process_audio_background(audio_path_str, show_id, ep_id):
                     src_br_kbps = None
                 target_bitrate = select_mp3_bitrate(src_br_kbps) if src_br_kbps else "192k"
                 app.logger.info(f"[BG] Selected target bitrate: {target_bitrate}")
-                new_path_str = transcode_audio_to_mp3(audio_path, bitrate=target_bitrate)
+                # Build ID3 metadata and detect cover art before transcoding
+                import datetime as _dt
+                metadata_dict = {}
+                # Load show configuration for album/artist fields
+                try:
+                    with (SHOWS_DIR / show_id / "config.json").open("r", encoding="utf-8") as _fcfg:
+                        show_cfg = json.load(_fcfg)
+                except Exception:
+                    show_cfg = {}
+
+                metadata_dict["title"] = meta.get("title") or ep_id
+                metadata_dict["artist"] = show_cfg.get("author") or show_cfg.get("title") or show_id
+                metadata_dict["album"] = show_cfg.get("title") or show_id
+                metadata_dict["date"] = _dt.datetime.utcnow().strftime("%Y")
+                # Normalise explicit flag: 1 = explicit, 0 = not explicit/clean
+                explicit_flag = str(meta.get("explicit", "")).strip().lower()
+                metadata_dict["ITUNESADVISORY"] = "1" if explicit_flag in ("yes", "true", "explicit", "y", "да", "1") else "0"
+
+                # Attempt to locate a cover image for the episode
+                cover_path_val = None
+                if meta.get("image"):
+                    candidate = ep_dir / Path(meta["image"]).name
+                    if candidate.exists():
+                        cover_path_val = candidate
+                if cover_path_val is None:
+                    for _img in ep_dir.iterdir():
+                        if _img.suffix.lower() in (".png", ".jpg", ".jpeg", ".webp"):
+                            cover_path_val = _img
+                            break
+
+                new_path_str = transcode_audio_to_mp3(
+                    audio_path,
+                    bitrate=target_bitrate,
+                    metadata=metadata_dict,
+                    cover_path=cover_path_val,
+                )
                 if new_path_str:
                     final_audio_path = Path(new_path_str)
                     app.logger.info(f"[BG] Transcoding successful. New file: {final_audio_path}")
@@ -988,8 +1051,19 @@ def upload_show_cover(show_id):
     file = request.files['cover']
     img_name = secure_filename(file.filename)
     remove_old_episode_covers(show_dir, img_name)
-    file.save(str(show_dir / img_name))
-    url = f"/shows/{show_id}/{img_name}?v={int(Path(show_dir / img_name).stat().st_mtime)}"
+    file_path = show_dir / img_name
+    file.save(str(file_path))
+
+    # Resize image to comply with podcast cover requirements
+    try:
+        processed_path = resize_cover_image(file_path)
+        file_path = processed_path  # may differ if extension converted
+        img_name = processed_path.name
+    except Exception as exc:
+        app.logger.error("Failed to resize cover for show %s: %s", show_id, exc)
+        return jsonify({"error": "Failed to process image"}), 500
+
+    url = f"/shows/{show_id}/{img_name}?v={int(file_path.stat().st_mtime)}"
     return jsonify({"image_url": url})
 
 @app.route("/shows/<show_id>/episodes/<ep_id>/cover-upload", methods=["POST"])
@@ -1002,8 +1076,19 @@ def upload_episode_cover(show_id, ep_id):
     file = request.files['cover']
     img_name = secure_filename(file.filename)
     remove_old_episode_covers(ep_dir, img_name)
-    file.save(str(ep_dir / img_name))
-    url = f"/shows/{show_id}/episodes/{ep_id}/{img_name}?v={int(Path(ep_dir / img_name).stat().st_mtime)}"
+    file_path = ep_dir / img_name
+    file.save(str(file_path))
+
+    # Resize image to comply with podcast cover requirements
+    try:
+        processed_path = resize_cover_image(file_path)
+        file_path = processed_path
+        img_name = processed_path.name
+    except Exception as exc:
+        app.logger.error("Failed to resize episode cover for %s/%s: %s", show_id, ep_id, exc)
+        return jsonify({"error": "Failed to process image"}), 500
+
+    url = f"/shows/{show_id}/episodes/{ep_id}/{img_name}?v={int(file_path.stat().st_mtime)}"
     return jsonify({"image_url": url})
 
 @app.route("/sanitize_html", methods=["POST"])
