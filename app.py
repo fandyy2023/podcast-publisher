@@ -498,6 +498,7 @@ def show_feed_xml(show_id):
     import mimetypes
     from pathlib import Path
     import datetime
+    import hashlib
     from flask import Response, request, url_for, abort
 
     # Force HTTPS in feed URLs because Cloudflare terminates TLS at the edge.
@@ -566,7 +567,8 @@ def show_feed_xml(show_id):
 
             # Prepare item fields, prioritizing metadata
             title = meta.get("title", ep_dir.name)
-            description = meta.get("description", cfg.get('description', ''))
+            raw_description = meta.get("description", cfg.get('description', ''))
+            description = sanitize_html_for_rss(raw_description)
             pubdate_str = meta.get("pubdate")
             try:
                 dt_obj = datetime.datetime.fromisoformat(pubdate_str)
@@ -609,7 +611,7 @@ def show_feed_xml(show_id):
             if not ep_image_url:
                 ep_image_url = show_cover_url
 
-            ep_summary = meta.get("summary", description)
+            ep_summary = sanitize_html_for_rss(meta.get("summary", description))
             # Transcript URL (recommended PSP-1 element)
             transcript_url = meta.get("transcript")
             if not transcript_url:
@@ -668,12 +670,14 @@ def show_feed_xml(show_id):
 
     # Assemble channel-level info
     channel_link = f"{base_url}{url_for('show_page', show_id=show_id)}"
+    # Sanitize show-level description separately
+    show_description = sanitize_html_for_rss(cfg.get('description', ''))
     atom_url = f"{base_url}{url_for('show_feed_xml', show_id=show_id)}"
     itunes_author = cfg.get('author')
     itunes_explicit = normalize_explicit(cfg.get('explicit'))
     itunes_owner_name = cfg.get('owner_name')
     itunes_owner_email = cfg.get('owner_email')
-    itunes_summary = cfg.get('summary', cfg.get('description', ''))
+    itunes_summary = sanitize_html_for_rss(cfg.get('summary', cfg.get('description', '')))
     itunes_owner = f'<itunes:owner><itunes:name>{cdata_or_escape(itunes_owner_name)}</itunes:name><itunes:email>{itunes_owner_email}</itunes:email></itunes:owner>' if itunes_owner_name and itunes_owner_email else ''
     now_gmt = datetime.datetime.utcnow().strftime("%a, %d %b %Y %H:%M:%S GMT")
     copyright_val = cfg.get('copyright', f" 2025 {itunes_author or cfg.get('title')}")
@@ -709,7 +713,7 @@ def show_feed_xml(show_id):
     <title>{cdata_or_escape(cfg.get('title', show_id))}</title>
     <link>{channel_link}</link>
     <atom:link href="{atom_url}" rel="self" type="application/rss+xml"/>
-    <description>{cdata_or_escape(cfg.get('description', ''))}</description>
+    <description>{cdata_or_escape(show_description)}</description>
     <language>{cfg.get('language', 'en-US')}</language>
     <copyright>{cdata_or_escape(copyright_val)}</copyright>
     <lastBuildDate>{now_gmt}</lastBuildDate>
@@ -724,7 +728,15 @@ def show_feed_xml(show_id):
     {podcast_locked}
 </channel>
 </rss>'''
-    return Response(rss, mimetype="application/rss+xml")
+        # Compute weak ETag using content hash and set caching headers
+    etag = hashlib.md5(rss.encode('utf-8')).hexdigest()
+    if request.headers.get('If-None-Match') == etag:
+        return Response(status=304)
+    response = Response(rss, mimetype="application/rss+xml")
+    response.headers['ETag'] = etag
+    response.headers['Last-Modified'] = now_gmt
+    response.headers.setdefault('Cache-Control', 'public, max-age=0')
+    return response
 
     audio_file = None
     for f in ep_dir.iterdir():
