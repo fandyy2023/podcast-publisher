@@ -438,14 +438,23 @@ def edit_show(show_id):
             image = request.files.get("image")
             if image and image.filename:
                 ext = image.filename.split('.')[-1].lower()
-                # Удаляем все старые cover.*
+                # Удаляем предыдущий файл обложки (если был указан в config)
+                old_image_name = cfg.get("image")
+                if old_image_name:
+                    try:
+                        (show_dir / old_image_name).unlink(missing_ok=True)
+                    except Exception:
+                        pass
+                # Также подчистим любые файлы cover.* для порядка
                 for old_file in show_dir.glob('cover.*'):
                     try:
                         old_file.unlink()
                     except Exception:
                         pass
-                # Сохраняем новый файл
-                image.save(str(show_dir / f"cover.{ext}"))
+                # Сохраняем новый файл под его оригинальным именем (без переименования)
+                new_name = secure_filename(image.filename)
+                image.save(str(show_dir / new_name))
+                cfg["image"] = new_name
             f.seek(0)
             json.dump(cfg, f, ensure_ascii=False, indent=2)
             f.truncate()
