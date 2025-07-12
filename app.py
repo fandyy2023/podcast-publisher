@@ -74,7 +74,9 @@ def episode_file(show_id: str, ep_id: str, filename: str):
     mimetype = None
     if filename.lower().endswith('.mp3'):
         mimetype = 'audio/mpeg'
-    return send_from_directory(ep_dir, filename, mimetype=mimetype, conditional=True)
+    response = send_from_directory(ep_dir, filename, mimetype=mimetype, conditional=True)
+    response.headers.setdefault("Accept-Ranges", "bytes")
+    return response
 
 
 @app.route("/shows/<show_id>/episodes/<ep_id>/browse")
@@ -498,7 +500,9 @@ def show_feed_xml(show_id):
     import datetime
     from flask import Response, request, url_for, abort
 
-    base_url = request.url_root.rstrip('/')
+    # Force HTTPS in feed URLs because Cloudflare terminates TLS at the edge.
+    # Using request.url_root could yield "http" since Cloudflare connects to the origin over HTTP.
+    base_url = f"https://{request.host}"
 
     # Load show config
     show_dir = SHOWS_DIR / show_id
@@ -772,8 +776,13 @@ def show_file(show_id, filename):
     if not target_path.exists() or not target_path.is_file():
         abort(404)
 
-    # ``send_from_directory`` requires directory & filename separately
-    return send_from_directory(str(target_path.parent), target_path.name)
+    # ``send_from_directory`` requires directory & filename separately.
+    # Pass conditional=True so Flask/Werkzeug handles Range requests.
+    response = send_from_directory(str(target_path.parent), target_path.name, conditional=True)
+    # Explicitly add Accept-Ranges header so validators that only perform a
+    # HEAD request without a Range header can still detect byte-range support.
+    response.headers.setdefault("Accept-Ranges", "bytes")
+    return response
 
 
 @app.route("/favicon.ico")
