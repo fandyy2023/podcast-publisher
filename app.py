@@ -589,10 +589,19 @@ def show_feed_xml(show_id):
             episode_link = f"{base_url}{url_for('edit_episode', show_id=show_id, ep_id=ep_dir.name)}"
             
             ep_image_url = None
+            img_path_candidate = None
             if meta.get("episode_image"):
                 img_name = Path(meta["episode_image"]).name
-                ep_image_url = f"{base_url}{url_for('show_file', show_id=show_id, filename=f'episodes/{ep_dir.name}/{img_name}')}"
-            # Fallback to show-level cover if episode image is missing
+                img_path_candidate = ep_dir / img_name
+                if img_path_candidate.exists():
+                    ep_image_url = f"{base_url}{url_for('show_file', show_id=show_id, filename=f'episodes/{ep_dir.name}/{img_name}')}"
+            # If metadata stale or missing, auto-discover any image file in episode dir
+            if not ep_image_url:
+                for f in ep_dir.iterdir():
+                    if f.is_file() and f.suffix.lower() in (".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp"):
+                        ep_image_url = f"{base_url}{url_for('show_file', show_id=show_id, filename=f'episodes/{ep_dir.name}/{f.name}')}"
+                        break
+            # Fallback to show-level cover if episode image still not found
             if not ep_image_url:
                 ep_image_url = show_cover_url
 
