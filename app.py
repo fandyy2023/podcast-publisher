@@ -455,7 +455,16 @@ def edit_show(show_id):
                         pass
                 # Сохраняем новый файл под его оригинальным именем (без переименования)
                 new_name = secure_filename(image.filename)
-                image.save(str(show_dir / new_name))
+                image_path = show_dir / new_name
+                image.save(str(image_path))
+                try:
+                    # Resize or convert to compliant format
+                    from utils import resize_cover_image
+                    processed_path = resize_cover_image(image_path)
+                    if processed_path.name != new_name:
+                        new_name = processed_path.name
+                except Exception as exc:
+                    app.logger.error("Failed to resize show cover on edit: %s", exc)
                 cfg["image"] = new_name
             f.seek(0)
             json.dump(cfg, f, ensure_ascii=False, indent=2)
@@ -870,6 +879,9 @@ def process_audio_background(audio_path_str, show_id, ep_id):
             metadata_dict["artist"] = show_cfg.get("author") or show_cfg.get("title") or show_id
             metadata_dict["album"] = show_cfg.get("title") or show_id
             metadata_dict["date"] = _dt.datetime.utcnow().strftime("%Y")
+            # Add copyright information to be written into the TCOP frame
+            if show_cfg.get("copyright"):
+                metadata_dict["copyright"] = show_cfg["copyright"]
             explicit_flag = str(meta.get("explicit", "")).strip().lower()
             metadata_dict["ITUNESADVISORY"] = "1" if explicit_flag in ("yes", "true", "explicit", "y", "да", "1") else "0"
 
@@ -922,21 +934,24 @@ def process_audio_background(audio_path_str, show_id, ep_id):
                 metadata_dict["artist"] = show_cfg.get("author") or show_cfg.get("title") or show_id
                 metadata_dict["album"] = show_cfg.get("title") or show_id
                 metadata_dict["date"] = _dt.datetime.utcnow().strftime("%Y")
-                # Normalise explicit flag: 1 = explicit, 0 = not explicit/clean
-                explicit_flag = str(meta.get("explicit", "")).strip().lower()
-                metadata_dict["ITUNESADVISORY"] = "1" if explicit_flag in ("yes", "true", "explicit", "y", "да", "1") else "0"
+            # Add copyright information to be written into the TCOP frame
+            if show_cfg.get("copyright"):
+                metadata_dict["copyright"] = show_cfg["copyright"]
+            # Normalise explicit flag: 1 = explicit, 0 = not explicit/clean
+            explicit_flag = str(meta.get("explicit", "")).strip().lower()
+            metadata_dict["ITUNESADVISORY"] = "1" if explicit_flag in ("yes", "true", "explicit", "y", "да", "1") else "0"
 
-                # Attempt to locate a cover image for the episode
-                cover_path_val = None
-                if meta.get("image"):
-                    candidate = ep_dir / Path(meta["image"]).name
-                    if candidate.exists():
-                        cover_path_val = candidate
-                if cover_path_val is None:
-                    for _img in ep_dir.iterdir():
-                        if _img.suffix.lower() in (".png", ".jpg", ".jpeg", ".webp"):
-                            cover_path_val = _img
-                            break
+            # Attempt to locate a cover image for the episode
+            cover_path_val = None
+            if meta.get("image"):
+                candidate = ep_dir / Path(meta["image"]).name
+                if candidate.exists():
+                    cover_path_val = candidate
+            if cover_path_val is None:
+                for _img in ep_dir.iterdir():
+                    if _img.suffix.lower() in (".png", ".jpg", ".jpeg", ".webp"):
+                        cover_path_val = _img
+                        break
 
                 new_path_str = transcode_audio_to_mp3(
                     audio_path,
@@ -1022,7 +1037,14 @@ def new_episode(show_id):
         if episode_image and episode_image.filename:
             img_name = secure_filename(episode_image.filename)
             remove_old_episode_covers(ep_dir, img_name)
-            episode_image.save(str(ep_dir / img_name))
+            image_path = ep_dir / img_name
+            episode_image.save(str(image_path))
+            try:
+                processed_path = resize_cover_image(image_path)
+                if processed_path.name != img_name:
+                    img_name = processed_path.name
+            except Exception as exc:
+                app.logger.error("Failed to resize episode cover image for %s/%s: %s", show_id, ep_id, exc)
             meta["episode_image"] = f"/shows/{show_id}/episodes/{ep_id}/{img_name}"
 
         if audio and audio.filename:
@@ -1101,7 +1123,14 @@ def edit_episode(show_id, ep_id):
         if episode_image and episode_image.filename:
             img_name = secure_filename(episode_image.filename)
             remove_old_episode_covers(ep_dir, img_name)
-            episode_image.save(str(ep_dir / img_name))
+            image_path = ep_dir / img_name
+            episode_image.save(str(image_path))
+            try:
+                processed_path = resize_cover_image(image_path)
+                if processed_path.name != img_name:
+                    img_name = processed_path.name
+            except Exception as exc:
+                app.logger.error("Failed to resize episode cover image for %s/%s: %s", show_id, ep_id, exc)
             meta["episode_image"] = f"/shows/{show_id}/episodes/{ep_id}/{img_name}"
         if audio and audio.filename:
             audio_name = secure_filename(audio.filename)
