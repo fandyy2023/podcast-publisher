@@ -13,6 +13,9 @@ import math
 import shutil
 import threading
 import subprocess
+import hashlib
+import time
+import traceback
 from utils import (
     transcode_audio_to_mp3,
     get_audio_info,
@@ -56,6 +59,16 @@ app.logger.setLevel(logging.INFO)
 BASE_DIR = Path(__file__).resolve().parent
 SHOWS_DIR = BASE_DIR / "shows"
 ASSETS_DIR = BASE_DIR / "assets"
+
+# Directory to store temporary large-file uploads received in chunks
+UPLOADS_DIR = BASE_DIR / "tmp_uploads"
+UPLOADS_DIR.mkdir(exist_ok=True)
+
+# Chunk size - 10MB is below Cloudflare limit (100MB)
+CHUNK_SIZE = 10 * 1024 * 1024  # 10MB in bytes
+
+# How long to keep temp uploads (in seconds)
+TEMP_UPLOAD_TTL = 24 * 60 * 60  # 24 hours
 
 @app.route("/feed.xml")
 def feed():
@@ -812,6 +825,8 @@ def favicon():
 
 from werkzeug.utils import secure_filename
 import uuid
+import os
+from werkzeug.utils import secure_filename
 
 
 
@@ -1066,6 +1081,43 @@ def new_episode(show_id):
             # Теперь запускаем фоновую обработку
             thread = threading.Thread(target=process_audio_background, args=(str(audio_path), show_id, ep_id))
             thread.start()
+        elif request.form.get('audio_url'):
+            # Format: /tmp_uploads/uploadid_filename.mp3
+            audio_url = request.form.get('audio_url')
+            if audio_url.startswith('/tmp_uploads/'):
+                try:
+                    # Extract the filename and move the file
+                    temp_path = BASE_DIR / audio_url.lstrip('/')
+                    if temp_path.exists():
+                        audio_name = secure_filename(temp_path.name.split('_', 1)[1])
+                        audio_path = ep_dir / audio_name
+                        shutil.copy2(temp_path, audio_path)
+                        # Delete the temp file after copying
+                        temp_path.unlink()
+                        meta["audio"] = f"/shows/{show_id}/episodes/{ep_id}/{audio_name}"
+
+                        # Если файл не MP3 или требует перекодировки, сразу помечаем это.
+                        # Окончательное решение примет фоновый процесс, но UI уже будет в курсе.
+                        # Для любого нового аудиофайла запускаем проверку/конвертацию
+                        meta['conversion_status'] = 'processing'
+                        if 'conversion_error' in meta: del meta['conversion_error']
+                        
+                        # СНАЧАЛА сохраняем метаданные, ПОТОМ запускаем поток
+                        with (ep_dir / "metadata.json").open("w", encoding="utf-8") as f:
+                            json.dump(meta, f, ensure_ascii=False, indent=2)
+                        
+                        # Теперь запускаем фоновую обработку
+                        thread = threading.Thread(target=process_audio_background, args=(str(audio_path), show_id, ep_id))
+                        thread.start()
+                    else:
+                        flash("Temporary audio file not found. Please upload again.", "error")
+                        shutil.rmtree(ep_dir)
+                        return render_template("new_episode.html", show_id=show_id, msg="Temporary audio file not found")
+                except Exception as e:
+                    app.logger.error(f"Error processing chunked upload: {str(e)}")
+                    flash(f"Error processing uploaded audio: {str(e)}", "error")
+                    shutil.rmtree(ep_dir)
+                    return render_template("new_episode.html", show_id=show_id, msg=f"Error processing upload: {str(e)}")
         else:
             flash("Аудиофайл обязателен для создания эпизода.", "error")
             shutil.rmtree(ep_dir)
@@ -1074,7 +1126,7 @@ def new_episode(show_id):
         # Этот блок был перемещен выше, чтобы исправить race condition
         flash("Эпизод успешно создан!", "success")
         return redirect(url_for("show_page", show_id=show_id))
-    return render_template("new_episode.html", msg=msg)
+    return render_template("new_episode.html", show_id=show_id, msg=msg)
 
 @app.route("/shows/<show_id>/episodes/<ep_id>/delete", methods=["POST"], endpoint="delete_episode")
 def delete_episode(show_id, ep_id):
@@ -1165,7 +1217,6 @@ def edit_episode(show_id, ep_id):
 
 import logging
 from logging.handlers import RotatingFileHandler
-import traceback
 
 # --- LOGGING SETUP ---
 LOG_PATH = Path("logs/podcast_app.log")
@@ -1253,6 +1304,438 @@ def sanitize_html_api():
         return jsonify({"cleaned": cleaned})
     except Exception as e:
         return jsonify({"error": str(e)}), 400
+@app.route('/api/upload/chunk', methods=['POST'])
+def upload_chunk():
+    """API endpoint for chunked file uploads"""
+    try:
+        if 'file' not in request.files:
+            app.logger.warning("Upload chunk failed: No file part in request")
+            return jsonify({'error': 'No file part', 'details': 'Request missing file data'}), 400
+        
+        file = request.files['file']
+        if file.filename == '':
+            app.logger.warning("Upload chunk failed: Empty filename")
+            return jsonify({'error': 'No selected file', 'details': 'Filename is empty'}), 400
+        
+        # Get upload parameters
+        try:
+            chunk_index = int(request.form.get('chunkIndex', 0))
+            total_chunks = int(request.form.get('totalChunks', 1))  
+            filename = request.form.get('filename')
+            upload_id = request.form.get('uploadId')
+        except ValueError as e:
+            app.logger.error(f"Upload chunk failed: Invalid parameters - {str(e)}")
+            return jsonify({'error': 'Invalid parameters', 'details': str(e)}), 400
+        
+        if not all([filename, upload_id]):
+            app.logger.warning("Upload chunk failed: Missing required parameters")
+            return jsonify({'error': 'Missing required parameters', 'details': 'Both filename and uploadId are required'}), 400
+        
+        # Create upload directory for this upload
+        upload_dir = UPLOADS_DIR / upload_id
+        upload_dir.mkdir(exist_ok=True)
+        
+        try:
+            # Save this chunk
+            chunk_file = upload_dir / f"chunk_{chunk_index:05d}"  # Zero-padded chunk index
+            file.save(str(chunk_file))
+            
+            # Update metadata
+            meta_file = upload_dir / "metadata.json"
+            meta = {}
+            if meta_file.exists():
+                with meta_file.open('r') as f:
+                    try:
+                        meta = json.load(f)
+                    except json.JSONDecodeError:
+                        app.logger.warning(f"Invalid metadata file for upload {upload_id}, creating new")
+                        meta = {}
+            
+            # Track progress
+            chunks_received = meta.get('chunks_received', [])
+            if chunk_index not in chunks_received:
+                chunks_received.append(chunk_index)
+            meta['chunks_received'] = sorted(set(chunks_received))  # Deduplicate and sort
+            meta['filename'] = secure_filename(filename)
+            meta['total_chunks'] = total_chunks
+            meta['last_update'] = time.time()
+            
+            # Write metadata
+            with meta_file.open('w') as f:
+                json.dump(meta, f)
+            
+            # Check if upload is complete
+            is_complete = len(meta['chunks_received']) == total_chunks
+            
+            app.logger.info(f"Chunk {chunk_index + 1}/{total_chunks} received for upload {upload_id} ({len(meta['chunks_received'])}/{total_chunks} complete)")
+            
+            return jsonify({
+                'success': True,
+                'chunkIndex': chunk_index,
+                'received': len(meta['chunks_received']),
+                'total': total_chunks,
+                'complete': is_complete
+            })
+            
+        except IOError as e:
+            app.logger.error(f"Upload chunk failed: IO Error - {str(e)}")
+            return jsonify({'error': 'File system error', 'details': str(e)}), 500
+    except Exception as e:
+        app.logger.error(f"Unexpected error in upload_chunk: {str(e)}")
+        app.logger.error(traceback.format_exc())
+        return jsonify({'error': 'Server error', 'details': str(e)}), 500
+@app.route('/api/upload/complete', methods=['POST'])
+def complete_upload():
+    """Complete a chunked upload - combines chunks into a single file"""
+    try:
+        # Получаем данные из запроса
+        try:
+            data = request.get_json(force=True) 
+            upload_id = data.get('uploadId')
+            destination = data.get('destination', 'temp')  # Where to store the file
+        except ValueError as e:
+            app.logger.error(f"Invalid JSON in complete_upload request: {str(e)}")
+            return jsonify({'error': 'Invalid JSON data', 'details': str(e)}), 400
+        
+        if not upload_id:
+            app.logger.warning("Complete upload failed: Missing uploadId parameter")
+            return jsonify({'error': 'Missing uploadId parameter', 'details': 'The uploadId field is required'}), 400
+        
+        # Verify upload directory exists
+        upload_dir = UPLOADS_DIR / upload_id
+        if not upload_dir.exists() or not upload_dir.is_dir():
+            app.logger.warning(f"Complete upload failed: Upload directory not found for ID {upload_id}")
+            return jsonify({'error': 'Upload not found or expired', 'details': 'The upload may have expired or was never started'}), 404
+        
+        # Check metadata
+        meta_file = upload_dir / "metadata.json"
+        if not meta_file.exists():
+            app.logger.error(f"Complete upload failed: Metadata file missing for upload {upload_id}")
+            return jsonify({'error': 'Upload metadata not found', 'details': 'The upload metadata is missing or corrupted'}), 404
+        
+        try:
+            with meta_file.open('r') as f:
+                meta = json.load(f)
+        except (IOError, json.JSONDecodeError) as e:
+            app.logger.error(f"Complete upload failed: Could not read metadata for upload {upload_id}: {str(e)}")
+            return jsonify({'error': 'Metadata read error', 'details': str(e)}), 500
+        
+        filename = meta.get('filename')
+        total_chunks = meta.get('total_chunks', 0)
+        chunks_received = meta.get('chunks_received', [])
+        
+        # Проверяем полноту загрузки
+        if len(chunks_received) != total_chunks:
+            app.logger.warning(f"Complete upload requested but incomplete: {len(chunks_received)}/{total_chunks} chunks for {upload_id}")
+            return jsonify({
+                'error': 'Upload incomplete', 
+                'details': f'Only {len(chunks_received)} of {total_chunks} chunks received',
+                'received': len(chunks_received),
+                'total': total_chunks
+            }), 400
+        
+        app.logger.info(f"Combining {total_chunks} chunks for upload {upload_id}, filename: {filename}")
+        
+        # Combine chunks into a single file
+        output_path = UPLOADS_DIR / f"{upload_id}_{filename}"
+        
+        try:
+            with output_path.open('wb') as output:
+                total_bytes = 0
+                for i in range(total_chunks):
+                    chunk_file = upload_dir / f"chunk_{i:05d}"
+                    if not chunk_file.exists():
+                        app.logger.error(f"Complete upload failed: Chunk {i} missing for upload {upload_id}")
+                        return jsonify({'error': f'Chunk {i} missing', 'details': f'Chunk file {i} not found on server'}), 400
+                    
+                    try:
+                        with chunk_file.open('rb') as chunk:
+                            chunk_data = chunk.read()
+                            output.write(chunk_data)
+                            total_bytes += len(chunk_data)
+                    except IOError as e:
+                        app.logger.error(f"Complete upload failed: Error reading chunk {i} for upload {upload_id}: {str(e)}")
+                        return jsonify({'error': f'Error reading chunk {i}', 'details': str(e)}), 500
+                
+                app.logger.info(f"Successfully combined {total_chunks} chunks, total size: {total_bytes} bytes")
+        except IOError as e:
+            app.logger.error(f"Complete upload failed: Error writing output file for upload {upload_id}: {str(e)}")
+            return jsonify({'error': 'Error writing output file', 'details': str(e)}), 500
+        
+        # Calculate hash for verification
+        try:
+            file_hash = calculate_file_hash(output_path)
+            file_size = output_path.stat().st_size
+        except Exception as e:
+            app.logger.error(f"Error calculating file hash for upload {upload_id}: {str(e)}")
+            file_hash = "unknown"
+            file_size = -1
+        
+        app.logger.info(f"Upload {upload_id} completed successfully: {filename}, size: {file_size} bytes, hash: {file_hash[:8]}...")
+        
+        # Return path/id for further processing
+        return jsonify({
+            'success': True,
+            'tempFile': str(output_path.relative_to(BASE_DIR)),
+            'filename': filename,
+            'hash': file_hash,
+            'size': file_size
+        })
+        
+    except Exception as e:
+        app.logger.error(f"Unexpected error completing upload: {str(e)}")
+        app.logger.error(traceback.format_exc())
+        return jsonify({'error': 'Server error', 'details': str(e)}), 500
+
+
+@app.route('/api/upload/status', methods=['GET'])
+def upload_status():
+    """Check status of a chunked upload"""
+    try:
+        upload_id = request.args.get('uploadId')
+        
+        if not upload_id:
+            app.logger.warning("Upload status check failed: Missing uploadId parameter")
+            return jsonify({
+                'error': 'Missing uploadId parameter', 
+                'details': 'The uploadId parameter must be provided in the query string'
+            }), 400
+        
+        upload_dir = UPLOADS_DIR / upload_id
+        meta_file = upload_dir / "metadata.json"
+        
+        # Проверка существования директории и метаданных
+        if not upload_dir.exists():
+            app.logger.warning(f"Upload status check failed: Upload directory not found for ID {upload_id}")
+            return jsonify({
+                'error': 'Upload not found', 
+                'details': 'The specified upload ID does not exist or has expired'
+            }), 404
+            
+        if not meta_file.exists():
+            app.logger.warning(f"Upload status check failed: Metadata file missing for upload {upload_id}")
+            return jsonify({
+                'error': 'Upload metadata not found', 
+                'details': 'The upload exists but metadata is missing or corrupted'
+            }), 404
+        
+        # Чтение метаданных с обработкой возможных ошибок
+        try:
+            with meta_file.open('r') as f:
+                meta = json.load(f)
+        except (IOError, json.JSONDecodeError) as e:
+            app.logger.error(f"Upload status check failed: Error reading metadata for {upload_id}: {str(e)}")
+            return jsonify({
+                'error': 'Metadata read error', 
+                'details': f'Could not read upload metadata: {str(e)}'
+            }), 500
+        
+        # Извлечение информации о загрузке
+        filename = meta.get('filename', 'unknown')
+        chunks_received = meta.get('chunks_received', [])
+        total_chunks = meta.get('total_chunks', 0)
+        start_time = meta.get('upload_start', 0)
+        last_update = meta.get('last_update', 0)
+        
+        # Расчет статуса и прогресса
+        received_count = len(chunks_received)
+        is_complete = received_count == total_chunks
+        percent_complete = int((received_count / max(total_chunks, 1)) * 100)
+        
+        duration = 0
+        if start_time > 0:
+            duration = int(time.time() - start_time)
+        
+        # Лог успешного запроса статуса
+        app.logger.info(f"Upload status for {upload_id}: {received_count}/{total_chunks} chunks ({percent_complete}%), filename: {filename}")
+        
+        return jsonify({
+            'filename': filename,
+            'received': received_count,
+            'total': total_chunks,
+            'percent': percent_complete,
+            'complete': is_complete,
+            'duration': duration,
+            'last_update': last_update,
+            'upload_id': upload_id
+        })
+    except Exception as e:
+        app.logger.error(f"Unexpected error checking upload status: {str(e)}")
+        app.logger.error(traceback.format_exc())
+        return jsonify({'error': 'Server error', 'details': str(e)}), 500
+
+
+@app.route('/api/upload/cleanup', methods=['POST'])
+def cleanup_old_uploads():
+    """Admin endpoint to clean up old uploads"""
+    try:
+        now = time.time()
+        cleaned = 0
+        failed = 0
+        skipped = 0
+        results = []
+        
+        app.logger.info(f"Starting cleanup of old uploads (TTL: {TEMP_UPLOAD_TTL} seconds)")
+        
+        # Проверяем существование директории загрузок
+        if not UPLOADS_DIR.exists() or not UPLOADS_DIR.is_dir():
+            app.logger.error(f"Uploads directory {UPLOADS_DIR} doesn't exist or is not a directory")
+            return jsonify({
+                'error': 'Uploads directory not found', 
+                'details': f'The path {UPLOADS_DIR} is not a valid directory'
+            }), 500
+        
+        # Получаем список всех элементов в директории
+        try:
+            items = list(UPLOADS_DIR.iterdir())
+            app.logger.info(f"Found {len(items)} items in uploads directory")
+        except PermissionError as e:
+            app.logger.error(f"Permission error accessing uploads directory: {str(e)}")
+            return jsonify({
+                'error': 'Permission denied', 
+                'details': f'Cannot access uploads directory: {str(e)}'
+            }), 500
+        except Exception as e:
+            app.logger.error(f"Error accessing uploads directory: {str(e)}")
+            return jsonify({
+                'error': 'File system error', 
+                'details': f'Cannot access uploads directory: {str(e)}'
+            }), 500
+        
+        # Обрабатываем каждый элемент
+        for upload_dir in items:
+            # Пропускаем не-директории
+            if not upload_dir.is_dir():
+                skipped += 1
+                continue
+            
+            dir_name = upload_dir.name
+            meta_file = upload_dir / "metadata.json"
+            result = {'id': dir_name, 'action': 'none'}
+            
+            try:
+                # Проверяем метаданные
+                if not meta_file.exists():
+                    # Нет метаданных, удаляем если старее установленного срока
+                    mod_time = upload_dir.stat().st_mtime
+                    age = now - mod_time
+                    
+                    if age > TEMP_UPLOAD_TTL:
+                        try:
+                            shutil.rmtree(upload_dir)
+                            app.logger.info(f"Deleted old directory without metadata: {dir_name} (age: {int(age)} seconds)")
+                            cleaned += 1
+                            result['action'] = 'deleted'
+                            result['reason'] = 'no_metadata_expired'
+                            result['age'] = int(age)
+                        except (PermissionError, OSError) as e:
+                            app.logger.error(f"Error deleting directory {dir_name}: {str(e)}")
+                            failed += 1
+                            result['action'] = 'failed'
+                            result['error'] = str(e)
+                    else:
+                        # Ещё не истёк срок
+                        app.logger.debug(f"Skipping directory without metadata (not expired): {dir_name} (age: {int(age)} seconds)")
+                        skipped += 1
+                        result['action'] = 'skipped'
+                        result['reason'] = 'no_metadata_not_expired'
+                        result['age'] = int(age)
+                else:
+                    # Есть метаданные, проверяем дату последнего обновления
+                    try:
+                        with meta_file.open('r') as f:
+                            meta = json.load(f)
+                        
+                        # Получаем время последнего обновления
+                        last_update = meta.get('last_update', 0)
+                        age = now - last_update
+                        chunks_total = meta.get('total_chunks', 0)
+                        chunks_received = len(meta.get('chunks_received', []))
+                        filename = meta.get('filename', 'unknown')
+                        
+                        # Записываем информацию в результат
+                        result['filename'] = filename
+                        result['chunks_total'] = chunks_total
+                        result['chunks_received'] = chunks_received
+                        result['last_update'] = last_update
+                        result['age'] = int(age)
+                        
+                        if age > TEMP_UPLOAD_TTL:
+                            try:
+                                shutil.rmtree(upload_dir)
+                                app.logger.info(f"Deleted expired upload: {dir_name} ({filename}) (age: {int(age)} seconds)")
+                                cleaned += 1
+                                result['action'] = 'deleted'
+                                result['reason'] = 'expired'
+                            except (PermissionError, OSError) as e:
+                                app.logger.error(f"Error deleting directory {dir_name}: {str(e)}")
+                                failed += 1
+                                result['action'] = 'failed'
+                                result['error'] = str(e)
+                        else:
+                            # Ещё не истёк срок
+                            app.logger.debug(f"Skipping active upload (not expired): {dir_name} (age: {int(age)} seconds)")
+                            skipped += 1
+                            result['action'] = 'skipped'
+                            result['reason'] = 'not_expired'
+                    except (json.JSONDecodeError, IOError) as e:
+                        # Ошибка чтения метаданных, проверяем время изменения директории
+                        app.logger.warning(f"Error reading metadata for {dir_name}: {str(e)}")
+                        mod_time = upload_dir.stat().st_mtime
+                        age = now - mod_time
+                        result['error'] = f"Metadata error: {str(e)}"
+                        result['age'] = int(age)
+                        
+                        if age > TEMP_UPLOAD_TTL:
+                            try:
+                                shutil.rmtree(upload_dir)
+                                app.logger.info(f"Deleted directory with corrupted metadata: {dir_name} (age: {int(age)} seconds)")
+                                cleaned += 1
+                                result['action'] = 'deleted'
+                                result['reason'] = 'corrupted_metadata_expired'
+                            except (PermissionError, OSError) as e:
+                                app.logger.error(f"Error deleting directory {dir_name}: {str(e)}")
+                                failed += 1
+                                result['action'] = 'failed'
+                                result['error'] = str(e)
+                        else:
+                            skipped += 1
+                            result['action'] = 'skipped'
+                            result['reason'] = 'corrupted_metadata_not_expired'
+            except Exception as e:
+                # Общая обработка ошибок для данной директории
+                app.logger.error(f"Unexpected error processing directory {dir_name}: {str(e)}")
+                failed += 1
+                result['action'] = 'error'
+                result['error'] = str(e)
+            
+            # Добавляем результат для этой директории
+            results.append(result)
+        
+        # Финальный лог
+        app.logger.info(f"Cleanup complete: {cleaned} deleted, {skipped} skipped, {failed} failed")
+        
+        # Возвращаем расширенный отчёт
+        return jsonify({
+            'success': True,
+            'cleaned': cleaned,
+            'skipped': skipped,
+            'failed': failed,
+            'results': results
+        })
+    except Exception as e:
+        app.logger.error(f"Unexpected error in cleanup_old_uploads: {str(e)}")
+        app.logger.error(traceback.format_exc())
+        return jsonify({'error': 'Server error', 'details': str(e)}), 500
+
+
+def calculate_file_hash(file_path):
+    """Calculate SHA-256 hash of a file"""
+    sha256 = hashlib.sha256()
+    with open(file_path, 'rb') as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            sha256.update(chunk)
+    return sha256.hexdigest()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5050)
