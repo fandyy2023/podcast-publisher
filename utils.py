@@ -582,6 +582,7 @@ def sanitize_html_for_rss(html: str) -> str:
       space, narrow nbsp, zero-width space) to ordinary spaces or nothing.
     • Replaces common typographic quotes with plain counterparts so feeds render
       identically across podcast apps.
+    • Removes problematic Unicode characters that some validators consider invalid.
     """
     if not html:
         return ""
@@ -604,6 +605,12 @@ def sanitize_html_for_rss(html: str) -> str:
         "\u2018": "'", "\u2019": "'",  # left/right single quotes
         "\u201C": '"', "\u201D": '"',  # left/right double quotes
         "\u201A": ',',  "\u201E": '"',  # single low-9 quote etc.
+        "\u2013": "-",  "\u2014": "--", # en-dash, em-dash
+        "\u2026": "...", # ellipsis
+        "\u00AB": '"',  "\u00BB": '"',  # double angle quotes
+        "\u2022": "*",   # bullet
+        "\u2010": "-",  "\u2011": "-",  # hyphens
+        "\u2012": "-",  "\u2015": "--", # more dashes
     }
     for bad, good in transl_map.items():
         html = html.replace(bad, good)

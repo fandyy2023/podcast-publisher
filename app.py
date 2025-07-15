@@ -1822,6 +1822,204 @@ def api_settings():
             app.logger.error(f"Error loading settings: {e}")
     
     return jsonify(current_settings)
+
+
+@app.route("/api/shows")
+def shows_api():
+    """API endpoint to get list of shows"""
+    shows = []
+    for show_id in get_shows():
+        show_path = SHOWS_DIR / show_id
+        if not show_path.is_dir():
+            continue
+            
+        config_path = show_path / "config.json"
+        if not config_path.exists():
+            continue
+            
+        try:
+            with open(config_path, 'r', encoding='utf-8') as f:
+                config = json.load(f)
+                
+            show_data = {
+                'id': show_id,
+                'title': config.get('title', ''),
+                'description': config.get('description', ''),
+                'language': config.get('language', 'en'),
+                'image': config.get('image')
+            }
+            shows.append(show_data)
+        except Exception as e:
+            app.logger.error(f"Error loading show {show_id}: {e}")
+            
+    return jsonify(shows)
+
+
+@app.route("/api/batch_upload/metadata")
+def batch_metadata_api():
+    """API endpoint to get metadata from Excel file based on language"""
+    import pandas as pd
+    
+    # Получаем язык из параметров запроса
+    language = request.args.get('language', 'english').lower()
+    
+    # Путь к файлу метаданных в зависимости от языка
+    metadata_file = f'{language.capitalize()}.xlsx'
+    file_path = os.path.join(BASE_DIR, metadata_file)
+    
+    if not os.path.exists(file_path):
+        return jsonify({
+            'error': f'Metadata file not found: {metadata_file}',
+            'message': f'Place the {metadata_file} file in the root directory.'
+        }), 404
+    
+    try:
+        # Чтение файла Excel
+        df = pd.read_excel(file_path)
+        
+        # Преобразование DataFrame в список словарей
+        metadata = []
+        for _, row in df.iterrows():
+            item = {
+                'number': int(row['Book Number']) if pd.notna(row.get('Book Number', None)) else None,
+                'title': row.get('Title', ''),
+                'author': row.get('Author', ''),
+                'description': row.get('Description', ''),
+                'about': row.get("What's it about?", ''),
+                'genre': row.get('Genre', '')
+            }
+            metadata.append(item)
+        
+        return jsonify(metadata)
+    except Exception as e:
+        app.logger.error(f"Error processing metadata file: {str(e)}")
+        app.logger.error(traceback.format_exc())
+        return jsonify({'error': str(e)}), 500
+        
+
+@app.route("/api/batch_upload/episodes", methods=["POST"])
+def batch_upload_episodes():
+    """API endpoint to handle batch upload of episodes"""
+    if not request.is_json:
+        return jsonify({'error': 'Invalid request format'}), 400
+    
+    try:
+        data = request.get_json()
+        episodes = data.get('episodes', [])
+        language = data.get('language', 'english')
+        
+        if not episodes:
+            return jsonify({'error': 'No episodes data provided'}), 400
+            
+        app.logger.info(f"Received batch upload request for {len(episodes)} episodes in {language}")
+        
+        # Результаты обработки каждого эпизода
+        results = []
+        
+        # Обработка каждого эпизода
+        for episode in episodes:
+            # Проверка необходимых полей
+            if not all(k in episode for k in ['showId', 'title', 'audioFile']):
+                results.append({
+                    'number': episode.get('number'),
+                    'success': False,
+                    'error': 'Missing required fields (showId, title or audioFile)'
+                })
+                continue
+                
+            # Данные эпизода
+            show_id = episode['showId']
+            title = episode['title']
+            number = episode.get('number', 0)
+            summary = episode.get('summary', '')
+            description = episode.get('description', '')
+            genres = episode.get('genres', [])
+            
+            # Проверка существования шоу
+            show_dir_path = SHOWS_DIR / show_id
+            if not show_dir_path.exists():
+                results.append({
+                    'number': number,
+                    'success': False,
+                    'error': f'Show {show_id} does not exist'
+                })
+                continue
+                
+            # Создание каталога эпизода
+            episode_id = create_episode_id(title)
+            episodes_dir = show_dir_path / "episodes"
+            episodes_dir.mkdir(exist_ok=True)
+            
+            # Проверка уникальности ID
+            if (episodes_dir / episode_id).exists():
+                # Создаем уникальный ID с номером эпизода
+                episode_id = f"{episode_id}-{number}"
+                
+                # Если и это существует, добавляем временную метку
+                if (episodes_dir / episode_id).exists():
+                    timestamp = int(time.time())
+                    episode_id = f"{episode_id}-{timestamp}"
+            
+            # Окончательный путь к каталогу эпизода
+            episode_dir = episodes_dir / episode_id
+            episode_dir.mkdir(exist_ok=True)
+            
+            # Создание конфигурации эпизода
+            episode_config = {
+                "title": title,
+                "summary": summary,
+                "description": plain_text_to_html(description) if description else "",
+                "number": number,
+                "genres": genres,
+                "published_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                "audio": None,  # Будет заполнено позже
+                "image": None   # Будет заполнено позже
+            }
+            
+            # Сохранение конфигурации
+            with open(episode_dir / "config.json", "w", encoding="utf-8") as f:
+                json.dump(episode_config, f, ensure_ascii=False, indent=2)
+                
+            # Обработка и сохранение файлов будет реализована на следующем этапе
+            
+            results.append({
+                'number': number,
+                'success': True,
+                'episode_id': episode_id,
+                'show_id': show_id,
+                'message': f'Episode {title} created successfully'
+            })
+            
+        return jsonify({
+            'success': True,
+            'language': language,
+            'total': len(episodes),
+            'created': sum(1 for r in results if r.get('success')),
+            'failed': sum(1 for r in results if not r.get('success')),
+            'results': results
+        })
+        
+    except Exception as e:
+        app.logger.error(f"Error in batch_upload_episodes: {str(e)}")
+        app.logger.error(traceback.format_exc())
+        return jsonify({'error': str(e), 'success': False}), 500
+
+
+# Функция для создания ID эпизода на основе названия
+def create_episode_id(title):
+    """Создает URL-безопасный ID эпизода из названия"""
+    # Преобразуем в нижний регистр
+    slug = title.lower()
+    
+    # Заменяем специальные символы на дефис
+    import re
+    slug = re.sub(r'[^\w\s-]', '', slug)
+    
+    # Заменяем пробелы на дефисы
+    slug = re.sub(r'[\s]+', '-', slug.strip())
+    
+    # Ограничиваем длину
+    return slug[:50]
     
     # Handle POST request (API)
     if request.method == "POST":
@@ -1847,6 +2045,17 @@ def api_settings():
     # Handle GET request (page)
     return render_template("settings.html", **current_settings)
 
+
+# Initialize batch upload routes
+try:
+    from batch_upload import init_batch_upload_routes
+    init_batch_upload_routes(app)
+    app.logger.info("Batch upload routes initialized successfully")
+except ImportError as e:
+    app.logger.warning(f"Could not initialize batch upload routes: {e}")
+    # If pandas is missing, provide helpful message
+    if "pandas" in str(e):
+        app.logger.warning("Please install pandas: pip install pandas")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5050)

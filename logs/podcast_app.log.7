@@ -1,41 +1,67 @@
-2025-07-11 18:57:16,290 ERROR: 500 Internal Error: POST http://podcast.ecowool.online/shows/22/episodes/c160631c/edit args={} form={'title': '2 The Tipping Podint: How Little Things Can Make a Big Difference By Malcolm Gladwell What’s It About? TheTipping Poins', 'language': 'de-DE', 'description': 'What’s It About?\r\nThe Tipping Point explores why certain ideas, behaviors, and products suddenly explode in popularity—spreading through society like an epidemic. Malcolm Gladwell investigates the subtle forces and social dynamics that drive these rapid changes, showing how small actions or influences can trigger massive, seemingly unstoppable trends.\r\nKey Concepts\r\n1. Epidemics of Ideas and Trends\r\n\t•\tGladwell draws a parallel between the spread of infectious diseases and the way ideas, fashions, and behaviors propagate through society.\r\n\t•\tInitially, only a handful of people are “infected” by a new idea or product. Then, seemingly all at once, it catches fire—reaching a “tipping point” where it spreads rapidly and widely.\r\n2. The Tipping Point\r\n\t•\tThe “tipping point” is the critical threshold at which an idea, product, or behavior crosses from being a rare phenomenon to a mainstream epidemic.\r\n\t•\tAfter this point, the spread becomes self-sustaining and very difficult to stop.', 'explicit': 'no', 'category_main': 'Arts', 'category_sub': '', 'summary': 'The Tipping Point: How Little Things Can Make a Big Difference\r\n\r\nBy Malcolm Gladwell\r\n\r\nWhat’s It About?\r\n\r\nThe Tipping Point explores why certain ideas, behaviors, and products suddenly explode in popularity—spreading through society like an epidemic. Malcolm Gladwell investigates the subtle forces and social dynamics that drive these rapid changes, showing how small actions or influences can trigger massive, seemingly unstoppable trends.\r\n\r\nKey Concepts\r\n\r\n• Epidemics of Ideas and Trends\r\n\r\n• Gladwell draws a parallel between the spread of infectious diseases and the way ideas, fashions, and behaviors propagate through society.\r\n\r\n• Initially, only a handful of people are “infected” by a new idea or product. Then, seemingly all at once, it catches fire—reaching a “tipping point” where it spreads rapidly and widely.\r\n\r\n• The Tipping Point\r\n\r\n• The “tipping point” is the critical threshold at which an idea, product, or behavior crosses from being a rare phenomenon to a mainstream epidemic.\r\n\r\n• After this point, the spread becomes self-sustaining and very difficult to stop.\r\n\r\n• The Hush Puppies Example\r\n\r\n• In the mid-1990s, Hush Puppies shoes went from being nearly obsolete to a must-have fashion item.\r\n\r\n• The sudden surge in popularity wasn’t due to a marketing campaign, but rather a small group of trendsetters in Manhattan who began wearing them, sparking a chain reaction.\r\n\r\n• Sales skyrocketed from 30,000 to 430,000 pairs in a year, and then to two million pairs the following year.The Tipping Point: How Little Things Can Make a Big Difference\r\n\r\nBy Malcolm Gladwell\r\n\r\nWhat’s It About?\r\n\r\nThe Tipping Point explores why certain ideas, behaviors, and products suddenly explode in popularity—spreading through society like an epidemic. Malcolm Gladwell investigates the subtle forces and social dynamics that drive these rapid changes, showing how small actions or influences can trigger massive, seemingly unstoppable trends.\r\n\r\nKey Concepts\r\n\r\n• Epidemics of Ideas and Trends\r\n\r\n• Gladwell draws a parallel between the spread of infectious diseases and the way ideas, fashions, and behaviors propagate through society.\r\n\r\n• Initially, only a handful of people are “infected” by a new idea or product. Then, seemingly all at once, it catches fire—reaching a “tipping point” where it spreads rapidly and widely.\r\n\r\n• The Tipping Point\r\n\r\n• The “tipping point” is the critical threshold at which an idea, product, or behavior crosses from being a rare phenomenon to a mainstream epidemic.\r\n\r\n• After this point, the spread becomes self-sustaining and very difficult to stop.\r\n\r\n• The Hush Puppies Example\r\n\r\n• In the mid-1990s, Hush Puppies shoes went from being nearly obsolete to a must-have fashion item.\r\n\r\n• The sudden surge in popularity wasn’t due to a marketing campaign, but rather a small group of trendsetters in Manhattan who began wearing them, sparking a chain reaction.\r\n\r\n• Sales skyrocketed from 30,000 to 430,000 pairs in a year, and then to two million pairs the following year.', 'duration': '43:13'}
-Traceback:
-Traceback (most recent call last):
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
-    response = self.full_dispatch_request()
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
-    rv = self.handle_user_exception(e)
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
-    rv = self.dispatch_request()
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/.venv/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
-    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
-           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/app.py", line 868, in edit_episode
-    "description": sanitize_html_for_rss(plain_text_to_html(description)),
-                                         ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/utils.py", line 247, in plain_text_to_html
-    _, bullet_content = bullet_match.groups()
-    ^^^^^^^^^^^^^^^^^
-ValueError: not enough values to unpack (expected 2, got 1)
- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:932]
-2025-07-11 18:58:45,102 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:39]
-2025-07-11 19:02:09,506 INFO: --- BG PROCESS START for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/f22f6b80/Becoming_the_Boss__Modern_Leadership_for_the_Next_Generation.wav --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:699]
-[2025-07-11 19:02:09,506] INFO in app: --- BG PROCESS START for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/f22f6b80/Becoming_the_Boss__Modern_Leadership_for_the_Next_Generation.wav ---
-2025-07-11 19:02:09,509 INFO: [BG] Loading metadata from /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/f22f6b80/metadata.json [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:708]
-[2025-07-11 19:02:09,509] INFO in app: [BG] Loading metadata from /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/f22f6b80/metadata.json
-2025-07-11 19:02:10,278 INFO: [BG] Checking transcoding for Becoming_the_Boss__Modern_Leadership_for_the_Next_Generation.wav: needs_transcoding=True, reason='Файл не в формате MP3 (.wav)' [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:713]
-[2025-07-11 19:02:10,278] INFO in app: [BG] Checking transcoding for Becoming_the_Boss__Modern_Leadership_for_the_Next_Generation.wav: needs_transcoding=True, reason='Файл не в формате MP3 (.wav)'
-2025-07-11 19:02:10,278 INFO: [BG] Transcoding required for Becoming_the_Boss__Modern_Leadership_for_the_Next_Generation.wav. [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:719]
-[2025-07-11 19:02:10,278] INFO in app: [BG] Transcoding required for Becoming_the_Boss__Modern_Leadership_for_the_Next_Generation.wav.
-2025-07-11 19:03:16,697 INFO: [BG] Transcoding successful. New file: /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/f22f6b80/Becoming_the_Boss__Modern_Leadership_for_the_Next_Generation.mp3 [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:723]
-[2025-07-11 19:03:16,697] INFO in app: [BG] Transcoding successful. New file: /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/f22f6b80/Becoming_the_Boss__Modern_Leadership_for_the_Next_Generation.mp3
-2025-07-11 19:03:16,697 INFO: [BG] Getting audio info for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/f22f6b80/Becoming_the_Boss__Modern_Leadership_for_the_Next_Generation.mp3 [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:730]
-[2025-07-11 19:03:16,697] INFO in app: [BG] Getting audio info for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/f22f6b80/Becoming_the_Boss__Modern_Leadership_for_the_Next_Generation.mp3
-2025-07-11 19:03:16,757 INFO: [BG] Audio info obtained and updated in metadata. [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:735]
-[2025-07-11 19:03:16,757] INFO in app: [BG] Audio info obtained and updated in metadata.
-2025-07-11 19:03:16,758 INFO: [BG] Metadata saved for episode f22f6b80 with final status: success [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:751]
-[2025-07-11 19:03:16,758] INFO in app: [BG] Metadata saved for episode f22f6b80 with final status: success
-2025-07-11 19:03:16,758 INFO: --- BG PROCESS END for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/f22f6b80/Becoming_the_Boss__Modern_Leadership_for_the_Next_Generation.wav --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:754]
-[2025-07-11 19:03:16,758] INFO in app: --- BG PROCESS END for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/f22f6b80/Becoming_the_Boss__Modern_Leadership_for_the_Next_Generation.wav ---
-2025-07-11 19:21:56,957 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:39]
-2025-07-11 19:28:41,275 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:39]
+2025-07-12 11:19:22,724 INFO: [BG] Checking transcoding for 51_The_Art_of_Mindful_Love.wav: needs_transcoding=True, reason='Файл не в формате MP3 (.wav)' [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:790]
+2025-07-12 11:19:22,729 INFO: [BG] Transcoding required for 51_The_Art_of_Mindful_Love.wav. Determining optimal bitrate… [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:835]
+2025-07-12 11:19:22,793 INFO: [BG] Selected target bitrate: 320k [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:842]
+2025-07-12 11:20:50,849 INFO: [BG] Transcoding successful. New file: /Users/poolpooly/CascadeProjects/podcast-publisher/shows/val/episodes/54cc8415/51_The_Art_of_Mindful_Love.mp3 [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:881]
+2025-07-12 11:20:50,850 INFO: [BG] Getting audio info for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/val/episodes/54cc8415/51_The_Art_of_Mindful_Love.mp3 [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:888]
+2025-07-12 11:20:51,074 INFO: [BG] Audio info obtained and updated in metadata. [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:893]
+2025-07-12 11:20:51,074 INFO: [BG] Metadata saved for episode 54cc8415 with final status: success [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:909]
+2025-07-12 11:20:51,075 INFO: --- BG PROCESS END for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/val/episodes/54cc8415/51_The_Art_of_Mindful_Love.wav --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:912]
+2025-07-12 11:30:02,892 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:50]
+2025-07-12 11:33:45,065 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:50]
+2025-07-12 11:41:50,062 ERROR: 404 Not Found: GET http://podcast.ecowool.online/shows/22/feed.xml args={} form={} [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1094]
+[2025-07-12 11:41:50,062] ERROR in app: 404 Not Found: GET http://podcast.ecowool.online/shows/22/feed.xml args={} form={}
+2025-07-12 11:41:50,525 ERROR: 404 Not Found: GET http://podcast.ecowool.online/shows/22/feed.xml args={} form={} [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1094]
+[2025-07-12 11:41:50,525] ERROR in app: 404 Not Found: GET http://podcast.ecowool.online/shows/22/feed.xml args={} form={}
+2025-07-12 11:41:50,756 ERROR: 404 Not Found: GET http://podcast.ecowool.online/shows/22/feed.xml args={} form={} [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1094]
+[2025-07-12 11:41:50,756] ERROR in app: 404 Not Found: GET http://podcast.ecowool.online/shows/22/feed.xml args={} form={}
+2025-07-12 11:41:51,471 ERROR: 404 Not Found: GET http://podcast.ecowool.online/shows/22/feed.xml args={} form={} [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1094]
+[2025-07-12 11:41:51,471] ERROR in app: 404 Not Found: GET http://podcast.ecowool.online/shows/22/feed.xml args={} form={}
+2025-07-12 11:41:51,880 ERROR: 404 Not Found: HEAD http://podcast.ecowool.online/shows/22/feed.xml args={} form={} [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1094]
+[2025-07-12 11:41:51,880] ERROR in app: 404 Not Found: HEAD http://podcast.ecowool.online/shows/22/feed.xml args={} form={}
+2025-07-12 11:41:52,100 ERROR: 404 Not Found: HEAD http://podcast.ecowool.online/shows/22/feed.xml args={} form={} [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1094]
+[2025-07-12 11:41:52,100] ERROR in app: 404 Not Found: HEAD http://podcast.ecowool.online/shows/22/feed.xml args={} form={}
+2025-07-12 11:41:52,418 ERROR: 404 Not Found: HEAD http://podcast.ecowool.online/shows/22/feed.xml args={} form={} [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1094]
+[2025-07-12 11:41:52,418] ERROR in app: 404 Not Found: HEAD http://podcast.ecowool.online/shows/22/feed.xml args={} form={}
+2025-07-12 11:41:52,819 ERROR: 404 Not Found: GET http://podcast.ecowool.online/shows/22/feed.xml args={} form={} [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1094]
+[2025-07-12 11:41:52,819] ERROR in app: 404 Not Found: GET http://podcast.ecowool.online/shows/22/feed.xml args={} form={}
+2025-07-12 11:41:53,226 ERROR: 404 Not Found: GET http://podcast.ecowool.online/shows/22/feed.xml args={} form={} [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1094]
+[2025-07-12 11:41:53,226] ERROR in app: 404 Not Found: GET http://podcast.ecowool.online/shows/22/feed.xml args={} form={}
+2025-07-12 11:41:53,608 ERROR: 404 Not Found: GET http://podcast.ecowool.online/shows/22/feed.xml args={} form={} [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1094]
+[2025-07-12 11:41:53,608] ERROR in app: 404 Not Found: GET http://podcast.ecowool.online/shows/22/feed.xml args={} form={}
+2025-07-12 11:41:54,078 ERROR: 404 Not Found: GET http://podcast.ecowool.online/shows/22/feed.xml args={} form={} [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1094]
+[2025-07-12 11:41:54,078] ERROR in app: 404 Not Found: GET http://podcast.ecowool.online/shows/22/feed.xml args={} form={}
+2025-07-12 11:41:54,297 ERROR: 404 Not Found: GET http://podcast.ecowool.online/shows/22/feed.xml args={} form={} [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1094]
+[2025-07-12 11:41:54,297] ERROR in app: 404 Not Found: GET http://podcast.ecowool.online/shows/22/feed.xml args={} form={}
+2025-07-12 11:41:54,589 ERROR: 404 Not Found: GET http://podcast.ecowool.online/shows/22/feed.xml args={} form={} [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1094]
+[2025-07-12 11:41:54,589] ERROR in app: 404 Not Found: GET http://podcast.ecowool.online/shows/22/feed.xml args={} form={}
+2025-07-12 11:41:54,808 ERROR: 404 Not Found: GET http://podcast.ecowool.online/shows/22/feed.xml args={} form={} [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1094]
+[2025-07-12 11:41:54,808] ERROR in app: 404 Not Found: GET http://podcast.ecowool.online/shows/22/feed.xml args={} form={}
+2025-07-12 11:41:55,023 ERROR: 404 Not Found: GET http://podcast.ecowool.online/shows/22/feed.xml args={} form={} [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1094]
+[2025-07-12 11:41:55,023] ERROR in app: 404 Not Found: GET http://podcast.ecowool.online/shows/22/feed.xml args={} form={}
+2025-07-12 11:41:55,237 ERROR: 404 Not Found: GET http://podcast.ecowool.online/shows/22/feed.xml args={} form={} [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1094]
+[2025-07-12 11:41:55,237] ERROR in app: 404 Not Found: GET http://podcast.ecowool.online/shows/22/feed.xml args={} form={}
+2025-07-12 11:43:29,996 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:50]
+2025-07-12 11:45:16,909 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:50]
+2025-07-12 11:47:40,017 ERROR: 404 Not Found: GET http://podcast.ecowool.online/shows/22/feed.xml args={} form={} [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1094]
+[2025-07-12 11:47:40,017] ERROR in app: 404 Not Found: GET http://podcast.ecowool.online/shows/22/feed.xml args={} form={}
+2025-07-12 11:47:42,050 ERROR: 404 Not Found: GET http://podcast.ecowool.online/shows/22/feed.xml args={} form={} [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1094]
+[2025-07-12 11:47:42,050] ERROR in app: 404 Not Found: GET http://podcast.ecowool.online/shows/22/feed.xml args={} form={}
+2025-07-12 11:47:42,369 ERROR: 404 Not Found: GET http://podcast.ecowool.online/shows/22/feed.xml args={} form={} [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1094]
+[2025-07-12 11:47:42,369] ERROR in app: 404 Not Found: GET http://podcast.ecowool.online/shows/22/feed.xml args={} form={}
+2025-07-12 11:50:14,379 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:50]
+2025-07-12 11:56:43,105 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:50]
+2025-07-12 12:03:31,399 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:50]
+2025-07-12 12:14:08,197 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:50]
+2025-07-12 12:14:56,825 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:50]
+2025-07-12 12:19:46,382 ERROR: 404 Not Found: GET http://podcast.ecowool.online/shows/val/64-1.jpg args={} form={} [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1113]
+[2025-07-12 12:19:46,382] ERROR in app: 404 Not Found: GET http://podcast.ecowool.online/shows/val/64-1.jpg args={} form={}
+2025-07-12 12:27:43,249 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:50]
+2025-07-12 12:36:28,593 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:50]
+2025-07-12 12:49:48,176 ERROR: 404 Not Found: GET http://podcast.ecowool.online/shows/22/episodes/c160631c/edit args={} form={} [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1122]
+[2025-07-12 12:49:48,176] ERROR in app: 404 Not Found: GET http://podcast.ecowool.online/shows/22/episodes/c160631c/edit args={} form={}
+2025-07-12 12:49:48,264 ERROR: 404 Not Found: GET http://podcast.ecowool.online/shows/22/episodes/c160631c/edit args={} form={} [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1122]
+[2025-07-12 12:49:48,264] ERROR in app: 404 Not Found: GET http://podcast.ecowool.online/shows/22/episodes/c160631c/edit args={} form={}
+2025-07-12 12:50:00,839 ERROR: 404 Not Found: GET http://podcast.ecowool.online/shows/22/episodes/21783338/edit args={} form={} [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1122]
+[2025-07-12 12:50:00,839] ERROR in app: 404 Not Found: GET http://podcast.ecowool.online/shows/22/episodes/21783338/edit args={} form={}
+2025-07-12 12:50:07,460 ERROR: 404 Not Found: GET http://podcast.ecowool.online/shows/22/episodes/c160631c/edit args={} form={} [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1122]
+[2025-07-12 12:50:07,460] ERROR in app: 404 Not Found: GET http://podcast.ecowool.online/shows/22/episodes/c160631c/edit args={} form={}
