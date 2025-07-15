@@ -4,10 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Podcast Publisher - Настройки</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="icon" type="image/png" href="/assets/favicon.png">
     <style>
         body { font-family: 'Segoe UI', Arial, sans-serif; background: #f9f9fb; color: #222; margin: 0; }
-        .container { max-width: 700px; margin: 40px auto; background: #fff; border-radius: 14px; box-shadow: 0 2px 16px #0001; padding: 32px; }
+        .container { max-width: 900px; margin: 40px auto; background: #fff; border-radius: 14px; box-shadow: 0 2px 16px #0001; padding: 32px; }
         h1 { color: #3a5fc8; }
         .back-link { 
             color: #3a5fc8;
@@ -48,6 +49,89 @@
             opacity: 0;
             width: 0;
             height: 0;
+        }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+        .tab {
+            cursor: pointer;
+            padding: 10px 20px;
+            margin-right: 5px;
+            border-radius: 5px 5px 0 0;
+            font-weight: 500;
+            color: #777;
+        }
+        .tab.active {
+            background-color: #3a5fc8;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Batch upload styles */
+        #file-drop-area {
+            border: 3px dashed #007bff;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            margin: 20px 0;
+            cursor: pointer;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+        
+        #file-drop-area.highlight {
+            border-color: #28a745;
+            background-color: rgba(40, 167, 69, 0.1);
+            transform: scale(1.02);
+        }
+        
+        #select-files-btn {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 16px;
+        }
+        
+        #select-files-btn:hover {
+            background-color: #0069d9;
+        }
+        
+        .file-info {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            width: 100%;
+        }
+        
+        .language-selector {
+            margin-bottom: 20px;
+        }
+        .language-selector select {
+            padding: 8px 15px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            margin-left: 10px;
         }
         .slider {
             position: absolute;
@@ -104,6 +188,125 @@
         .save-message.show {
             opacity: 1;
         }
+        
+        /* Стили для таблицы сопоставления */
+        .match-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .match-table th, .match-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .match-table th {
+            background-color: #f2f6ff;
+            color: #3a5fc8;
+        }
+        
+        .match-table input[type="text"], .match-table textarea, .match-table select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        
+        /* Стили для тегов жанров */
+        .genre-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        
+        .genre-tag {
+            background-color: #e8efff;
+            color: #3a5fc8;
+            padding: 4px 8px;
+            border-radius: 16px;
+            display: inline-flex;
+            align-items: center;
+            font-size: 0.9em;
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .remove-genre {
+            margin-left: 5px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background-color: rgba(0,0,0,0.1);
+            color: #3a5fc8;
+            font-size: 10px;
+        }
+        
+        .remove-genre:hover {
+            background-color: rgba(0,0,0,0.2);
+        }
+        
+        /* Стили для добавления новых жанров */
+        .add-genre-input {
+            display: flex;
+            margin-top: 5px;
+        }
+        
+        .add-genre-input input {
+            flex: 1;
+            padding: 4px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px 0 0 4px;
+        }
+        
+        .add-genre-btn {
+            background-color: #3a5fc8;
+            color: white;
+            border: none;
+            border-radius: 0 4px 4px 0;
+            padding: 4px 8px;
+            cursor: pointer;
+        }
+        
+        /* Адаптивная таблица */
+        .table-responsive {
+            overflow-x: auto;
+        }
+        
+        .save-btn {
+            background-color: #3a5fc8;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .save-btn:hover {
+            background-color: #2a4cb8;
+        }
+        .save-btn:disabled {
+            background-color: #b8c2df;
+            cursor: not-allowed;
+        }
+        .save-message {
+            color: #34a853;
+            margin-left: 15px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .save-message.show {
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
@@ -111,32 +314,108 @@
         <a href="/" class="back-link">← На главную</a>
         <h1>Настройки</h1>
         
-        <div class="setting-group">
-            <h3>Загрузка файлов</h3>
-            
-            <div class="setting-row">
-                <div>
-                    <div class="setting-label">Чанковая загрузка по умолчанию</div>
-                    <div class="setting-description">
-                        Используйте эту опцию, если обычная загрузка прерывается из-за ограничений 
-                        Cloudflare (>100MB) или сервера. Файлы будут загружены по частям.
+        <!-- Tabs -->
+        <div class="tabs">
+            <div class="tab active" data-tab="settings">Основные настройки</div>
+            <div class="tab" data-tab="batch-upload">Пакетная загрузка</div>
+        </div>
+        
+        <!-- Основные настройки -->
+        <div id="settings-tab" class="tab-content active">
+            <div class="setting-group">
+                <h3>Загрузка файлов</h3>
+                
+                <div class="setting-row">
+                    <div>
+                        <div class="setting-label">Чанковая загрузка по умолчанию</div>
+                        <div class="setting-description">
+                            Используйте эту опцию, если обычная загрузка прерывается из-за ограничений 
+                            Cloudflare (>100MB) или сервера. Файлы будут загружены по частям.
+                        </div>
                     </div>
+                    <label class="switch">
+                        <input type="checkbox" id="chunked-upload-toggle" {% if chunked_upload_default %}checked{% endif %}>
+                        <span class="slider"></span>
+                    </label>
                 </div>
-                <label class="switch">
-                    <input type="checkbox" id="chunked-upload-toggle" {% if chunked_upload_default %}checked{% endif %}>
-                    <span class="slider"></span>
-                </label>
+            </div>
+            
+            <div style="margin-top: 32px; display: flex; align-items: center;">
+                <button id="save-btn" class="save-btn">Сохранить</button>
+                <span id="save-message" class="save-message">Настройки сохранены</span>
             </div>
         </div>
         
-        <div style="margin-top: 32px; display: flex; align-items: center;">
-            <button id="save-btn" class="save-btn">Сохранить</button>
-            <span id="save-message" class="save-message">Настройки сохранены</span>
+        <!-- Пакетная загрузка -->
+        <div id="batch-upload-tab" class="tab-content">
+            <h3>Пакетная загрузка эпизодов</h3>
+            <p>Этот инструмент позволяет загружать несколько эпизодов одновременно, автоматически сопоставляя аудиофайлы с изображениями и метаданными.</p>
+            
+            <!-- Выбор языка -->
+            <div class="language-selector">
+                <label for="language-select"><strong>Язык эпизодов:</strong></label>
+                <select id="language-select" name="language">
+                    <option value="english">English</option>
+                    <option value="russian">Русский</option>
+                </select>
+                <p class="setting-description">Выберите язык для загружаемых эпизодов. Система будет использовать соответствующий файл метаданных (например, English.xlsx).</p>
+            </div>
+            
+            <!-- Загрузка файлов -->
+            <div class="setting-group">
+                <h4>Шаг 1: Выберите файлы для загрузки</h4>
+                <div class="file-drop-area" id="file-drop-area">
+                    <div class="drop-icon">
+                        <i class="fas fa-cloud-upload-alt" style="font-size: 48px; color: #007bff; margin-bottom: 15px;"></i>
+                    </div>
+                    <p><strong>Перетащите аудио и изображения сюда</strong></p>
+                    <p>или</p>
+                    <button id="select-files-btn" class="btn btn-primary">Выбрать файлы</button>
+                    <input type="file" id="file-input" multiple accept="audio/*,image/*" style="display: none;">
+                    <p class="file-types-hint" style="margin-top: 10px; font-size: 12px; color: #6c757d;">
+                        Поддерживаемые форматы: MP3, PNG, JPG
+                    </p>
+                </div>
+                <p class="setting-description">Примеры названий файлов: <code>01_episode.mp3</code> и <code>01_cover.jpg</code>, <code>23_my_biography.mp3</code> и <code>23_cover.png</code></p>
+            </div>
+            
+            <!-- Таблица результатов -->
+            <div class="setting-group" id="results-table-container" style="display: none;">
+                <h4>Шаг 2: Проверьте сопоставление файлов с метаданными</h4>
+                <div class="table-responsive">
+                    <table id="match-table" class="match-table">
+                        <thead>
+                            <tr>
+                                <th>№</th>
+                                <th>Аудиофайл</th>
+                                <th>Обложка</th>
+                                <th>Название</th>
+                                <th>Краткое описание</th>
+                                <th>Жанры</th>
+                                <th>Шоу</th>
+                            </tr>
+                        </thead>
+                        <tbody id="match-table-body">
+                            <!-- Сюда будут добавлены строки с результатами сопоставления -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="batch-actions">
+                    <button id="upload-selected-btn" class="save-btn">Загрузить выбранные эпизоды</button>
+                </div>
+            </div>
+            
+            <!-- Статус загрузки -->
+            <div class="setting-group" id="upload-status" style="display: none;">
+                <h4>Статус загрузки</h4>
+                <div id="upload-progress"></div>
+            </div>
         </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // --- Основные настройки --- //
             const saveBtn = document.getElementById('save-btn');
             const saveMessage = document.getElementById('save-message');
             const chunkedUploadToggle = document.getElementById('chunked-upload-toggle');
@@ -158,6 +437,449 @@
             
             // Add event listeners
             chunkedUploadToggle.addEventListener('change', updateSaveButtonState);
+            
+            // --- Tabs switching --- //
+            const tabElements = document.querySelectorAll('.tab');
+            const tabContentElements = document.querySelectorAll('.tab-content');
+            
+            tabElements.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.getAttribute('data-tab');
+                    
+                    // Activate the selected tab
+                    tabElements.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    // Show the corresponding content
+                    tabContentElements.forEach(content => {
+                        content.classList.remove('active');
+                        if (content.id === `${tabId}-tab`) {
+                            content.classList.add('active');
+                        }
+                    });
+                });
+            });
+            
+            // --- Batch Upload --- //
+            // Variables
+            const batchLanguageSelect = document.getElementById('language-select');
+            const batchFileInput = document.getElementById('file-input');
+            const batchSelectFilesBtn = document.getElementById('select-files-btn');
+            const batchFileDropArea = document.getElementById('file-drop-area');
+            const batchResultsTableContainer = document.getElementById('results-table-container');
+            const batchMatchTableBody = document.getElementById('match-table-body');
+            const batchUploadSelectedBtn = document.getElementById('upload-selected-btn');
+            const batchUploadProgress = document.getElementById('upload-progress');
+            const batchUploadStatusContainer = document.getElementById('upload-status');
+            
+            // Global data
+            let batchSelectedLanguage = 'english';
+            let batchAudioFiles = [];
+            let batchImageFiles = [];
+            let batchMetadata = [];
+            let batchEpisodes = [];
+            
+            // Изменение языка
+            if (batchLanguageSelect) {
+                batchLanguageSelect.addEventListener('change', () => {
+                    const selectedLanguage = batchLanguageSelect.value;
+                    console.log('Язык изменен на:', selectedLanguage);
+                    fetchMetadata(selectedLanguage);
+                });
+                
+                // Подсвечиваем текущий выбранный язык
+                console.log('Текущий выбранный язык:', batchLanguageSelect.value);
+            }
+            
+            // Fetch metadata for selected language
+            function fetchMetadata(language = 'english') {
+                batchUploadProgress.innerHTML = `Загрузка метаданных для языка ${language}...`;
+                
+                return fetch(`/api/batch_upload/metadata?language=${language}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            batchUploadProgress.innerHTML = `Ошибка: ${data.message || data.error}`;
+                            return [];
+                        } else {
+                            batchUploadProgress.innerHTML = `Загружено ${data.length} записей из ${language}.xlsx`;
+                            return data;
+                        }
+                    })
+                    .catch(error => {
+                        console.error(`Error fetching metadata for ${language}:`, error);
+                        batchUploadProgress.innerHTML = `Ошибка загрузки метаданных: ${error.message}`;
+                        return [];
+                    });
+            }
+            
+            // --- Старые обработчики убраны, используется единый setupDragAndDrop() выше ---
+            
+
+            
+            // Drag and drop handling
+            batchFileDropArea.addEventListener('dragover', e => {
+                e.preventDefault();
+                batchFileDropArea.classList.add('highlight');
+            });
+            
+            batchFileDropArea.addEventListener('dragleave', () => {
+                batchFileDropArea.classList.remove('highlight');
+            });
+            
+            batchFileDropArea.addEventListener('drop', e => {
+                e.preventDefault();
+                batchFileDropArea.classList.remove('highlight');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    // Add files to file input for consistent processing
+                    batchFileInput.files = files;
+                    handleFileSelection();
+                }
+            });
+            
+            // Process selected files
+            function handleFileSelection() {
+                const files = batchFileInput.files;
+                if (!files || files.length === 0) return;
+                
+                // Clear previous files and reset button label
+                batchAudioFiles = [];
+                batchImageFiles = [];
+                
+                // Reset the button label before processing
+                if (batchSelectFilesBtn) {
+                    batchSelectFilesBtn.textContent = 'Выбрать файлы';
+                }
+                
+                // Sort files by type
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const fileType = file.type.split('/')[0];
+                    
+                    if (fileType === 'audio') {
+                        batchAudioFiles.push(file);
+                    } else if (fileType === 'image') {
+                        batchImageFiles.push(file);
+                    }
+                }
+                
+                // Update progress text
+                batchUploadProgress.innerHTML = `Выбрано ${batchAudioFiles.length} аудиофайлов и ${batchImageFiles.length} изображений`;
+                batchUploadStatusContainer.style.display = 'block';
+
+                // Update the button label with live counters
+                if (batchSelectFilesBtn) {
+                    batchSelectFilesBtn.textContent = `Выбрано: ${batchAudioFiles.length} аудио / ${batchImageFiles.length} изображ.`;
+                }
+                
+                // Load metadata and then match files
+                fetchMetadata(batchSelectedLanguage)
+                    .then(data => {
+                        batchMetadata = data;
+                        matchFilesWithMetadata();
+                    });
+            }
+            
+            // Match files with metadata
+            function matchFilesWithMetadata() {
+                batchEpisodes = [];
+                
+                // Extract episode numbers from filenames
+                batchAudioFiles.forEach(audioFile => {
+                    const match = audioFile.name.match(/^(\d+)/); // Find number at the start
+                    if (match) {
+                        const episodeNumber = parseInt(match[1], 10);
+                        
+                        // Find matching image
+                        const coverFile = batchImageFiles.find(img => {
+                            const imgMatch = img.name.match(/^(\d+)/);
+                            return imgMatch && parseInt(imgMatch[1], 10) === episodeNumber;
+                        });
+                        
+                        // Find matching metadata
+                        const episodeMetadata = batchMetadata.find(meta => meta.number === episodeNumber);
+                        
+                        // Create episode data
+                        batchEpisodes.push({
+                            number: episodeNumber,
+                            audioFile: audioFile,
+                            coverFile: coverFile || null,
+                            title: episodeMetadata ? episodeMetadata.title : `Эпизод ${episodeNumber}`,
+                            summary: episodeMetadata ? episodeMetadata.description : '',
+                            description: episodeMetadata ? episodeMetadata.about : '',
+                            genres: episodeMetadata ? episodeMetadata.genre.split(',').map(g => g.trim()) : [],
+                            selected: true,
+                            showId: null
+                        });
+                    }
+                });
+                
+                // Display matched episodes
+                displayMatchResults();
+            }
+            
+            // Display match results
+            function displayMatchResults() {
+                batchMatchTableBody.innerHTML = ''; // Clear table
+                
+                if (batchEpisodes.length === 0) {
+                    batchUploadProgress.innerHTML = 'Не удалось найти совпадающие эпизоды';
+                    return;
+                }
+                
+                // Fetch shows for selection
+                fetchShows().then(shows => {
+                    // For each episode, create a row
+                    batchEpisodes.forEach(episode => {
+                        const row = document.createElement('tr');
+                        
+                        // Episode number
+                        const numCell = document.createElement('td');
+                        numCell.textContent = episode.number;
+                        row.appendChild(numCell);
+                        
+                        // Audio file
+                        const audioCell = document.createElement('td');
+                        audioCell.textContent = episode.audioFile.name;
+                        row.appendChild(audioCell);
+                        
+                        // Cover image
+                        const coverCell = document.createElement('td');
+                        if (episode.coverFile) {
+                            const img = document.createElement('img');
+                            img.style.width = '50px';
+                            img.style.height = '50px';
+                            img.style.objectFit = 'cover';
+                            
+                            const reader = new FileReader();
+                            reader.onload = e => img.src = e.target.result;
+                            reader.readAsDataURL(episode.coverFile);
+                            
+                            coverCell.appendChild(img);
+                        } else {
+                            coverCell.textContent = 'Нет';
+                        }
+                        row.appendChild(coverCell);
+                        
+                        // Title
+                        const titleCell = document.createElement('td');
+                        const titleInput = document.createElement('input');
+                        titleInput.type = 'text';
+                        titleInput.value = episode.title;
+                        titleInput.addEventListener('change', () => {
+                            episode.title = titleInput.value;
+                        });
+                        titleCell.appendChild(titleInput);
+                        row.appendChild(titleCell);
+                        
+                        // Summary
+                        const summaryCell = document.createElement('td');
+                        const summaryTextarea = document.createElement('textarea');
+                        summaryTextarea.value = episode.summary;
+                        summaryTextarea.rows = 3;
+                        summaryTextarea.addEventListener('change', () => {
+                            episode.summary = summaryTextarea.value;
+                        });
+                        summaryCell.appendChild(summaryTextarea);
+                        row.appendChild(summaryCell);
+                        
+                        // Genres
+                        const genresCell = document.createElement('td');
+                        const genresContainer = document.createElement('div');
+                        genresContainer.className = 'genre-tags';
+                        
+                        // Add each genre
+                        episode.genres.forEach(genre => {
+                            if (!genre) return;
+                            
+                            const tag = document.createElement('span');
+                            tag.className = 'genre-tag';
+                            tag.textContent = genre;
+                            
+                            const removeBtn = document.createElement('span');
+                            removeBtn.className = 'remove-genre';
+                            removeBtn.textContent = '×';
+                            removeBtn.addEventListener('click', () => {
+                                episode.genres = episode.genres.filter(g => g !== genre);
+                                tag.remove();
+                            });
+                            
+                            tag.appendChild(removeBtn);
+                            genresContainer.appendChild(tag);
+                        });
+                        
+                        // Add input for new genre
+                        const addGenreInput = document.createElement('div');
+                        addGenreInput.className = 'add-genre-input';
+                        
+                        const genreInput = document.createElement('input');
+                        genreInput.type = 'text';
+                        genreInput.placeholder = 'Добавить жанр';
+                        
+                        const addBtn = document.createElement('button');
+                        addBtn.textContent = '+';
+                        addBtn.className = 'add-genre-btn';
+                        addBtn.addEventListener('click', () => {
+                            const newGenre = genreInput.value.trim();
+                            if (newGenre && !episode.genres.includes(newGenre)) {
+                                episode.genres.push(newGenre);
+                                
+                                const tag = document.createElement('span');
+                                tag.className = 'genre-tag';
+                                tag.textContent = newGenre;
+                                
+                                const removeBtn = document.createElement('span');
+                                removeBtn.className = 'remove-genre';
+                                removeBtn.textContent = '×';
+                                removeBtn.addEventListener('click', () => {
+                                    episode.genres = episode.genres.filter(g => g !== newGenre);
+                                    tag.remove();
+                                });
+                                
+                                tag.appendChild(removeBtn);
+                                genresContainer.insertBefore(tag, addGenreInput);
+                                genreInput.value = '';
+                            }
+                        });
+                        
+                        addGenreInput.appendChild(genreInput);
+                        addGenreInput.appendChild(addBtn);
+                        genresContainer.appendChild(addGenreInput);
+                        genresCell.appendChild(genresContainer);
+                        row.appendChild(genresCell);
+                        
+                        // Show selection
+                        const showCell = document.createElement('td');
+                        const showSelect = document.createElement('select');
+                        showSelect.className = 'show-select';
+                        showSelect.dataset.episodeNumber = episode.number;
+                        
+                        // Add option to create new show
+                        const newOption = document.createElement('option');
+                        newOption.value = 'new';
+                        newOption.textContent = 'Создать новое шоу...';
+                        showSelect.appendChild(newOption);
+                        
+                        // Add existing shows
+                        shows.forEach(show => {
+                            const option = document.createElement('option');
+                            option.value = show.id;
+                            option.textContent = show.title;
+                            showSelect.appendChild(option);
+                        });
+                        
+                        // Select handler
+                        showSelect.addEventListener('change', function() {
+                            if (this.value === 'new') {
+                                const newShowName = prompt('Введите название нового шоу:');
+                                if (newShowName) {
+                                    // Will be implemented in future version
+                                    alert('Функционал создания нового шоу будет добавлен в будущей версии');
+                                    this.value = shows.length > 0 ? shows[0].id : '';
+                                }
+                            }
+                            
+                            episode.showId = this.value;
+                        });
+                        
+                        // Default selection
+                        if (shows.length > 0) {
+                            showSelect.value = shows[0].id;
+                            episode.showId = shows[0].id;
+                        }
+                        
+                        showCell.appendChild(showSelect);
+                        row.appendChild(showCell);
+                        
+                        batchMatchTableBody.appendChild(row);
+                    });
+                    
+                    // Show results table
+                    batchResultsTableContainer.style.display = 'block';
+                });
+            }
+            
+            // Fetch shows from API
+            function fetchShows() {
+                return fetch('/api/shows')
+                    .then(response => response.json())
+                    .catch(error => {
+                        console.error('Error fetching shows:', error);
+                        return [];
+                    });
+            }
+            
+            // Upload selected episodes
+            batchUploadSelectedBtn.addEventListener('click', () => {
+                const selectedEpisodes = batchEpisodes.filter(ep => ep.selected);
+                
+                if (selectedEpisodes.length === 0) {
+                    alert('Нет выбранных эпизодов для загрузки!');
+                    return;
+                }
+                
+                // Validate required fields
+                const invalidEpisodes = selectedEpisodes.filter(ep => !ep.showId || !ep.title);
+                if (invalidEpisodes.length > 0) {
+                    alert(`Некоторые эпизоды не имеют выбранного шоу или названия. Пожалуйста, заполните все обязательные поля.`);
+                    return;
+                }
+                
+                batchUploadProgress.innerHTML = `Начинаем загрузку ${selectedEpisodes.length} эпизодов...`;
+                batchUploadSelectedBtn.disabled = true;
+                
+                // Prepare data for API
+                const episodesData = selectedEpisodes.map(ep => ({
+                    number: ep.number,
+                    showId: ep.showId,
+                    title: ep.title,
+                    summary: ep.summary,
+                    description: ep.description,
+                    genres: ep.genres,
+                    audioFile: ep.audioFile.name,
+                    coverFile: ep.coverFile ? ep.coverFile.name : null
+                }));
+                
+                // Send API request
+                fetch('/api/batch_upload/episodes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        episodes: episodesData,
+                        language: selectedLanguage
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    
+                    // Show results
+                    batchUploadProgress.innerHTML = `Создано эпизодов: ${data.created}, ошибок: ${data.failed}. 
+                        В следующей версии будет добавлена загрузка файлов.`;
+                    
+                    batchUploadSelectedBtn.disabled = false;
+                })
+                .catch(error => {
+                    console.error('Upload error:', error);
+                    batchUploadProgress.innerHTML = `Ошибка загрузки: ${error.message}`;
+                    batchUploadSelectedBtn.disabled = false;
+                });
+            });
+            
+            // Initialize batch upload
+            document.addEventListener('DOMContentLoaded', () => {
+                // Initial language metadata load
+                if (batchLanguageSelect) {
+                    fetchMetadata(batchSelectedLanguage);
+                }
+            });
+
             
             // Save settings
             saveBtn.addEventListener('click', () => {
@@ -196,6 +918,763 @@
             
             // Initial button state
             updateSaveButtonState();
+            
+            // --- Управление вкладками --- //
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.getAttribute('data-tab');
+                    
+                    // Deactivate all tabs
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    
+                    // Activate selected tab
+                    tab.classList.add('active');
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                });
+            });
+            
+            // --- Пакетная загрузка --- //
+            // Добавляем console.log для проверки инициализации элементов
+            const languageSelect = document.getElementById('language-select');
+            const fileDropArea = document.getElementById('file-drop-area');
+            const fileInput = document.getElementById('file-input');
+            const selectFilesBtn = document.getElementById('select-files-btn');
+            const resultsTableContainer = document.getElementById('results-table-container');
+            const matchTableBody = document.getElementById('match-table-body');
+            const uploadSelectedBtn = document.getElementById('upload-selected-btn');
+            const uploadStatus = document.getElementById('upload-status');
+            const uploadProgress = document.getElementById('upload-progress');
+            
+            // Проверяем наличие элементов
+            console.log('Проверка инициализации элементов:');
+            console.log('languageSelect:', languageSelect);
+            console.log('fileDropArea:', fileDropArea);
+            console.log('fileInput:', fileInput);
+            console.log('selectFilesBtn:', selectFilesBtn);
+            
+            // Массив загруженных файлов
+            let uploadedFiles = [];
+            let matchedEpisodes = [];
+            
+            // Обработка перетаскивания файлов
+            // Более надёжная кросс-браузерная реализация
+            function setupDragAndDrop() {
+                if (!fileDropArea || !selectFilesBtn || !fileInput) {
+                    console.error('Ошибка: не найдены необходимые элементы для drag-and-drop');
+                    console.log('fileDropArea:', fileDropArea);
+                    console.log('selectFilesBtn:', selectFilesBtn);
+                    console.log('fileInput:', fileInput);
+                    return;
+                }
+                
+                console.log('Инициализирую улучшенные обработчики drag-and-drop');
+                
+                // Предотвращение стандартного поведения браузера
+                function preventDefaults(e) {
+                    if (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                }
+                
+                // Добавление подсветки при наведении
+                function highlight(e) {
+                    preventDefaults(e);
+                    fileDropArea.classList.add('highlight');
+                }
+                
+                // Удаление подсветки
+                function unhighlight(e) {
+                    preventDefaults(e);
+                    fileDropArea.classList.remove('highlight');
+                }
+                
+                // Обработка события drop
+                function handleDrop(e) {
+                    preventDefaults(e);
+                    unhighlight(e);
+                    
+                    let files;
+                    if (e.dataTransfer) {
+                        files = e.dataTransfer.files;
+                    } else if (e.target && e.target.files) {
+                        files = e.target.files;
+                    }
+                    
+                    if (files && files.length > 0) {
+                        console.log('Получены файлы:', files.length);
+                        handleFiles(files);
+                    } else {
+                        console.warn('Нет файлов для обработки');
+                    }
+                }
+                
+                // Очистить все существующие обработчики перед добавлением новых
+                function removeAllEventListeners(element, events, handler) {
+                    events.forEach(event => {
+                        try {
+                            element.removeEventListener(event, handler);
+                        } catch (e) {}
+                    });
+                }
+                
+                // Сначала удалим все существующие обработчики
+                const allEvents = ['dragenter', 'dragover', 'dragleave', 'drop', 'click'];
+                removeAllEventListeners(fileDropArea, allEvents, preventDefaults);
+                
+                // Добавляем новые обработчики
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(event => {
+                    fileDropArea.addEventListener(event, preventDefaults, false);
+                });
+                
+                fileDropArea.addEventListener('dragenter', highlight, false);
+                fileDropArea.addEventListener('dragover', highlight, false);
+                fileDropArea.addEventListener('dragleave', unhighlight, false);
+                fileDropArea.addEventListener('drop', handleDrop, false);
+                
+                // Обработчик кнопки выбора файлов
+                selectFilesBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // Сброс value у input для возможности повторного выбора тех же файлов
+                    if (fileInput) {
+                        fileInput.value = '';
+                    }
+                    
+                    try {
+                        console.log('Клик по кнопке выбора файлов');
+                        fileInput.click();
+                    } catch (err) {
+                        console.error('Ошибка при клике на fileInput:', err);
+                    }
+                });
+                
+                // Улучшенный обработчик выбора файлов через input для кросс-браузерной совместимости
+                if (fileInput) {
+                    fileInput.onchange = null; // Удаляем старый обработчик
+                    
+                    fileInput.onchange = function(e) {
+                        console.log('fileInput change сработал, файлов:', this.files ? this.files.length : 0);
+                        
+                        // Копируем файлы, так как коллекция FileList не является обычным массивом
+                        if (this.files && this.files.length > 0) {
+                            const fileArray = Array.from(this.files);
+                            console.log('Успешно получены файлы:', fileArray.length);
+                            
+                            // Задержка для Safari, чтобы избежать проблем с обработкой событий
+                            setTimeout(function() {
+                                handleFiles(fileArray);
+                            }, 10);
+                        } else {
+                            // Reset button label when selection cancelled
+        if (selectFilesBtn) {
+            selectFilesBtn.textContent = 'Выбрать файлы';
+        }
+        console.warn('Файлы не были выбраны');
+                        }
+                    };
+                    
+                    console.log('Установлен новый обработчик для fileInput');
+                }
+            }
+            
+            // Вызываем функцию настройки
+            setupDragAndDrop();
+            
+            // Обработка выбранных файлов
+            function handleFiles(files) {
+                console.log('Функция handleFiles вызвана:', files);
+                
+                if (!files || files.length === 0) {
+                    console.log('Нет выбранных файлов');
+                    return;
+                }
+                
+                uploadedFiles = Array.from(files); // Convert FileList to array
+
+    // Calculate counts by type
+    const audioCount = uploadedFiles.filter(f => f.type.startsWith('audio')).length;
+    const imageCount = uploadedFiles.filter(f => f.type.startsWith('image')).length;
+    
+    // Update the button label with detailed counters
+    if (selectFilesBtn) {
+        selectFilesBtn.textContent = `Выбрано: ${audioCount} аудио / ${imageCount} изображ.`;
+    }
+                
+                // Показать информацию о выбранных файлах
+                console.log(`Выбрано ${uploadedFiles.length} файлов:`);
+                uploadedFiles.forEach(file => console.log(` - ${file.name} (${file.type})`));
+                
+                // Отобразить информацию о загружаемых файлах в UI
+                const fileInfo = document.createElement('div');
+                fileInfo.textContent = `Выбрано ${audioCount} аудио и ${imageCount} изображ.`;
+                
+                // Очищаем предыдущие сообщения
+                const prevInfo = fileDropArea.querySelector('.file-info');
+                if (prevInfo) {
+                    prevInfo.remove();
+                }
+                
+                fileInfo.classList.add('file-info');
+                fileDropArea.appendChild(fileInfo);
+                
+                // Получить язык и метаданные
+                const language = languageSelect ? languageSelect.value : 'english';
+                console.log('Запрашиваю метаданные для языка:', language);
+                fetchMetadata(language, uploadedFiles);
+            }
+            
+            // Получение метаданных из Excel по выбранному языку
+            function fetchMetadata(language, files) {
+                // Добавляем логирование
+                console.log('Вызван fetchMetadata для языка:', language);
+                console.log('Файлы:', files ? files.length : 0);
+                
+                // Заменим на реальный запрос к API
+                const endpoint = `/api/batch_upload/metadata?language=${language}`;
+                console.log('Запрашиваю метаданные по URL:', endpoint);
+                
+                fetch(endpoint)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        console.log('Ответ получен, парсим JSON');
+                        return response.json();
+                    })
+                    .then(metadata => {
+                        console.log('Метаданные получены:', metadata);
+                        // Сопоставление файлов с метаданными
+                        if (Array.isArray(metadata)) {
+                            matchFilesWithMetadata(files, metadata);
+                        } else if (metadata.error) {
+                            console.error('Ошибка API:', metadata.error);
+                            alert(`Ошибка API: ${metadata.error}`);
+                        } else {
+                            console.error('Неизвестный формат метаданных:', metadata);
+                            alert('Неизвестный формат метаданных. Проверьте консоль для деталей.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching metadata:', error);
+                        alert(`Ошибка получения метаданных для языка ${language}: ${error.message}`);
+                    });
+            }
+            
+            // Сопоставление файлов с метаданными
+            function matchFilesWithMetadata(files, metadata) {
+                // Объект для группировки файлов по номеру эпизода
+                const episodeFiles = {};
+                
+                // Регулярное выражение для извлечения номера из имени файла
+                const numberRegex = /^(\d+)[^\d]*.*$/;
+                
+                // Группировка файлов по номеру
+                files.forEach(file => {
+                    const match = file.name.match(numberRegex);
+                    if (match) {
+                        const episodeNumber = parseInt(match[1], 10);
+                        if (!episodeFiles[episodeNumber]) {
+                            episodeFiles[episodeNumber] = { audio: null, cover: null };
+                        }
+                        
+                        // Определяем тип файла
+                        const fileType = file.name.toLowerCase();
+                        if (fileType.endsWith('.mp3') || fileType.endsWith('.wav')) {
+                            episodeFiles[episodeNumber].audio = file;
+                        } else if (fileType.endsWith('.jpg') || fileType.endsWith('.jpeg') || fileType.endsWith('.png')) {
+                            episodeFiles[episodeNumber].cover = file;
+                        }
+                    }
+                });
+                
+                // Сопоставляем с метаданными и создаем объекты эпизодов
+                matchedEpisodes = [];
+                
+                for (const [episodeNumber, files] of Object.entries(episodeFiles)) {
+                    const metaItem = metadata.find(item => item.number === parseInt(episodeNumber, 10));
+                    
+                    if (metaItem && files.audio) {
+                        matchedEpisodes.push({
+                            number: parseInt(episodeNumber, 10),
+                            audioFile: files.audio,
+                            coverFile: files.cover,
+                            title: metaItem.title || '',
+                            summary: metaItem.description || '',
+                            description: metaItem.about || '',
+                            genres: metaItem.genre ? metaItem.genre.split(',').map(g => g.trim()) : [],
+                            selected: true
+                        });
+                    }
+                }
+                
+                // Отображение результатов сопоставления
+                displayMatchResults(matchedEpisodes, metadata);
+            }
+            
+            // Отображение результатов сопоставления
+            function displayMatchResults(episodes, metadata) {
+                // Очистка таблицы
+                matchTableBody.innerHTML = '';
+                
+                // Заполнение таблицы
+                episodes.forEach(episode => {
+                    const row = document.createElement('tr');
+                    
+                    // Чекбокс выбора
+                    const checkboxCell = document.createElement('td');
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.checked = episode.selected;
+                    checkbox.addEventListener('change', () => {
+                        episode.selected = checkbox.checked;
+                    });
+                    checkboxCell.appendChild(checkbox);
+                    row.appendChild(checkboxCell);
+                    
+                    // Номер
+                    const numberCell = document.createElement('td');
+                    numberCell.textContent = episode.number;
+                    row.appendChild(numberCell);
+                    
+                    // Аудиофайл
+                    const audioCell = document.createElement('td');
+                    audioCell.textContent = episode.audioFile ? episode.audioFile.name : 'Не найден';
+                    row.appendChild(audioCell);
+                    
+                    // Обложка
+                    const coverCell = document.createElement('td');
+                    if (episode.coverFile) {
+                        const coverPreview = document.createElement('img');
+                        coverPreview.style.width = '50px';
+                        coverPreview.style.height = '50px';
+                        coverPreview.alt = 'Обложка';
+                        
+                        // Чтение файла для предпросмотра
+                        const reader = new FileReader();
+                        reader.onload = e => coverPreview.src = e.target.result;
+                        reader.readAsDataURL(episode.coverFile);
+                        
+                        coverCell.appendChild(coverPreview);
+                    } else {
+                        coverCell.textContent = 'Не найдена';
+                    }
+                    row.appendChild(coverCell);
+                    
+                    // Название
+                    const titleCell = document.createElement('td');
+                    const titleInput = document.createElement('input');
+                    titleInput.type = 'text';
+                    titleInput.value = episode.title;
+                    titleInput.addEventListener('change', () => {
+                        episode.title = titleInput.value;
+                    });
+                    titleCell.appendChild(titleInput);
+                    row.appendChild(titleCell);
+                    
+                    // Краткое описание
+                    const summaryCell = document.createElement('td');
+                    const summaryTextarea = document.createElement('textarea');
+                    summaryTextarea.value = episode.summary;
+                    summaryTextarea.rows = 2;
+                    summaryTextarea.addEventListener('change', () => {
+                        episode.summary = summaryTextarea.value;
+                    });
+                    summaryCell.appendChild(summaryTextarea);
+                    row.appendChild(summaryCell);
+                    
+                    // Жанры
+                    const genresCell = document.createElement('td');
+                    genresCell.classList.add('genre-tags');
+                    
+                    // Функция для отображения жанра как тега
+                    function addGenreTag(genre) {
+                        const tag = document.createElement('span');
+                        tag.classList.add('genre-tag');
+                        tag.textContent = genre;
+                        const removeBtn = document.createElement('span');
+                        removeBtn.classList.add('remove-genre');
+                        removeBtn.textContent = '✕';
+                        removeBtn.addEventListener('click', () => {
+                            episode.genres = episode.genres.filter(g => g !== genre);
+                            tag.remove();
+                        });
+                        tag.appendChild(removeBtn);
+                        genresCell.appendChild(tag);
+                    }
+                    
+                    // Добавление существующих жанров
+                    episode.genres.forEach(genre => addGenreTag(genre));
+                    
+                    // Добавление поля для ввода нового жанра
+                    const addGenreDiv = document.createElement('div');
+                    addGenreDiv.classList.add('add-genre-input');
+                    
+                    const genreInput = document.createElement('input');
+                    genreInput.type = 'text';
+                    genreInput.placeholder = 'Добавить жанр';
+                    
+                    const addButton = document.createElement('button');
+                    addButton.classList.add('add-genre-btn');
+                    addButton.textContent = '+';
+                    addButton.addEventListener('click', () => {
+                        const newGenre = genreInput.value.trim();
+                        if (newGenre && !episode.genres.includes(newGenre)) {
+                            episode.genres.push(newGenre);
+                            addGenreTag(newGenre);
+                            genreInput.value = '';
+                        }
+                    });
+                    
+                    // Обработка нажатия Enter в поле ввода
+                    genreInput.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            addButton.click();
+                        }
+                    });
+                    
+                    addGenreDiv.appendChild(genreInput);
+                    addGenreDiv.appendChild(addButton);
+                    genresCell.appendChild(addGenreDiv);
+                    
+                    row.appendChild(genresCell);
+                    
+                    // Выбор шоу
+                    const showCell = document.createElement('td');
+                    // Здесь будет выпадающий список шоу
+                    // Заменим на реальный запрос к API для получения списка шоу
+                    showCell.textContent = 'Загрузка шоу...';
+                    row.appendChild(showCell);
+                    
+                    // Добавление строки в таблицу
+                    matchTableBody.appendChild(row);
+                });
+                
+                // Показ таблицы результатов
+                resultsTableContainer.style.display = 'block';
+                
+                // Получение списка шоу и обновление ячеек
+                fetchShows().then(shows => {
+                    // Заполнение выпадающих списков выбора шоу
+                    const showSelects = document.querySelectorAll('.show-select');
+                    showSelects.forEach(select => {
+                        select.innerHTML = ''; // Очистка
+                        
+                        // Опция для создания нового шоу
+                        const newShowOption = document.createElement('option');
+                        newShowOption.value = 'new';
+                        newShowOption.textContent = 'Создать новое шоу...';
+                        select.appendChild(newShowOption);
+                        
+                        // Добавление существующих шоу
+                        shows.forEach(show => {
+                            const option = document.createElement('option');
+                            option.value = show.id;
+                            option.textContent = show.title;
+                            // Рекомендуем шоу по совпадению жанров или языка
+                            const episode = episodes.find(ep => select.dataset.episodeNumber === String(ep.number));
+                            if (episode) {
+                                // Присваиваем шоу эпизоду
+                                episode.showId = show.id;
+                                // Автовыбор шоу на основе их предпочтений
+                                // Тодо: добавить логику рекомендаций
+                            }
+                            select.appendChild(option);
+                        });
+                        
+                        // Обработчик изменения шоу
+                        select.addEventListener('change', function() {
+                            const episodeNumber = this.dataset.episodeNumber;
+                            const selectedShowId = this.value;
+                            const episode = episodes.find(ep => String(ep.number) === episodeNumber);
+                            
+                            if (selectedShowId === 'new') {
+                                // Показать модальное окно для создания нового шоу
+                                // Для простоты можно использовать prompt
+                                const showTitle = prompt('Введите название нового шоу:');
+                                if (showTitle) {
+                                    // Код для создания нового шоу будет реализован позже
+                                    // Временно вернёмся к первому варианту
+                                    this.value = shows.length > 0 ? shows[0].id : '';
+                                    alert('Функционал создания нового шоу будет реализован в следующей версии');
+                                }
+                            } else if (episode) {
+                                // Присвоить выбранное шоу эпизоду
+                                episode.showId = selectedShowId;
+                            }
+                        });
+                    });
+                });
+            }
+            // Получение списка шоу
+            function fetchShows() {
+                return fetch('/api/shows')
+                    .then(response => response.json())
+                    .catch(error => {
+                        console.error('Error fetching shows:', error);
+                        return [];
+                    });
+            }
+            
+            // Получение метаданных в зависимости от языка
+            function fetchMetadata(language = 'english') {
+                return fetch(`/api/batch_upload/metadata?language=${language}`)
+                    .then(response => response.json())
+                    .catch(error => {
+                        console.error(`Error fetching metadata for language ${language}:`, error);
+                        return [];
+                    });
+            }
+            
+            // Изменение языка и перезагрузка метаданных
+            function changeLanguage(lang) {
+                // Сохраняем выбранный язык
+                selectedLanguage = lang;
+                
+                // Показываем индикатор загрузки
+                metadataStatus.textContent = `Загрузка данных для языка ${lang}...`;
+                
+                // Запрашиваем метаданные для выбранного языка
+                fetchMetadata(lang)
+                    .then(data => {
+                        if (data.error) {
+                            metadataStatus.textContent = `Ошибка: ${data.message || data.error}`;
+                            metadataStatus.classList.add('error');
+                            metadata = [];
+                        } else {
+                            metadata = data;
+                            metadataStatus.textContent = `Загружено ${metadata.length} записей из ${lang.capitalize()}.xlsx`;
+                            metadataStatus.classList.remove('error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        metadataStatus.textContent = `Ошибка загрузки метаданных: ${error.message}`;
+                        metadataStatus.classList.add('error');
+                    });
+            }
+            
+            // Отправка выбранных эпизодов на сервер
+            function uploadEpisodes() {
+                const selectedEpisodes = episodes.filter(ep => ep.selected);
+                
+                if (selectedEpisodes.length === 0) {
+                    alert('Нет выбранных эпизодов для загрузки!');
+                    return;
+                }
+                
+                // Проверка наличия всех необходимых данных
+                const invalidEpisodes = selectedEpisodes.filter(ep => !ep.showId || !ep.title || !ep.audioFile);
+                if (invalidEpisodes.length > 0) {
+                    const missingFields = invalidEpisodes.map(ep => `Эпизод ${ep.number}: Отсутствует ${!ep.showId ? 'шоу' : ''} ${!ep.title ? 'название' : ''} ${!ep.audioFile ? 'аудиофайл' : ''}`).join('\n');
+                    alert(`Некоторые эпизоды не готовы к загрузке:\n${missingFields}`);
+                    return;
+                }
+                
+                // Статус загрузки
+                uploadStatusEl.textContent = `Начинаем загрузку ${selectedEpisodes.length} эпизодов...`;
+                uploadStatusEl.classList.remove('success', 'error');
+                uploadBtn.disabled = true;
+                
+                // Создаем объект для отправки на сервер
+                const episodesData = selectedEpisodes.map(ep => {
+                    return {
+                        number: ep.number,
+                        showId: ep.showId,
+                        title: ep.title,
+                        summary: ep.summary,
+                        description: ep.description,
+                        genres: ep.genres,
+                        audioFile: ep.audioFile.name,
+                        coverFile: ep.coverFile ? ep.coverFile.name : null
+                    };
+                });
+                
+                // Отправляем данные эпизодов на сервер
+                fetch('/api/batch_upload/episodes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        episodes: episodesData,
+                        language: selectedLanguage
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    
+                    // Обновляем статус
+                    uploadStatusEl.textContent = `Создано эпизодов: ${data.created}, ошибок: ${data.failed}`;
+                    uploadStatusEl.classList.add('success');
+                    
+                    // Теперь нужно загрузить файлы для каждого созданного эпизода
+                    const successfulUploads = data.results.filter(r => r.success);
+                    uploadFilesSequentially(selectedEpisodes, successfulUploads);
+                })
+                .catch(error => {
+                    console.error('Error uploading episodes:', error);
+                    uploadStatusEl.textContent = `Ошибка загрузки: ${error.message}`;
+                    uploadStatusEl.classList.add('error');
+                    uploadBtn.disabled = false;
+                });
+            }
+            
+            // Последовательная загрузка файлов эпизодов
+            function uploadFilesSequentially(episodes, successfulResults) {
+                // Эта функция будет реализована на следующем этапе
+                // Она должна отправить файлы на сервер, используя FormData и подходящий API эндпоинт
+                uploadStatusEl.textContent += '\nФайлы будут загружены в следующей версии функционала.';
+                uploadBtn.disabled = false;
+            }
+            
+            // Обновление селекторов шоу
+            function updateShowSelectors(shows) {
+                const showCells = matchTableBody.querySelectorAll('tr td:last-child');
+                
+                showCells.forEach((cell, index) => {
+                    const episode = matchedEpisodes[index];
+                    
+                    // Очистка ячейки
+                    cell.innerHTML = '';
+                    
+                    // Создание селектора
+                    const select = document.createElement('select');
+                    
+                    // Опция для создания нового шоу
+                    const newShowOption = document.createElement('option');
+                    newShowOption.value = 'new';
+                    newShowOption.textContent = 'Создать новое шоу...';
+                    select.appendChild(newShowOption);
+                    
+                    // Опции для существующих шоу
+                    shows.forEach(show => {
+                        const option = document.createElement('option');
+                        option.value = show.id;
+                        option.textContent = show.title;
+                        select.appendChild(option);
+                    });
+                    
+                    // Обработчик изменения
+                    select.addEventListener('change', () => {
+                        if (select.value === 'new') {
+                            // Логика создания нового шоу
+                            alert('Функционал создания нового шоу будет доступен в следующей версии');
+                            // Пока что возвращаем на первую опцию
+                            select.selectedIndex = 1;
+                        }
+                        episode.showId = select.value;
+                    });
+                    
+                    cell.appendChild(select);
+                    
+                    // По умолчанию выбираем первое шоу из списка если есть
+                    if (shows.length > 0) {
+                        select.selectedIndex = 1;
+                        episode.showId = shows[0].id;
+                    }
+                });
+            }
+            
+            // Обработка загрузки эпизодов
+            uploadSelectedBtn.addEventListener('click', () => {
+                const selectedEpisodes = matchedEpisodes.filter(episode => episode.selected);
+                
+                if (selectedEpisodes.length === 0) {
+                    alert('Пожалуйста, выберите хотя бы один эпизод для загрузки');
+                    return;
+                }
+                
+                // Проверка наличия всех необходимых данных
+                const invalidEpisodes = selectedEpisodes.filter(episode => {
+                    return !episode.title || !episode.audioFile || !episode.showId;
+                });
+                
+                if (invalidEpisodes.length > 0) {
+                    alert(`Некоторые эпизоды не содержат необходимых данных. Проверьте наличие названия, аудиофайла и выбранного шоу.`);
+                    return;
+                }
+                
+                // Отображение статуса загрузки
+                uploadStatus.style.display = 'block';
+                uploadProgress.innerHTML = `<p>Подготовка к загрузке ${selectedEpisodes.length} эпизодов...</p>`;
+                
+                // Здесь будет код для отправки файлов на сервер
+                uploadEpisodes(selectedEpisodes, languageSelect.value);
+            });
+            
+            // Функция загрузки эпизодов
+            async function uploadEpisodes(episodes, language) {
+                console.log('Загрузка эпизодов:', episodes);
+                uploadProgress.innerHTML += `<p>Подготовка данных для ${episodes.length} эпизодов</p>`;
+                
+                // Подготовка данных для API
+                const episodesData = episodes.map(ep => ({
+                    number: ep.number,
+                    title: ep.title,
+                    summary: ep.description, 
+                    description: ep.fullDescription,
+                    genres: ep.genres,
+                    showId: ep.showId
+                }));
+                
+                // Отправка метаданных и получение ID эпизодов
+                try {
+                    uploadProgress.innerHTML += `<p>Отправка метаданных на сервер...</p>`;
+                    
+                    const response = await fetch('/api/batch_upload/episodes', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            episodes: episodesData,
+                            language: language
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (!response.ok) {
+                        throw new Error(result.error || 'Ошибка создания эпизодов');
+                    }
+                    
+                    uploadProgress.innerHTML += `<p>Создано ${result.created} эпизодов, ${result.failed} с ошибкой.</p>`;
+                    
+                    // Если были ошибки, показать их
+                    if (result.errors && result.errors.length > 0) {
+                        uploadProgress.innerHTML += `<p>Ошибки:</p><ul>${result.errors.map(err => `<li>${err}</li>`).join('')}</ul>`;
+                    }
+                    
+                    // Теперь загрузка файлов
+                    if (result.created > 0) {
+                        uploadProgress.innerHTML += `<p>Загрузка аудио и изображений будет доступна в следующей версии...</p>`;
+                        // TODO: Добавить загрузку файлов в следующей версии
+                        // uploadFiles(episodes, result.createdEpisodes);
+                    }
+                    
+                    uploadProgress.innerHTML += `<p>Процесс загрузки завершен!</p>`;
+                    
+                } catch (error) {
+                    console.error('Ошибка при загрузке эпизодов:', error);
+                    uploadProgress.innerHTML += `<p class="error">Ошибка: ${error.message}</p>`;
+                }
+            }
+            
+            // Будущая функция для загрузки файлов
+            async function uploadFiles(episodes, createdEpisodes) {
+                // Эта функциональность будет реализована в следующей версии
+                // Здесь будет загрузка аудио и изображений для созданных эпизодов
+            }
         });
     </script>
 </body>
