@@ -5,6 +5,7 @@
     <title>Добавить эпизод</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <script src="/static/js/chunked-uploader.js"></script>
     <style>
         body { font-family: 'Segoe UI', Arial, sans-serif; background: #f9f9fb; color: #222; margin: 0; }
         .container { max-width: 480px; margin: 40px auto; background: #fff; border-radius: 14px; box-shadow: 0 2px 16px #0001; padding: 32px; }
@@ -86,8 +87,18 @@
             <label for="episode_image">Обложка эпизода (jpg/png/webp, опционально)</label>
             <input type="file" id="episode_image" name="episode_image" accept="image/*">
 
-            <label for="audio">Аудиофайл (mp3/wav/m4a/ogg...)</label>
-            <input type="file" id="audio" name="audio" accept="audio/*" required>
+            <label for="audio">Аудиофайл</label>
+            <div class="upload-container">
+                <input type="file" id="audio" name="audio" accept="audio/*">
+                <input type="hidden" id="audio_url" name="audio_url">
+                <div class="upload-progress" style="display:none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width:0%"></div>
+                    </div>
+                    <div class="progress-text">0%</div>
+                </div>
+                <div class="upload-status"></div>
+            </div>
 
             <label for="duration">Длительность</label>
             <input type="text" id="duration" name="duration" class="readonly" readonly placeholder="Будет заполнено автоматически">
@@ -184,5 +195,150 @@
   updateAll();
 </script>
 <script src="/static/js/episode_duration.js"></script>
+
+<style>
+.upload-container {
+    margin-top: 8px;
+}
+.upload-progress {
+    margin-top: 10px;
+    display: none;
+}
+.progress-bar {
+    height: 20px;
+    background: #f1f1f1;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+.progress-fill {
+    height: 100%;
+    background: #2ecc40;
+    width: 0%;
+    transition: width 0.3s;
+}
+.progress-text {
+    font-size: 0.9em;
+    color: #666;
+}
+.upload-status {
+    margin-top: 5px;
+    font-size: 0.9em;
+}
+.upload-status.error {
+    color: #e74c3c;
+}
+.upload-status.success {
+    color: #27ae60;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('audio');
+    const audioUrlInput = document.getElementById('audio_url');
+    const uploadProgress = document.querySelector('.upload-progress');
+    const progressBar = document.querySelector('.progress-fill');
+    const progressText = document.querySelector('.progress-text');
+    const uploadStatus = document.querySelector('.upload-status');
+    const submitBtn = document.querySelector('.submit-btn');
+    
+    // Get user settings
+    let useChunkedUpload = false; // Default setting
+    
+    // Fetch settings from the server
+    fetch('/api/settings')
+        .then(response => response.json())
+        .then(settings => {
+            if (settings && settings.chunked_upload_default !== undefined) {
+                useChunkedUpload = settings.chunked_upload_default;
+                console.log('Chunked upload setting:', useChunkedUpload ? 'enabled' : 'disabled');
+            }
+        })
+        .catch(err => {
+            console.warn('Could not load settings:', err);
+        });
+    
+    // Init uploader
+    const uploader = new ChunkedUploader({
+        chunkSize: 8 * 1024 * 1024, // 8MB chunks
+        retries: 3,
+        concurrentChunks: 3,
+        onProgress: function(progress) {
+            // Update progress UI
+            uploadProgress.style.display = 'block';
+            progressBar.style.width = progress.percent + '%';
+            progressText.textContent = progress.percent + '% (' + 
+                                      progress.completedChunks + '/' + progress.totalChunks + ')';
+        },
+        onComplete: function(result) {
+            // Set hidden field value for form submission
+            audioUrlInput.value = '/' + result.tempFile;
+            uploadStatus.textContent = 'Загрузка завершена: ' + result.filename;
+            uploadStatus.classList.add('success');
+            uploadStatus.classList.remove('error');
+            
+            // Enable submit button
+            submitBtn.disabled = false;
+            
+            // Update duration if possible
+            try {
+                // This will only work if we have audio metadata extraction in the browser
+                if (window.updateAudioDuration) {
+                    window.updateAudioDuration(fileInput.files[0]);
+                }
+            } catch (e) {
+                console.warn('Could not extract duration from browser', e);
+            }
+        },
+        onError: function(error) {
+            let errorMsg = error.message || 'Неизвестная ошибка';
+            uploadStatus.textContent = 'Ошибка загрузки: ' + errorMsg;
+            uploadStatus.classList.add('error');
+            uploadStatus.classList.remove('success');
+            
+            // Разблокируем кнопку, чтобы можно было попробовать другой способ загрузки
+            submitBtn.disabled = false;
+            
+            // Показываем более подробную информацию об ошибке
+            console.error('Upload error:', error);
+        }
+    });
+    
+    fileInput.addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        // Clear previous state
+        uploadStatus.textContent = '';
+        uploadStatus.className = 'upload-status';
+        audioUrlInput.value = '';
+        
+        // File size check
+        const fileSizeMB = file.size / (1024 * 1024);
+        
+        // Определяем, нужно ли использовать чанковую загрузку:
+        // 1. Если настройка включена - дробим только большие файлы (>100MB)
+        // 2. Если настройка выключена - не используем чанковую загрузку вообще
+        const shouldUseChunkedUpload = useChunkedUpload && fileSizeMB > 100;
+        
+        if (shouldUseChunkedUpload) {
+            // Use chunked upload (user preference or large file)
+            submitBtn.disabled = true; // Disable submit until upload completes
+            uploadStatus.textContent = 'Подготовка к загрузке файла по частям...';
+            uploadProgress.style.display = 'block';
+            
+            // Start upload
+            uploader.upload(file).catch(function(error) {
+                console.error('Upload failed:', error);
+            });
+        } else {
+            // Small file and user prefers normal upload - use regular form upload
+            audioUrlInput.value = '';
+            uploadProgress.style.display = 'none';
+        }
+    });
+});
+</script>
 </body>
 </html>

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Podcast Publisher - Настройки</title>
+    <link rel="icon" type="image/png" href="/assets/favicon.png">
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f9f9fb; color: #222; margin: 0; }
+        .container { max-width: 700px; margin: 40px auto; background: #fff; border-radius: 14px; box-shadow: 0 2px 16px #0001; padding: 32px; }
+        h1 { color: #3a5fc8; }
+        .back-link { 
+            color: #3a5fc8;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1em;
+            margin-bottom: 18px;
+            display: inline-block;
+        }
+        .setting-group {
+            margin: 24px 0;
+            padding: 16px;
+            background: #f8f9fd;
+            border-radius: 10px;
+            border: 1px solid #e0e6f2;
+        }
+        .setting-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+        }
+        .setting-label {
+            font-weight: 500;
+        }
+        .setting-description {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 4px;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 56px;
+            height: 28px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .3s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #3a5fc8;
+        }
+        input:checked + .slider:before {
+            transform: translateX(28px);
+        }
+        .save-btn {
+            background-color: #3a5fc8;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .save-btn:hover {
+            background-color: #2a4ca6;
+        }
+        .save-btn:disabled {
+            background-color: #b0b0b0;
+            cursor: not-allowed;
+        }
+        .save-message {
+            margin-left: 16px;
+            color: #4caf50;
+            font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .save-message.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">← На главную</a>
+        <h1>Настройки</h1>
+        
+        <div class="setting-group">
+            <h3>Загрузка файлов</h3>
+            
+            <div class="setting-row">
+                <div>
+                    <div class="setting-label">Чанковая загрузка по умолчанию</div>
+                    <div class="setting-description">
+                        Используйте эту опцию, если обычная загрузка прерывается из-за ограничений 
+                        Cloudflare (>100MB) или сервера. Файлы будут загружены по частям.
+                    </div>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="chunked-upload-toggle" {% if chunked_upload_default %}checked{% endif %}>
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+        
+        <div style="margin-top: 32px; display: flex; align-items: center;">
+            <button id="save-btn" class="save-btn">Сохранить</button>
+            <span id="save-message" class="save-message">Настройки сохранены</span>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const saveBtn = document.getElementById('save-btn');
+            const saveMessage = document.getElementById('save-message');
+            const chunkedUploadToggle = document.getElementById('chunked-upload-toggle');
+            
+            // Initial state
+            let initialState = {
+                chunkedUpload: chunkedUploadToggle.checked
+            };
+            
+            // Check if settings changed
+            function settingsChanged() {
+                return initialState.chunkedUpload !== chunkedUploadToggle.checked;
+            }
+            
+            // Update save button state
+            function updateSaveButtonState() {
+                saveBtn.disabled = !settingsChanged();
+            }
+            
+            // Add event listeners
+            chunkedUploadToggle.addEventListener('change', updateSaveButtonState);
+            
+            // Save settings
+            saveBtn.addEventListener('click', () => {
+                const settings = {
+                    chunked_upload_default: chunkedUploadToggle.checked
+                };
+                
+                fetch('/settings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(settings)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update initial state
+                        initialState.chunkedUpload = chunkedUploadToggle.checked;
+                        updateSaveButtonState();
+                        
+                        // Show success message
+                        saveMessage.classList.add('show');
+                        setTimeout(() => {
+                            saveMessage.classList.remove('show');
+                        }, 3000);
+                    } else {
+                        alert('Ошибка при сохранении настроек: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error saving settings:', error);
+                    alert('Произошла ошибка при сохранении настроек');
+                });
+            });
+            
+            // Initial button state
+            updateSaveButtonState();
+        });
+    </script>
+</body>
+</html>

@@ -59,6 +59,8 @@ app.logger.setLevel(logging.INFO)
 BASE_DIR = Path(__file__).resolve().parent
 SHOWS_DIR = BASE_DIR / "shows"
 ASSETS_DIR = BASE_DIR / "assets"
+# Settings file path
+SETTINGS_FILE = BASE_DIR / "settings.json"
 
 # Directory to store temporary large-file uploads received in chunks
 UPLOADS_DIR = BASE_DIR / "tmp_uploads"
@@ -121,6 +123,7 @@ def assets(filename: str):
     """Serve static assets such as show cover."""
     return send_from_directory(ASSETS_DIR, filename)
 
+# Settings routes are defined at the end of the file
 
 @app.route("/")
 def index():
@@ -521,6 +524,8 @@ def show_feed_xml(show_id):
     from pathlib import Path
     import datetime
     import hashlib
+    import time
+    from email.utils import formatdate
     from flask import Response, request, url_for, abort
 
     # Force HTTPS in feed URLs because Cloudflare terminates TLS at the edge.
@@ -750,14 +755,32 @@ def show_feed_xml(show_id):
     {podcast_locked}
 </channel>
 </rss>'''
-        # Compute weak ETag using content hash and set caching headers
-    etag = hashlib.md5(rss.encode('utf-8')).hexdigest()
+
+    # Calculate ETag and Last-Modified headers
+    last_modified_time = 0
+    content_hash = hashlib.sha256()
+    content_hash.update(rss.encode('utf-8'))
+    
+    # Find the most recent modification time among all files
+    for meta_path in config_path, *[d / "metadata.json" for d in sorted_ep_dirs]:
+        try:
+            mtime = meta_path.stat().st_mtime
+            if mtime > last_modified_time:
+                last_modified_time = mtime
+        except (FileNotFoundError, OSError):
+            pass
+    
+    # Add config and audio file modification times to ETag calculation
+    content_hash.update(str(last_modified_time).encode('utf-8'))
+    etag = f'"{content_hash.hexdigest()[:16]}"'
+    
+    # Return the feed with caching headers
+    response = Response(rss, content_type="application/rss+xml; charset=utf-8")
+    response.headers['ETag'] = etag
+    response.headers['Last-Modified'] = formatdate(last_modified_time, localtime=False, usegmt=True)
+    response.headers.setdefault('Cache-Control', 'public, max-age=0')
     if request.headers.get('If-None-Match') == etag:
         return Response(status=304)
-    response = Response(rss, mimetype="application/rss+xml")
-    response.headers['ETag'] = etag
-    response.headers['Last-Modified'] = now_gmt
-    response.headers.setdefault('Cache-Control', 'public, max-age=0')
     return response
 
     audio_file = None
@@ -1736,6 +1759,94 @@ def calculate_file_hash(file_path):
         for chunk in iter(lambda: f.read(4096), b""):
             sha256.update(chunk)
     return sha256.hexdigest()
+
+@app.route("/settings", methods=["GET", "POST"])
+def settings():
+    """Settings page and API for user preferences"""
+    # Default settings
+    default_settings = {
+        "chunked_upload_default": False
+    }
+    
+    # Load current settings if they exist
+    current_settings = default_settings.copy()
+    if SETTINGS_FILE.exists():
+        try:
+            with open(SETTINGS_FILE, 'r') as f:
+                stored_settings = json.load(f)
+                current_settings.update(stored_settings)
+        except (json.JSONDecodeError, IOError) as e:
+            app.logger.error(f"Error loading settings: {e}")
+    
+    # Handle POST request (API)
+    if request.method == "POST":
+        if request.is_json:
+            try:
+                new_settings = request.get_json()
+                
+                # Update settings
+                if "chunked_upload_default" in new_settings:
+                    current_settings["chunked_upload_default"] = bool(new_settings["chunked_upload_default"])
+                
+                # Save settings
+                with open(SETTINGS_FILE, 'w') as f:
+                    json.dump(current_settings, f, indent=2)
+                
+                return jsonify({"success": True})
+            except Exception as e:
+                app.logger.error(f"Error saving settings: {e}")
+                return jsonify({"success": False, "error": str(e)}), 500
+        else:
+            return jsonify({"success": False, "error": "Invalid content type"}), 400
+    
+    # Handle GET request (page)
+    return render_template("settings.html", **current_settings)
+
+
+@app.route("/api/settings", methods=["GET"])
+def api_settings():
+    """API endpoint to get user settings"""
+    # Default settings
+    default_settings = {
+        "chunked_upload_default": False
+    }
+    
+    # Load current settings if they exist
+    current_settings = default_settings.copy()
+    if SETTINGS_FILE.exists():
+        try:
+            with open(SETTINGS_FILE, 'r') as f:
+                stored_settings = json.load(f)
+                current_settings.update(stored_settings)
+        except (json.JSONDecodeError, IOError) as e:
+            app.logger.error(f"Error loading settings: {e}")
+    
+    return jsonify(current_settings)
+    
+    # Handle POST request (API)
+    if request.method == "POST":
+        if request.is_json:
+            try:
+                new_settings = request.get_json()
+                
+                # Update settings
+                if "chunked_upload_default" in new_settings:
+                    current_settings["chunked_upload_default"] = bool(new_settings["chunked_upload_default"])
+                
+                # Save settings
+                with open(SETTINGS_FILE, 'w') as f:
+                    json.dump(current_settings, f, indent=2)
+                
+                return jsonify({"success": True})
+            except Exception as e:
+                app.logger.error(f"Error saving settings: {e}")
+                return jsonify({"success": False, "error": str(e)}), 500
+        else:
+            return jsonify({"success": False, "error": "Invalid content type"}), 400
+    
+    # Handle GET request (page)
+    return render_template("settings.html", **current_settings)
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5050)

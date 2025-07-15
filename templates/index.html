@@ -92,16 +92,21 @@
 {% if show_id %}<script>window.show_id = '{{ show_id }}';</script>{% endif %}
     <div class="container">
         {% if show %}
-            <div style="display:flex;align-items:center;gap:30px;margin-bottom:18px;">
-                <a href="/" style="color:#3a5fc8;text-decoration:none;font-weight:600;font-size:1.1em;">← На главную</a>
-                <form method="get" id="show-switch-form" style="display:inline-block;">
-                    <label for="show-switch" style="font-size:1em;color:#444;margin-right:6px;">Перейти к шоу:</label>
-                    <select id="show-switch" name="show_id" style="font-size:1em;padding:4px 12px;border-radius:6px;border:1px solid #bbb;">
-                        {% for s in shows_list %}
-                        <option value="{{ s.id }}" {% if s.id == show_id %}selected{% endif %}>{{ s.title }}</option>
-                        {% endfor %}
-                    </select>
-                </form>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+                <div style="display:flex;align-items:center;gap:30px;">
+                    <a href="/" style="color:#3a5fc8;text-decoration:none;font-weight:600;font-size:1.1em;">← На главную</a>
+                    <form method="get" id="show-switch-form" style="display:inline-block;">
+                        <label for="show-switch" style="font-size:1em;color:#444;margin-right:6px;">Перейти к шоу:</label>
+                        <select id="show-switch" name="show_id" style="font-size:1em;padding:4px 12px;border-radius:6px;border:1px solid #bbb;">
+                            {% for s in shows_list %}
+                            <option value="{{ s.id }}" {% if s.id == show_id %}selected{% endif %}>{{ s.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </form>
+                </div>
+                <div>
+                    <a href="/settings" title="Настройки" style="font-size:1.3em;color:#3a5fc8;text-decoration:none;">⚙️</a>
+                </div>
             </div>
             <h1><span class="editable" data-field="title">{{ show.title }}</span></h1>
             <p><span class="editable" data-field="description">{{ show.description }}</span></p>
@@ -164,7 +169,12 @@
             };
             </script>
         {% else %}
-            <h1>LeadForward Podcast</h1>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+                <h1 style="margin:0;">Подкасты</h1>
+                <div>
+                    <a href="/settings" title="Настройки" style="font-size:1.3em;color:#3a5fc8;text-decoration:none;">⚙️</a>
+                </div>
+            </div>
             <p>Добро пожаловать в LeadForward — подкаст о лидерстве, предпринимательстве и росте!</p>
             <a class="rss-link" href="/feed.xml" target="_blank">RSS Feed</a>
             <div class="episodes">

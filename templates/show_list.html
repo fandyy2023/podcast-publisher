@@ -94,7 +94,12 @@
 </head>
 <body>
     <div class="container">
-        <h1>Подкасты</h1>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+            <h1 style="margin:0;">Подкасты</h1>
+            <div>
+                <a href="/settings" title="Настройки" style="font-size:1.3em;color:#3a5fc8;text-decoration:none;">⚙️</a>
+            </div>
+        </div>
         <a class="add-btn" href="/shows/new">+ Добавить шоу</a>
         <button id="toggle-view" style="margin-left:24px; padding:8px 18px; border-radius:7px; background:#eee; color:#3a5fc8; border:1px solid #3a5fc8; font-weight:600; cursor:pointer;">Переключить вид</button>
         {% if languages %}
