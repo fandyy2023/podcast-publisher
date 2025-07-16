@@ -1,57 +1,65 @@
-2025-07-12 01:50:13,867 INFO: --- BG PROCESS END for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/e28403e0/Becoming_the_Boss__Modern_Leadership_for_the_Next_Generation.wav --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:820]
-2025-07-12 01:51:39,190 INFO: --- BG PROCESS START for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/f0430d6c/The_Virgin_Way__Bransons_Leadership_Secrets.wav --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:758]
-2025-07-12 01:51:39,193 INFO: [BG] Loading metadata from /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/f0430d6c/metadata.json [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:767]
-2025-07-12 01:51:39,434 INFO: [BG] Checking transcoding for The_Virgin_Way__Bransons_Leadership_Secrets.wav: needs_transcoding=True, reason='Файл не в формате MP3 (.wav)' [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:772]
-2025-07-12 01:51:39,434 INFO: [BG] Transcoding required for The_Virgin_Way__Bransons_Leadership_Secrets.wav. Determining optimal bitrate… [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:778]
-2025-07-12 01:51:39,492 INFO: [BG] Selected target bitrate: 320k [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:785]
-2025-07-12 01:53:14,801 INFO: [BG] Transcoding successful. New file: /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/f0430d6c/The_Virgin_Way__Bransons_Leadership_Secrets.mp3 [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:789]
-2025-07-12 01:53:14,802 INFO: [BG] Getting audio info for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/f0430d6c/The_Virgin_Way__Bransons_Leadership_Secrets.mp3 [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:796]
-2025-07-12 01:53:14,881 INFO: [BG] Audio info obtained and updated in metadata. [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:801]
-2025-07-12 01:53:14,882 INFO: [BG] Metadata saved for episode f0430d6c with final status: success [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:817]
-2025-07-12 01:53:14,882 INFO: --- BG PROCESS END for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/f0430d6c/The_Virgin_Way__Bransons_Leadership_Secrets.wav --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:820]
-2025-07-12 01:55:39,633 INFO: --- BG PROCESS START for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/b4cf06ff/Becoming_the_Boss__Modern_Leadership_for_the_Next_Generation.mp3 --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:758]
-2025-07-12 01:55:39,636 INFO: [BG] Loading metadata from /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/b4cf06ff/metadata.json [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:767]
-2025-07-12 01:55:39,893 INFO: [BG] Checking transcoding for Becoming_the_Boss__Modern_Leadership_for_the_Next_Generation.mp3: needs_transcoding=False, reason='Файл уже в нужном формате и качестве' [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:772]
-2025-07-12 01:55:39,893 INFO: [BG] No transcoding needed. [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:775]
-2025-07-12 01:55:39,893 INFO: [BG] Getting audio info for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/b4cf06ff/Becoming_the_Boss__Modern_Leadership_for_the_Next_Generation.mp3 [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:796]
-2025-07-12 01:55:39,964 INFO: [BG] Audio info obtained and updated in metadata. [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:801]
-2025-07-12 01:55:39,965 INFO: [BG] Metadata saved for episode b4cf06ff with final status: success [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:817]
-2025-07-12 01:55:39,965 INFO: --- BG PROCESS END for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/b4cf06ff/Becoming_the_Boss__Modern_Leadership_for_the_Next_Generation.mp3 --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:820]
-2025-07-12 02:39:14,161 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:48]
-2025-07-12 02:40:15,075 INFO: --- BG PROCESS START for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/7fd51a20/Becoming_the_Boss__Modern_Leadership_for_the_Next_Generation.wav --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:761]
-[2025-07-12 02:40:15,075] INFO in app: --- BG PROCESS START for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/7fd51a20/Becoming_the_Boss__Modern_Leadership_for_the_Next_Generation.wav ---
-2025-07-12 02:40:15,077 INFO: [BG] Loading metadata from /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/7fd51a20/metadata.json [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:770]
-[2025-07-12 02:40:15,077] INFO in app: [BG] Loading metadata from /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/7fd51a20/metadata.json
-2025-07-12 02:40:15,406 INFO: [BG] Checking transcoding for Becoming_the_Boss__Modern_Leadership_for_the_Next_Generation.wav: needs_transcoding=True, reason='Файл не в формате MP3 (.wav)' [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:775]
-[2025-07-12 02:40:15,406] INFO in app: [BG] Checking transcoding for Becoming_the_Boss__Modern_Leadership_for_the_Next_Generation.wav: needs_transcoding=True, reason='Файл не в формате MP3 (.wav)'
-2025-07-12 02:40:15,407 INFO: [BG] Transcoding required for Becoming_the_Boss__Modern_Leadership_for_the_Next_Generation.wav. Determining optimal bitrate… [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:781]
-[2025-07-12 02:40:15,407] INFO in app: [BG] Transcoding required for Becoming_the_Boss__Modern_Leadership_for_the_Next_Generation.wav. Determining optimal bitrate…
-2025-07-12 02:40:15,463 INFO: [BG] Selected target bitrate: 320k [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:788]
-[2025-07-12 02:40:15,463] INFO in app: [BG] Selected target bitrate: 320k
-2025-07-12 02:41:07,189 INFO: --- BG PROCESS START for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/e5dee8b8/232.wav --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:761]
-[2025-07-12 02:41:07,189] INFO in app: --- BG PROCESS START for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/e5dee8b8/232.wav ---
-2025-07-12 02:41:07,190 INFO: [BG] Loading metadata from /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/e5dee8b8/metadata.json [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:770]
-[2025-07-12 02:41:07,190] INFO in app: [BG] Loading metadata from /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/e5dee8b8/metadata.json
-2025-07-12 02:41:07,378 INFO: [BG] Checking transcoding for 232.wav: needs_transcoding=True, reason='Файл не в формате MP3 (.wav)' [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:775]
-[2025-07-12 02:41:07,378] INFO in app: [BG] Checking transcoding for 232.wav: needs_transcoding=True, reason='Файл не в формате MP3 (.wav)'
-2025-07-12 02:41:07,378 INFO: [BG] Transcoding required for 232.wav. Determining optimal bitrate… [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:781]
-[2025-07-12 02:41:07,378] INFO in app: [BG] Transcoding required for 232.wav. Determining optimal bitrate…
-2025-07-12 02:41:07,443 INFO: [BG] Selected target bitrate: 320k [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:788]
-[2025-07-12 02:41:07,443] INFO in app: [BG] Selected target bitrate: 320k
-2025-07-12 02:41:33,353 INFO: [BG] Transcoding successful. New file: /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/7fd51a20/Becoming_the_Boss__Modern_Leadership_for_the_Next_Generation.mp3 [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:792]
-[2025-07-12 02:41:33,353] INFO in app: [BG] Transcoding successful. New file: /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/7fd51a20/Becoming_the_Boss__Modern_Leadership_for_the_Next_Generation.mp3
-2025-07-12 02:41:33,353 INFO: [BG] Getting audio info for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/7fd51a20/Becoming_the_Boss__Modern_Leadership_for_the_Next_Generation.mp3 [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:799]
-[2025-07-12 02:41:33,353] INFO in app: [BG] Getting audio info for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/7fd51a20/Becoming_the_Boss__Modern_Leadership_for_the_Next_Generation.mp3
-2025-07-12 02:41:33,426 INFO: [BG] Audio info obtained and updated in metadata. [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:804]
-[2025-07-12 02:41:33,426] INFO in app: [BG] Audio info obtained and updated in metadata.
-2025-07-12 02:41:33,426 INFO: [BG] Metadata saved for episode 7fd51a20 with final status: success [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:820]
-[2025-07-12 02:41:33,426] INFO in app: [BG] Metadata saved for episode 7fd51a20 with final status: success
-2025-07-12 02:41:33,427 INFO: --- BG PROCESS END for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/7fd51a20/Becoming_the_Boss__Modern_Leadership_for_the_Next_Generation.wav --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:823]
-[2025-07-12 02:41:33,427] INFO in app: --- BG PROCESS END for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/7fd51a20/Becoming_the_Boss__Modern_Leadership_for_the_Next_Generation.wav ---
-2025-07-12 02:42:22,747 INFO: [BG] Transcoding successful. New file: /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/e5dee8b8/232.mp3 [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:792]
-[2025-07-12 02:42:22,747] INFO in app: [BG] Transcoding successful. New file: /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/e5dee8b8/232.mp3
-2025-07-12 02:42:22,748 INFO: [BG] Getting audio info for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/e5dee8b8/232.mp3 [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:799]
-[2025-07-12 02:42:22,748] INFO in app: [BG] Getting audio info for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/e5dee8b8/232.mp3
-[2025-07-12 02:42:22,844] INFO in app: [BG] Audio info obtained and updated in metadata.
-[2025-07-12 02:42:22,848] INFO in app: [BG] Metadata saved for episode e5dee8b8 with final status: success
-[2025-07-12 02:42:22,848] INFO in app: --- BG PROCESS END for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/e5dee8b8/232.wav ---
+2025-07-12 08:32:19,570 INFO: [BG] Selected target bitrate: 320k [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:788]
+2025-07-12 08:33:32,348 INFO: [BG] Transcoding successful. New file: /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/441074fc/48_A_Guide_to_Personal_Philosophy__Living_a_Good_Life.mp3 [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:827]
+2025-07-12 08:33:32,349 INFO: [BG] Getting audio info for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/441074fc/48_A_Guide_to_Personal_Philosophy__Living_a_Good_Life.mp3 [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:834]
+2025-07-12 08:33:32,503 INFO: [BG] Audio info obtained and updated in metadata. [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:839]
+2025-07-12 08:33:32,504 INFO: [BG] Metadata saved for episode 441074fc with final status: success [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:855]
+2025-07-12 08:33:32,504 INFO: --- BG PROCESS END for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/441074fc/48_A_Guide_to_Personal_Philosophy__Living_a_Good_Life.wav --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:858]
+2025-07-12 09:36:06,397 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:50]
+2025-07-12 09:36:53,315 INFO: --- BG PROCESS START for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/92288dca/58_Preventing_the_Next_Global_Pandemic.wav --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:763]
+[2025-07-12 09:36:53,315] INFO in app: --- BG PROCESS START for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/92288dca/58_Preventing_the_Next_Global_Pandemic.wav ---
+2025-07-12 09:36:53,318 INFO: [BG] Loading metadata from /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/92288dca/metadata.json [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:772]
+[2025-07-12 09:36:53,318] INFO in app: [BG] Loading metadata from /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/92288dca/metadata.json
+2025-07-12 09:36:53,698 INFO: [BG] Checking transcoding for 58_Preventing_the_Next_Global_Pandemic.wav: needs_transcoding=True, reason='Файл не в формате MP3 (.wav)' [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:777]
+[2025-07-12 09:36:53,698] INFO in app: [BG] Checking transcoding for 58_Preventing_the_Next_Global_Pandemic.wav: needs_transcoding=True, reason='Файл не в формате MP3 (.wav)'
+2025-07-12 09:36:53,703 INFO: [BG] Transcoding required for 58_Preventing_the_Next_Global_Pandemic.wav. Determining optimal bitrate… [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:822]
+[2025-07-12 09:36:53,703] INFO in app: [BG] Transcoding required for 58_Preventing_the_Next_Global_Pandemic.wav. Determining optimal bitrate…
+2025-07-12 09:36:53,769 INFO: [BG] Selected target bitrate: 320k [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:829]
+[2025-07-12 09:36:53,769] INFO in app: [BG] Selected target bitrate: 320k
+2025-07-12 09:37:50,597 INFO: [BG] Transcoding successful. New file: /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/92288dca/58_Preventing_the_Next_Global_Pandemic.mp3 [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:868]
+[2025-07-12 09:37:50,597] INFO in app: [BG] Transcoding successful. New file: /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/92288dca/58_Preventing_the_Next_Global_Pandemic.mp3
+2025-07-12 09:37:50,597 INFO: [BG] Getting audio info for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/92288dca/58_Preventing_the_Next_Global_Pandemic.mp3 [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:875]
+[2025-07-12 09:37:50,597] INFO in app: [BG] Getting audio info for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/92288dca/58_Preventing_the_Next_Global_Pandemic.mp3
+2025-07-12 09:37:50,670 INFO: [BG] Audio info obtained and updated in metadata. [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:880]
+[2025-07-12 09:37:50,670] INFO in app: [BG] Audio info obtained and updated in metadata.
+2025-07-12 09:37:50,671 INFO: [BG] Metadata saved for episode 92288dca with final status: success [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:896]
+[2025-07-12 09:37:50,671] INFO in app: [BG] Metadata saved for episode 92288dca with final status: success
+2025-07-12 09:37:50,671 INFO: --- BG PROCESS END for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/92288dca/58_Preventing_the_Next_Global_Pandemic.wav --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:899]
+[2025-07-12 09:37:50,671] INFO in app: --- BG PROCESS END for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/92288dca/58_Preventing_the_Next_Global_Pandemic.wav ---
+2025-07-12 09:46:08,059 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:50]
+2025-07-12 09:54:05,586 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:50]
+2025-07-12 09:58:45,978 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:50]
+2025-07-12 10:03:21,077 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:50]
+2025-07-12 10:05:31,742 INFO: --- BG PROCESS START for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/92288dca/57_Crafting_a_Winning_Business_Plan_for_Success.wav --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:776]
+[2025-07-12 10:05:31,742] INFO in app: --- BG PROCESS START for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/92288dca/57_Crafting_a_Winning_Business_Plan_for_Success.wav ---
+2025-07-12 10:05:31,745 INFO: [BG] Loading metadata from /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/92288dca/metadata.json [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:785]
+[2025-07-12 10:05:31,745] INFO in app: [BG] Loading metadata from /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/92288dca/metadata.json
+2025-07-12 10:05:31,993 INFO: [BG] Checking transcoding for 57_Crafting_a_Winning_Business_Plan_for_Success.wav: needs_transcoding=True, reason='Файл не в формате MP3 (.wav)' [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:790]
+[2025-07-12 10:05:31,993] INFO in app: [BG] Checking transcoding for 57_Crafting_a_Winning_Business_Plan_for_Success.wav: needs_transcoding=True, reason='Файл не в формате MP3 (.wav)'
+2025-07-12 10:05:31,993 INFO: [BG] Transcoding required for 57_Crafting_a_Winning_Business_Plan_for_Success.wav. Determining optimal bitrate… [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:835]
+[2025-07-12 10:05:31,993] INFO in app: [BG] Transcoding required for 57_Crafting_a_Winning_Business_Plan_for_Success.wav. Determining optimal bitrate…
+2025-07-12 10:05:32,053 INFO: [BG] Selected target bitrate: 320k [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:842]
+[2025-07-12 10:05:32,053] INFO in app: [BG] Selected target bitrate: 320k
+2025-07-12 10:06:42,040 INFO: [BG] Transcoding successful. New file: /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/92288dca/57_Crafting_a_Winning_Business_Plan_for_Success.mp3 [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:881]
+[2025-07-12 10:06:42,040] INFO in app: [BG] Transcoding successful. New file: /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/92288dca/57_Crafting_a_Winning_Business_Plan_for_Success.mp3
+2025-07-12 10:06:42,040 INFO: [BG] Getting audio info for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/92288dca/57_Crafting_a_Winning_Business_Plan_for_Success.mp3 [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:888]
+[2025-07-12 10:06:42,040] INFO in app: [BG] Getting audio info for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/92288dca/57_Crafting_a_Winning_Business_Plan_for_Success.mp3
+2025-07-12 10:06:42,172 INFO: [BG] Audio info obtained and updated in metadata. [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:893]
+[2025-07-12 10:06:42,172] INFO in app: [BG] Audio info obtained and updated in metadata.
+2025-07-12 10:06:42,172 INFO: [BG] Metadata saved for episode 92288dca with final status: success [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:909]
+[2025-07-12 10:06:42,172] INFO in app: [BG] Metadata saved for episode 92288dca with final status: success
+2025-07-12 10:06:42,172 INFO: --- BG PROCESS END for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/92288dca/57_Crafting_a_Winning_Business_Plan_for_Success.wav --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:912]
+[2025-07-12 10:06:42,172] INFO in app: --- BG PROCESS END for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/22/episodes/92288dca/57_Crafting_a_Winning_Business_Plan_for_Success.wav ---
+2025-07-12 11:10:17,491 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:50]
+2025-07-12 11:17:36,885 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:50]
+2025-07-12 11:19:22,380 INFO: --- BG PROCESS START for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/val/episodes/54cc8415/51_The_Art_of_Mindful_Love.wav --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:776]
+[2025-07-12 11:19:22,380] INFO in app: --- BG PROCESS START for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/val/episodes/54cc8415/51_The_Art_of_Mindful_Love.wav ---
+2025-07-12 11:19:22,383 INFO: [BG] Loading metadata from /Users/poolpooly/CascadeProjects/podcast-publisher/shows/val/episodes/54cc8415/metadata.json [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:785]
+[2025-07-12 11:19:22,383] INFO in app: [BG] Loading metadata from /Users/poolpooly/CascadeProjects/podcast-publisher/shows/val/episodes/54cc8415/metadata.json
+[2025-07-12 11:19:22,724] INFO in app: [BG] Checking transcoding for 51_The_Art_of_Mindful_Love.wav: needs_transcoding=True, reason='Файл не в формате MP3 (.wav)'
+[2025-07-12 11:19:22,729] INFO in app: [BG] Transcoding required for 51_The_Art_of_Mindful_Love.wav. Determining optimal bitrate…
+[2025-07-12 11:19:22,793] INFO in app: [BG] Selected target bitrate: 320k
+[2025-07-12 11:20:50,849] INFO in app: [BG] Transcoding successful. New file: /Users/poolpooly/CascadeProjects/podcast-publisher/shows/val/episodes/54cc8415/51_The_Art_of_Mindful_Love.mp3
+[2025-07-12 11:20:50,850] INFO in app: [BG] Getting audio info for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/val/episodes/54cc8415/51_The_Art_of_Mindful_Love.mp3
+[2025-07-12 11:20:51,074] INFO in app: [BG] Audio info obtained and updated in metadata.
+[2025-07-12 11:20:51,074] INFO in app: [BG] Metadata saved for episode 54cc8415 with final status: success
+[2025-07-12 11:20:51,075] INFO in app: --- BG PROCESS END for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/val/episodes/54cc8415/51_The_Art_of_Mindful_Love.wav ---

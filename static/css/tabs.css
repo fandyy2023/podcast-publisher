@@ -1,0 +1,30 @@
+/* Стили для вкладок */
+.tabs {
+    display: flex;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 20px;
+}
+
+.tab {
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 4px 4px 0 0;
+    background-color: #f8f9fa;
+    margin-right: 5px;
+}
+
+.tab.active {
+    background-color: #4169E1;
+    color: white;
+}
+
+.tab-content {
+    display: none;
+    padding: 15px;
+    background-color: #fff;
+    border-radius: 0 0 4px 4px;
+}
+
+.tab-content.active {
+    display: block;
+}

@@ -150,28 +150,6 @@ def init_batch_upload_routes(app):
             logger.error(f"Error processing batch metadata: {str(e)}")
             return jsonify({'error': str(e)}), 500
     
-    @app.route('/api/shows', methods=['GET'])
-    def get_shows():
-        """Get list of shows for the batch upload UI"""
-        try:
-            from show import get_shows_list
-            shows = get_shows_list()
-            
-            # Convert to simplified format for UI
-            show_list = []
-            for show in shows:
-                show_list.append({
-                    'id': show['id'],
-                    'title': show['title'],
-                    'image': show.get('image', ''),
-                    'genres': show.get('tags', [])
-                })
-            
-            return jsonify(show_list), 200
-            
-        except Exception as e:
-            logger.error(f"Error getting shows list: {str(e)}")
-            return jsonify({'error': str(e)}), 500
     
     @app.route('/api/batch_upload/episodes', methods=['POST'])
     def create_batch_episodes():
@@ -188,6 +166,7 @@ def init_batch_upload_routes(app):
             created = 0
             failed = 0
             errors = []
+            results = []
             
             # Import needed functions
             try:
@@ -244,20 +223,39 @@ def init_batch_upload_routes(app):
                     
                     if episode_id:
                         created += 1
+                        results.append({
+                            'number': new_episode['number'],
+                            'episodeId': episode_id,
+                            'showId': show_id,
+                            'success': True
+                        })
                         logger.info(f"Created episode {episode_id} for show {show_id}")
                     else:
                         failed += 1
                         errors.append(f"Episode {new_episode['number']}: Failed to create episode")
+                        results.append({
+                            'number': new_episode['number'],
+                            'showId': show_id,
+                            'success': False,
+                            'error': 'Failed to create episode'
+                        })
                 
                 except Exception as e:
                     failed += 1
                     errors.append(f"Episode {episode_data.get('number', 'Unknown')}: {str(e)}")
+                    results.append({
+                        'number': episode_data.get('number', 'Unknown'),
+                        'showId': show_id if 'show_id' in locals() else None,
+                        'success': False,
+                        'error': str(e)
+                    })
                     logger.error(f"Error creating episode: {str(e)}")
             
             return jsonify({
                 'created': created,
                 'failed': failed,
-                'errors': errors
+                'errors': errors,
+                'results': results
             }), 200
             
         except Exception as e:

@@ -194,14 +194,9 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
-            table-layout: fixed;
         }
         
         .match-table th, .match-table td {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
             padding: 10px;
             text-align: left;
             border-bottom: 1px solid #ddd;
@@ -322,7 +317,7 @@
         <!-- Tabs -->
         <div class="tabs">
             <div class="tab active" data-tab="settings">Основные настройки</div>
-            <div class="tab" data-tab="batch-upload">Пакетная загрузка</div>
+            <div class="tab" data-tab="batch-upload" onclick="activateTab('batch-upload')">Пакетная загрузка</div>
         </div>
         
         <!-- Основные настройки -->
@@ -391,7 +386,7 @@
                     <table id="match-table" class="match-table">
                         <thead>
                             <tr>
-                                <th>№</th>
+                                
                                 <th>Аудиофайл</th>
                                 <th>Обложка</th>
                                 <th>Название</th>
@@ -419,11 +414,35 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        // Функция для активации вкладки
+        function activateTab(tabId) {
+            // Снимаем активность со всех вкладок
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            
+            // Активируем выбранную вкладку
+            document.querySelector(`.tab[data-tab="${tabId}"]`).classList.add('active');
+            
+            // Скрываем все содержимое вкладок
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Показываем содержимое выбранной вкладки
+            document.getElementById(`${tabId}-tab`).classList.add('active');
+        }
+        
+        // Добавляем обработчики событий при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
             // --- Основные настройки --- //
             const saveBtn = document.getElementById('save-btn');
             const saveMessage = document.getElementById('save-message');
             const chunkedUploadToggle = document.getElementById('chunked-upload-toggle');
+            
+            // Добавляем обработчики событий для вкладок
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    activateTab(tabId);
+                });
+            });
             
             // Initial state
             let initialState = {
@@ -500,8 +519,7 @@
             function fetchMetadata(language = 'english') {
                 batchUploadProgress.innerHTML = `Загрузка метаданных для языка ${language}...`;
                 
-                const url = `${window.location.origin}/api/batch_upload/metadata?language=${encodeURIComponent(language)}`;
-                return fetch(url)
+                return fetch(`/api/batch_upload/metadata?language=${language}`)
                     .then(response => response.json())
                     .then(data => {
                         if (data.error) {
@@ -579,65 +597,92 @@
                 if (batchSelectFilesBtn) {
                     batchSelectFilesBtn.textContent = `Выбрано: ${batchAudioFiles.length} аудио / ${batchImageFiles.length} изображ.`;
                 }
+
+                // Reset previous results & progress
+                batchUploadProgress.innerHTML = '';
+                batchResultsTableContainer.style.display = 'none';
                 
                 // Load metadata and then match files
                 fetchMetadata(batchSelectedLanguage)
                     .then(data => {
                         batchMetadata = data;
-                        matchFilesWithMetadata();
+                        // Combine all uploaded files (audio + images)
+                        const allFiles = [...batchAudioFiles, ...batchImageFiles];
+                        matchFilesWithMetadata(allFiles, batchMetadata);
                     });
             }
             
             // Match files with metadata
-            function matchFilesWithMetadata() {
-                batchEpisodes = [];
-                
-                // Extract episode numbers from filenames
-                batchAudioFiles.forEach(audioFile => {
-                    const match = audioFile.name.match(/^(\d+)/); // Find number at the start
-                    if (match) {
-                        const episodeNumber = parseInt(match[1], 10);
-                        
-                        // Find matching image
-                        const coverFile = batchImageFiles.find(img => {
-                            const imgMatch = img.name.match(/^(\d+)/);
-                            return imgMatch && parseInt(imgMatch[1], 10) === episodeNumber;
-                        });
-                        
-                        // Find matching metadata
-                        const episodeMetadata = batchMetadata.find(meta => meta.number === episodeNumber);
-                        
-                        // Create episode data
-                        batchEpisodes.push({
-                            number: episodeNumber,
-                            audioFile: audioFile,
-                            coverFile: coverFile || null,
-                            title: episodeMetadata ? episodeMetadata.title : `Эпизод ${episodeNumber}`,
-                            summary: episodeMetadata ? episodeMetadata.description : '',
-                            description: episodeMetadata ? episodeMetadata.about : '',
-                            genres: episodeMetadata ? episodeMetadata.genre.split(',').map(g => g.trim()) : [],
-                            selected: true,
-                            showId: null
-                        });
-                    }
-                });
-                
-                // Display matched episodes
-                displayMatchResults(batchEpisodes, batchMetadata);
-            }
+            // --- Unified metadata matching --- //
+            // Глобальное хранилище файлов для эпизодов
+            window.episodeFiles = {};
             
-            // Display match results
-            function displayMatchResultsDeprecated() {
-                batchMatchTableBody.innerHTML = ''; // Clear table
-                
+            function matchFilesWithMetadata(files, metadata) {
+                batchEpisodes = [];
+                // Очищаем глобальное хранилище файлов при каждом новом сопоставлении
+                window.episodeFiles = {};
+
+                const numberRegex = /^(\d+)[^\d]*.*$/;
+
+                // Group files by episode number
+                const episodeMap = {};
+
+                files.forEach(file => {
+                    const match = file.name.match(numberRegex);
+                    if (!match) return;
+                    const num = parseInt(match[1], 10);
+                    
+                    // Сохраняем файл в глобальное хранилище
+                    if (!window.episodeFiles[num]) window.episodeFiles[num] = {};
+                    const fileType = file.type.startsWith('audio') ? 'audioFile' : 'coverFile';
+                    window.episodeFiles[num][fileType] = file;
+                    console.log(`Сохранен файл для эпизода ${num}:`, file.name, file.type);
+                    
+                    // Добавляем в локальную карту эпизодов
+                    if (!episodeMap[num]) episodeMap[num] = { number: num };
+                    episodeMap[num][fileType] = file;
+                });
+
+                Object.entries(episodeMap).forEach(([num, filesObj]) => {
+                    const meta = (metadata || []).find(m => m.number === parseInt(num, 10));
+                    batchEpisodes.push({
+                        number: parseInt(num, 10),
+                        audioFile: filesObj.audioFile || null,
+                        coverFile: filesObj.coverFile || null,
+                        title: meta ? meta.title : `Episode ${num}`,
+                        summary: meta ? meta.description : '',
+                        description: meta ? meta.about : '',
+                        genres: meta && meta.genre ? meta.genre.split(',').map(g => g.trim()) : [],
+                        selected: true,
+                        showId: null
+                    });
+                });
+
+                // Show/hide results container
                 if (batchEpisodes.length === 0) {
+                    batchResultsTableContainer.style.display = 'none';
                     batchUploadProgress.innerHTML = 'Не удалось найти совпадающие эпизоды';
                     return;
                 }
+
                 
                 // Fetch shows for selection
                 fetchShows().then(shows => {
-                    // For each episode, create a row
+                    // Create table header
+                    const tableHeader = document.createElement('tr');
+                    const headers = ['Episode', 'Audio File', 'Cover Image', 'Title', 'Summary', 'Genres', 'Show'];
+                    headers.forEach(header => {
+                        const th = document.createElement('th');
+                        th.textContent = header;
+                        tableHeader.appendChild(th);
+                    });
+                    batchMatchTableBody.appendChild(tableHeader);
+
+                    // Создаем массив эпизодов
+                    const episodes = [];
+                    window.batchEpisodesFiles = {}; // Глобальное хранилище файлов
+                    
+                    // Обрабатываем каждую строку таблицы
                     batchEpisodes.forEach(episode => {
                         const row = document.createElement('tr');
                         
@@ -818,17 +863,8 @@
             }
             
             // Upload selected episodes
-            batchUploadSelectedBtn.addEventListener('click', () => {
-                // Собираем выбранные эпизоды на основании чекбоксов в таблице (надёжнее, если есть дубли переменных)
-                const selectedEpisodes = [];
-                const rows = batchMatchTableBody.querySelectorAll('tr');
-                rows.forEach((row, idx) => {
-                    const episodeObj = batchEpisodes[idx] || matchedEpisodes[idx];
-                    const checkbox = row.querySelector('input[type="checkbox"]');
-                    if (checkbox && checkbox.checked && episodeObj) {
-                        selectedEpisodes.push(episodeObj);
-                    }
-                });
+            batchUploadSelectedBtn.addEventListener('click', function() {
+                const selectedEpisodes = batchEpisodes.filter(ep => ep.selected);
                 
                 if (selectedEpisodes.length === 0) {
                     alert('Нет выбранных эпизодов для загрузки!');
@@ -838,25 +874,27 @@
                 // Validate required fields
                 const invalidEpisodes = selectedEpisodes.filter(ep => !ep.showId || !ep.title);
                 if (invalidEpisodes.length > 0) {
-                    alert(`Некоторые эпизоды не имеют выбранного шоу или названия. Пожалуйста, заполните все обязательные поля.`);
+                    alert('Некоторые эпизоды не имеют выбранного шоу или названия. Пожалуйста, заполните все обязательные поля.');
                     return;
                 }
                 
                 batchUploadStatusContainer.style.display = 'block';
-                batchUploadProgress.innerHTML = `Начинаем загрузку ${selectedEpisodes.length} эпизодов...`;
+                batchUploadProgress.innerHTML = 'Начинаем загрузку ' + selectedEpisodes.length + ' эпизодов...';
                 batchUploadSelectedBtn.disabled = true;
                 
                 // Prepare data for API
-                const episodesData = selectedEpisodes.map(ep => ({
-                    number: ep.number,
-                    showId: ep.showId,
-                    title: ep.title,
-                    summary: ep.summary,
-                    description: ep.description,
-                    genres: ep.genres,
-                    audioFile: ep.audioFile.name,
-                    coverFile: ep.coverFile ? ep.coverFile.name : null
-                }));
+                const episodesData = selectedEpisodes.map(function(ep) {
+                    return {
+                        number: ep.number,
+                        showId: ep.showId,
+                        title: ep.title,
+                        summary: ep.summary,
+                        description: ep.description,
+                        genres: ep.genres,
+                        audioFile: ep.audioFile.name,
+                        coverFile: ep.coverFile ? ep.coverFile.name : null
+                    };
+                });
                 
                 // Send API request
                 fetch('/api/batch_upload/episodes', {
@@ -869,22 +907,28 @@
                         language: batchSelectedLanguage
                     })
                 })
-                .then(response => response.json())
-                .then(data => {
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(data) {
                     if (data.error) {
                         throw new Error(data.error);
                     }
                     
                     // Show results
-                    batchUploadProgress.innerHTML = `Создано эпизодов: ${data.created}, ошибок: ${data.failed}. 
-                        В следующей версии будет добавлена загрузка файлов.`;
-                    batchUploadStatusContainer.scrollIntoView({ behavior: 'smooth' });
+                    batchUploadProgress.innerHTML = 'Создано эпизодов: ' + data.created + ', ошибок: ' + data.failed + '. <br>Загружаем файлы...';
                     
-                    batchUploadSelectedBtn.disabled = false;
+                    // Start file upload
+                    const useChunked = chunkedUploadToggle ? chunkedUploadToggle.checked : false;
+                    
+                    uploadFiles(selectedEpisodes, data.episode_mapping, useChunked).then(function() {
+                        batchUploadProgress.innerHTML += '<p>Загрузка завершена</p>';
+                        batchUploadSelectedBtn.disabled = false;
+                    });
                 })
-                .catch(error => {
+                .catch(function(error) {
                     console.error('Upload error:', error);
-                    batchUploadProgress.innerHTML = `Ошибка загрузки: ${error.message}`;
+                    batchUploadProgress.innerHTML = 'Ошибка загрузки: ' + error.message;
                     batchUploadSelectedBtn.disabled = false;
                 });
             });
@@ -975,7 +1019,7 @@
             
             // Массив загруженных файлов
             let uploadedFiles = [];
-            let matchedEpisodes = [];
+            // NOTE: Using unified global batchEpisodes array defined earlier
             
             // Обработка перетаскивания файлов
             // Более надёжная кросс-браузерная реализация
@@ -1144,16 +1188,52 @@
                 const language = languageSelect ? languageSelect.value : 'english';
                 console.log('Запрашиваю метаданные для языка:', language);
                 fetchMetadata(language)
+        .then(data => {
+            batchMetadata = data;
+            matchFilesWithMetadata(uploadedFiles, batchMetadata);
+        });
+            }
+            
+            // Получение метаданных из Excel по выбранному языку
+            // Deprecated duplicate - keeping stub to avoid collisions
+function fetchMetadata_deprecated(language, files) {
+                // Добавляем логирование
+                console.log('Вызван fetchMetadata для языка:', language);
+                console.log('Файлы:', files ? files.length : 0);
+                
+                // Заменим на реальный запрос к API
+                const endpoint = `/api/batch_upload/metadata?language=${language}`;
+                console.log('Запрашиваю метаданные по URL:', endpoint);
+                
+                fetch(endpoint)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        console.log('Ответ получен, парсим JSON');
+                        return response.json();
+                    })
                     .then(metadata => {
-                        matchFilesWithMetadata(uploadedFiles, metadata);
+                        console.log('Метаданные получены:', metadata);
+                        // Сопоставление файлов с метаданными
+                        if (Array.isArray(metadata)) {
+                            matchFilesWithMetadata(files, metadata);
+                        } else if (metadata.error) {
+                            console.error('Ошибка API:', metadata.error);
+                            alert(`Ошибка API: ${metadata.error}`);
+                        } else {
+                            console.error('Неизвестный формат метаданных:', metadata);
+                            alert('Неизвестный формат метаданных. Проверьте консоль для деталей.');
+                        }
                     })
                     .catch(error => {
                         console.error('Error fetching metadata:', error);
-                        alert(`Ошибка получения метаданных: ${error.message}`);
+                        alert(`Ошибка получения метаданных для языка ${language}: ${error.message}`);
                     });
             }
-            // Сопоставление файлов с метаданными
-            function matchFilesWithMetadata(files, metadata) {
+            
+            // Сопоставление файлов с метаданными (duplicate)
+            function matchFilesWithMetadata_duplicate(files, metadata) {
                 // Объект для группировки файлов по номеру эпизода
                 const episodeFiles = {};
                 
@@ -1196,20 +1276,8 @@
                             genres: metaItem.genre ? metaItem.genre.split(',').map(g => g.trim()) : [],
                             selected: true
                         });
-                    }
-                }
-                
-                // Синхронизируем глобальный массив для других обработчиков
-                batchEpisodes = matchedEpisodes;
-                
-                // Отображение результатов сопоставления
-                displayMatchResults(batchEpisodes, metadata);
-            }
-            
-            // Отображение результатов сопоставления
-            function displayMatchResults(episodes, metadata) {
                 // Очистка таблицы
-                batchMatchTableBody.innerHTML = '';
+                matchTableBody.innerHTML = '';
                 
                 // Заполнение таблицы
                 episodes.forEach(episode => {
@@ -1334,26 +1402,24 @@
                     
                     row.appendChild(genresCell);
                     
-                    // Выбор шоу (создаём select сразу, позже заполним вариантами)
+                    // Выбор шоу
                     const showCell = document.createElement('td');
                     const showSelect = document.createElement('select');
-                    showSelect.className = 'show-select';
+                    showSelect.classList.add('show-select');
                     showSelect.dataset.episodeNumber = episode.number;
-                    // Placeholder option
-                    const loadingOpt = document.createElement('option');
-                    loadingOpt.textContent = 'Загрузка...';
-                    loadingOpt.disabled = true;
-                    loadingOpt.selected = true;
-                    showSelect.appendChild(loadingOpt);
+                    const loadingOption = document.createElement('option');
+                    loadingOption.textContent = 'Загрузка...';
+                    loadingOption.value = '';
+                    showSelect.appendChild(loadingOption);
                     showCell.appendChild(showSelect);
                     row.appendChild(showCell);
                     
                     // Добавление строки в таблицу
-                    batchMatchTableBody.appendChild(row);
+                    matchTableBody.appendChild(row);
                 });
                 
                 // Показ таблицы результатов
-                batchResultsTableContainer.style.display = 'block';
+                resultsTableContainer.style.display = 'block';
                 
                 // Получение списка шоу и обновление ячеек
                 fetchShows().then(shows => {
@@ -1383,15 +1449,6 @@
                             }
                             select.appendChild(option);
                         });
-                        
-                        // По умолчанию выбираем первое шоу, если оно есть
-                        if (shows.length > 0) {
-                            select.value = shows[0].id;
-                            const episodeDefault = episodes.find(ep => String(ep.number) === select.dataset.episodeNumber);
-                            if (episodeDefault) {
-                                episodeDefault.showId = shows[0].id;
-                            }
-                        }
                         
                         // Обработчик изменения шоу
                         select.addEventListener('change', function() {
@@ -1429,8 +1486,7 @@
             
             // Получение метаданных в зависимости от языка
             function fetchMetadata(language = 'english') {
-                const url = `${window.location.origin}/api/batch_upload/metadata?language=${encodeURIComponent(language)}`;
-                return fetch(url)
+                return fetch(`/api/batch_upload/metadata?language=${language}`)
                     .then(response => response.json())
                     .catch(error => {
                         console.error(`Error fetching metadata for language ${language}:`, error);
@@ -1439,7 +1495,8 @@
             }
             
             // Изменение языка и перезагрузка метаданных
-            function changeLanguage(lang) {
+            // duplicate changeLanguage disabled; main logic elsewhere
+function changeLanguage_duplicate(lang) {
                 // Сохраняем выбранный язык
                 selectedLanguage = lang;
                 
@@ -1484,9 +1541,9 @@
                 }
                 
                 // Статус загрузки
-                uploadProgress.textContent = `Начинаем загрузку ${selectedEpisodes.length} эпизодов...`;
-                uploadProgress.classList.remove('success', 'error');
-                uploadSelectedBtn.disabled = true;
+                uploadStatusEl.textContent = `Начинаем загрузку ${selectedEpisodes.length} эпизодов...`;
+                uploadStatusEl.classList.remove('success', 'error');
+                uploadBtn.disabled = true;
                 
                 // Создаем объект для отправки на сервер
                 const episodesData = selectedEpisodes.map(ep => {
@@ -1520,8 +1577,8 @@
                     }
                     
                     // Обновляем статус
-                    uploadProgress.textContent = `Создано эпизодов: ${data.created}, ошибок: ${data.failed}`;
-                    uploadProgress.classList.add('success');
+                    uploadStatusEl.textContent = `Создано эпизодов: ${data.created}, ошибок: ${data.failed}`;
+                    uploadStatusEl.classList.add('success');
                     
                     // Теперь нужно загрузить файлы для каждого созданного эпизода
                     const successfulUploads = data.results.filter(r => r.success);
@@ -1529,60 +1586,38 @@
                 })
                 .catch(error => {
                     console.error('Error uploading episodes:', error);
-                    uploadProgress.textContent = `Ошибка загрузки: ${error.message}`;
-                    uploadProgress.classList.add('error');
-                    uploadSelectedBtn.disabled = false;
+                    uploadStatusEl.textContent = `Ошибка загрузки: ${error.message}`;
+                    uploadStatusEl.classList.add('error');
+                    uploadBtn.disabled = false;
                 });
             }
             
             // Последовательная загрузка файлов эпизодов
             async function uploadFilesSequentially(episodes, successfulResults) {
+                uploadStatusEl.textContent += '\nНачинаем загрузку файлов...';
+                
                 try {
-                    for (const result of successfulResults) {
-                        // Находим локальный объект эпизода по номеру
-                        const ep = episodes.find(e => e.number === result.number);
-                        if (!ep) continue;
-
-                        uploadProgress.textContent += `\n▶️ Загрузка файлов для эпизода ${result.number}...`;
-
-                        // 1. Аудио
-                        if (ep.audioFile) {
-                            const fd = new FormData();
-                            fd.append('audio', ep.audioFile);
-                            const audioResp = await fetch(`/shows/${result.show_id}/episodes/${result.episode_id}/audio-upload`, {
-                                method: 'POST',
-                                body: fd
-                            });
-                            if (!audioResp.ok) {
-                                throw new Error(`Ошибка загрузки аудио для эпизода ${result.number}`);
-                            }
-                        }
-
-                        // 2. Обложка
-                        if (ep.coverFile) {
-                            const fd2 = new FormData();
-                            fd2.append('cover', ep.coverFile);
-                            const imgResp = await fetch(`/shows/${result.show_id}/episodes/${result.episode_id}/cover-upload`, {
-                                method: 'POST',
-                                body: fd2
-                            });
-                            if (!imgResp.ok) {
-                                throw new Error(`Ошибка загрузки обложки для эпизода ${result.number}`);
-                            }
-                        }
-
-                        uploadProgress.textContent += `\n✅ Эпизод ${result.number}: файлы загружены.`;
-                    }
-
-                    uploadProgress.textContent += '\n🎉 Все файлы успешно загружены!';
-                    uploadSelectedBtn.disabled = false;
-                } catch (err) {
-                    console.error('uploadFilesSequentially error:', err);
-                    uploadProgress.textContent += `\n❌ ${err.message}`;
-                    uploadSelectedBtn.disabled = false;
+                    // Преобразуем успешные результаты в формат, подходящий для функции uploadFiles
+                    const createdEpisodes = successfulResults.map(result => ({
+                        number: result.number,
+                        title: result.title,
+                        show_id: result.show_id,
+                        episode_id: result.episode_id
+                    }));
+                    
+                    console.log('Подготовленные эпизоды для загрузки:', createdEpisodes);
+                    
+                    // Вызываем нашу обновленную функцию загрузки файлов
+                    await uploadFiles(episodes, createdEpisodes);
+                    
+                    uploadStatusEl.textContent += '\nЗагрузка файлов завершена успешно!';
+                } catch (error) {
+                    console.error('Ошибка при загрузке файлов:', error);
+                    uploadStatusEl.textContent += `\nОшибка при загрузке файлов: ${error.message}`;
+                } finally {
+                    uploadBtn.disabled = false;
                 }
             }
-            
             // Обновление селекторов шоу
             function updateShowSelectors(shows) {
                 const showCells = matchTableBody.querySelectorAll('tr td:last-child');
@@ -1631,10 +1666,10 @@
                 });
             }
             
-            // Обработка загрузки эпизодов
-            // [Deprecated handler removed to avoid interference with batch upload logic]
-/*
-uploadSelectedBtn.addEventListener('click', () => {
+            // Обработка загрузки эпизодов - этот обработчик отключен, т.к. используется batchUploadSelectedBtn
+            // Оставляем комментарий для документации
+            /*
+            uploadSelectedBtn.addEventListener('click', () => {
                 const selectedEpisodes = matchedEpisodes.filter(episode => episode.selected);
                 
                 if (selectedEpisodes.length === 0) {
@@ -1651,17 +1686,17 @@ uploadSelectedBtn.addEventListener('click', () => {
                     alert(`Некоторые эпизоды не содержат необходимых данных. Проверьте наличие названия, аудиофайла и выбранного шоу.`);
                     return;
                 }
-                
-                // Отображение статуса загрузки
+            });
+            */
+            
+            // Функция для отображения статуса загрузки (используется в batchUploadSelectedBtn)
+            function showUploadStatus(selectedEpisodes) {
                 uploadStatus.style.display = 'block';
                 uploadProgress.innerHTML = `<p>Подготовка к загрузке ${selectedEpisodes.length} эпизодов...</p>`;
-                
-                // Здесь будет код для отправки файлов на сервер
-                uploadEpisodes(selectedEpisodes, languageSelect.value);
-*/
+            }
             
             // Функция загрузки эпизодов
-            async function uploadEpisodes(episodes, language) {
+            async function uploadBatchEpisodes(episodes, language) {
                 console.log('Загрузка эпизодов:', episodes);
                 uploadProgress.innerHTML += `<p>Подготовка данных для ${episodes.length} эпизодов</p>`;
                 
@@ -1705,9 +1740,36 @@ uploadSelectedBtn.addEventListener('click', () => {
                     
                     // Теперь загрузка файлов
                     if (result.created > 0) {
-                        uploadProgress.innerHTML += `<p>Загрузка аудио и изображений будет доступна в следующей версии...</p>`;
-                        // TODO: Добавить загрузку файлов в следующей версии
-                        // uploadFiles(episodes, result.createdEpisodes);
+                        uploadProgress.innerHTML += `<p>Загрузка аудио и изображений...</p>`;
+                        console.log('Ответ сервера:', result);
+                        
+                        try {
+                            // Извлекаем данные о созданных эпизодах из ответа сервера
+                            let createdEpisodes = [];
+                            
+                            if (result.results && Array.isArray(result.results)) {
+                                createdEpisodes = result.results
+                                    .filter(r => r.success)
+                                    .map(r => ({
+                                        number: r.number,
+                                        title: r.title,
+                                        show_id: r.show_id,
+                                        episode_id: r.episode_id
+                                    }));
+                            }
+                            
+                            uploadProgress.innerHTML += `<p>Подготовка к загрузке ${createdEpisodes.length} эпизодов...</p>`;
+                            console.log('Подготовленные эпизоды для загрузки:', createdEpisodes);
+                            
+                            if (createdEpisodes.length > 0) {
+                                await uploadFiles(episodes, createdEpisodes);
+                            } else {
+                                uploadProgress.innerHTML += `<p class="error">Ошибка: нет успешно созданных эпизодов для загрузки файлов</p>`;
+                            }
+                        } catch (error) {
+                            console.error('Ошибка при подготовке к загрузке файлов:', error);
+                            uploadProgress.innerHTML += `<p class="error">Ошибка при подготовке к загрузке файлов: ${error.message}</p>`;
+                        }
                     }
                     
                     uploadProgress.innerHTML += `<p>Процесс загрузки завершен!</p>`;
@@ -1718,11 +1780,134 @@ uploadSelectedBtn.addEventListener('click', () => {
                 }
             }
             
-            // Будущая функция для загрузки файлов
-            async function uploadFiles(episodes, createdEpisodes) {
-                // Эта функциональность будет реализована в следующей версии
-                // Здесь будет загрузка аудио и изображений для созданных эпизодов
+            // Функция для загрузки файлов для созданных эпизодов
+            // Функция для загрузки файлов для созданных эпизодов
+            async function uploadFiles(episodes, createdEpisodes, useChunked) {
+                return new Promise(async function(resolve) {
+                    console.log('Запущена функция uploadFiles с параметрами:', { episodes, createdEpisodes });
+                    uploadProgress.innerHTML += '<p>Начинаем загрузку файлов для ' + createdEpisodes.length + ' эпизодов...</p>';
+                
+                    // Отслеживаем прогресс загрузки
+                    let successCount = 0;
+                    let errorCount = 0;
+                    
+                    // Проверяем наличие глобального хранилища файлов
+                    if (!window.episodeFiles) {
+                        console.error('Ошибка: глобальное хранилище файлов не найдено');
+                        uploadProgress.innerHTML += '<p class="error">Ошибка: не найдены файлы для загрузки</p>';
+                        resolve({ success: 0, errors: createdEpisodes.length });
+                        return;
+                    }
+                
+                    console.log('Глобальное хранилище файлов:', window.episodeFiles);
+                    
+                    // Обрабатываем каждый эпизод
+                    for (let i = 0; i < createdEpisodes.length; i++) {
+                        const episode = createdEpisodes[i];
+                        const episodeNumber = Number(episode.number);
+                        
+                        uploadProgress.innerHTML += '<p>Загрузка файлов для эпизода ' + episodeNumber + ': ' + episode.title + '...</p>';
+                    
+                        // Получаем файлы из глобального хранилища
+                        const episodeFiles = window.episodeFiles[episodeNumber] || {};
+                        const audioFile = episodeFiles.audioFile;
+                        const coverFile = episodeFiles.coverFile;
+                        
+                        console.log('Файлы для эпизода ' + episodeNumber + ':', episodeFiles);
+                    
+                        try {
+                            // Загружаем аудиофайл, если есть
+                            if (audioFile) {
+                                uploadProgress.innerHTML += '<p>- Загрузка аудио: ' + audioFile.name + '</p>';
+                                console.log('Загрузка аудиофайла для эпизода ' + episodeNumber + ':', audioFile);
+                                
+                                // Создаем форму для загрузки аудио
+                                const formData = new FormData();
+                                formData.append('file', audioFile);
+                                formData.append('show_id', episode.show_id);
+                                formData.append('episode_id', episode.episode_id);
+                                formData.append('file_type', 'audio');
+                            
+                                // Загружаем аудиофайл
+                                const audioResponse = await fetch('/api/batch_upload/files', {
+                                    method: 'POST',
+                                    body: formData
+                                });
+                                
+                                const audioResult = await audioResponse.json();
+                                
+                                if (audioResponse.ok) {
+                                    uploadProgress.innerHTML += '<p class="success">- Аудио загружено успешно</p>';
+                                } else {
+                                    uploadProgress.innerHTML += '<p class="error">- Ошибка загрузки аудио: ' + (audioResult.error || 'Неизвестная ошибка') + '</p>';
+                                    errorCount++;
+                                }
+                            }
+                            
+                            // Загружаем обложку, если есть
+                            if (coverFile) {
+                                uploadProgress.innerHTML += '<p>- Загрузка обложки: ' + coverFile.name + '</p>';
+                                console.log('Загрузка обложки для эпизода ' + episodeNumber + ':', coverFile);
+                            
+                                // Создаем форму для загрузки обложки
+                                const formData = new FormData();
+                                formData.append('file', coverFile);
+                                formData.append('show_id', episode.show_id);
+                                formData.append('episode_id', episode.episode_id);
+                                formData.append('file_type', 'cover');
+                                
+                                // Загружаем обложку
+                                const coverResponse = await fetch('/api/batch_upload/files', {
+                                    method: 'POST',
+                                    body: formData
+                                });
+                                
+                                const coverResult = await coverResponse.json();
+                                
+                                if (coverResponse.ok) {
+                                    uploadProgress.innerHTML += '<p class="success">- Обложка загружена успешно</p>';
+                                } else {
+                                    uploadProgress.innerHTML += '<p class="error">- Ошибка загрузки обложки: ' + (coverResult.error || 'Неизвестная ошибка') + '</p>';
+                                    errorCount++;
+                                }
+                            }
+                            
+                            // Успешно загружен эпизод
+                            successCount++;
+                            console.log('Успешно загружены файлы для эпизода ' + episodeNumber);
+                            uploadProgress.innerHTML += '<p class="success">Файлы для эпизода ' + episodeNumber + ' успешно загружены</p>';
+                        } catch (error) {
+                            console.error('Ошибка при загрузке файлов для эпизода ' + episodeNumber + ':', error);
+                            uploadProgress.innerHTML += '<p class="error">- Ошибка: ' + error.message + '</p>';
+                            errorCount++;
+                        }
+                    }
+                    
+                    // Показываем итоговый статус
+                    uploadProgress.innerHTML += '<p>Загрузка файлов завершена. Успешно: ' + successCount + ', Ошибок: ' + errorCount + '</p>';
+                    
+                    // Если все загрузки были успешными, показываем ссылку на страницу шоу
+                    if (errorCount === 0 && successCount > 0 && createdEpisodes.length > 0) {
+                        const showId = createdEpisodes[0].show_id;
+                        uploadProgress.innerHTML += '<p><a href="/shows/' + showId + '/" class="btn">Перейти к шоу</a></p>';
+                        console.log('Добавлена ссылка на шоу:', showId);
+                    }
+                    
+                    // Возвращаем результат
+                    resolve({ success: successCount, errors: errorCount });
+                });
             }
+        });
+        
+        // Инициализация вкладки при загрузке
+        document.addEventListener('DOMContentLoaded', function() {
+            // Добавляем обработчики событий для вкладок
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    activateTab(tabId);
+                });
+            });
         });
     </script>
 </body>

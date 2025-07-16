@@ -1316,6 +1316,35 @@ def upload_episode_cover(show_id, ep_id):
     url = f"/shows/{show_id}/episodes/{ep_id}/{img_name}?v={int(file_path.stat().st_mtime)}"
     return jsonify({"image_url": url})
 
+@app.route("/shows/<show_id>/episodes/<ep_id>/audio-upload", methods=["POST"])
+def upload_episode_audio(show_id, ep_id):
+    """Upload/replace episode MP3 file"""
+    ep_dir = SHOWS_DIR / show_id / "episodes" / ep_id
+    if not ep_dir.exists():
+        return jsonify({"error": "Episode not found"}), 404
+
+    if 'audio' not in request.files:
+        return jsonify({"error": "No file uploaded"}), 400
+
+    file = request.files['audio']
+    filename = secure_filename(file.filename)
+    if not filename.lower().endswith('.mp3'):
+        return jsonify({"error": "Only MP3 files are allowed"}), 400
+
+    # Remove existing mp3 files to keep directory clean
+    for existing in ep_dir.glob('*.mp3'):
+        try:
+            existing.unlink()
+        except OSError:
+            pass
+
+    file_path = ep_dir / filename
+    file.save(str(file_path))
+
+    url = f"/shows/{show_id}/episodes/{ep_id}/{filename}?v={int(file_path.stat().st_mtime)}"
+    return jsonify({"audio_url": url})
+
+
 @app.route("/sanitize_html", methods=["POST"])
 def sanitize_html_api():
     from utils import sanitize_html_for_rss, plain_text_to_html
@@ -1828,7 +1857,10 @@ def api_settings():
 def shows_api():
     """API endpoint to get list of shows"""
     shows = []
-    for show_id in get_shows():
+    for show_dir in sorted(SHOWS_DIR.iterdir()):
+        if not show_dir.is_dir():
+            continue
+        show_id = show_dir.name
         show_path = SHOWS_DIR / show_id
         if not show_path.is_dir():
             continue
@@ -1878,15 +1910,20 @@ def batch_metadata_api():
         df = pd.read_excel(file_path)
         
         # Преобразование DataFrame в список словарей
+        # Заменяем NaN/None на пустые строки, чтобы JSON был валидным
         metadata = []
         for _, row in df.iterrows():
+            def safe_get(col):
+                value = row.get(col, '')
+                return value if pd.notna(value) else ''
+
             item = {
-                'number': int(row['Book Number']) if pd.notna(row.get('Book Number', None)) else None,
-                'title': row.get('Title', ''),
-                'author': row.get('Author', ''),
-                'description': row.get('Description', ''),
-                'about': row.get("What's it about?", ''),
-                'genre': row.get('Genre', '')
+                'number': int(row['Book Number']) if pd.notna(row.get('Book Number')) else None,
+                'title': safe_get('Title'),
+                'author': safe_get('Author'),
+                'description': safe_get('Description'),
+                'about': safe_get("What's it about?"),
+                'genre': safe_get('Genre')
             }
             metadata.append(item)
         
