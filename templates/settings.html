@@ -6,6 +6,7 @@
     <title>Podcast Publisher - Настройки</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="icon" type="image/png" href="/assets/favicon.png">
+    <script src="/static/js/chunked-uploader.js"></script>
     <style>
         body { font-family: 'Segoe UI', Arial, sans-serif; background: #f9f9fb; color: #222; margin: 0; }
         .container { max-width: 900px; margin: 40px auto; background: #fff; border-radius: 14px; box-shadow: 0 2px 16px #0001; padding: 32px; }
@@ -311,6 +312,28 @@
         }
         .save-message.show {
             opacity: 1;
+        }
+        /* Progress bar for uploads */
+        .upload-progress-bar {
+            width: 120px;
+            height: 8px;
+            margin: 0 8px;
+            vertical-align: middle;
+        }
+        .upload-progress-bar.aborted {
+            background: #f8d7da;
+        }
+        .abort-btn {
+            background: transparent;
+            border: none;
+            color: #e74c3c;
+            font-size: 1em;
+            cursor: pointer;
+            margin-left: 4px;
+        }
+        .abort-btn:disabled {
+            color: #aaa;
+            cursor: default;
         }
     </style>
 </head>
@@ -640,6 +663,7 @@
                     // For each episode, create a row
                     batchEpisodes.forEach(episode => {
                         const row = document.createElement('tr');
+                    row.dataset.index = idx;
                         
                         // Episode number
                         const numCell = document.createElement('td');
@@ -822,13 +846,15 @@
                 // Собираем выбранные эпизоды на основании чекбоксов в таблице (надёжнее, если есть дубли переменных)
                 const selectedEpisodes = [];
                 const rows = batchMatchTableBody.querySelectorAll('tr');
-                rows.forEach((row, idx) => {
-                    const episodeObj = batchEpisodes[idx] || matchedEpisodes[idx];
-                    const checkbox = row.querySelector('input[type="checkbox"]');
-                    if (checkbox && checkbox.checked && episodeObj) {
-                        selectedEpisodes.push(episodeObj);
-                    }
-                });
+                rows.forEach(row => {
+                     const idxAttr = parseInt(row.dataset.index, 10);
+                     if (isNaN(idxAttr)) return; // safety check
+                     const episodeObj = batchEpisodes[idxAttr];
+                     const checkbox = row.querySelector('input[type="checkbox"]');
+                     if (checkbox && checkbox.checked && episodeObj) {
+                         selectedEpisodes.push(episodeObj);
+                     }
+                 });
                 
                 if (selectedEpisodes.length === 0) {
                     alert('Нет выбранных эпизодов для загрузки!');
@@ -875,12 +901,14 @@
                         throw new Error(data.error);
                     }
                     
-                    // Show results
-                    batchUploadProgress.innerHTML = `Создано эпизодов: ${data.created}, ошибок: ${data.failed}. 
-                        В следующей версии будет добавлена загрузка файлов.`;
+                    // Summary of episode creation
+                    batchUploadProgress.innerHTML = `Создано эпизодов: ${data.created}, ошибок: ${data.failed}. \nНачинаем загрузку файлов...`;
                     batchUploadStatusContainer.scrollIntoView({ behavior: 'smooth' });
-                    
-                    batchUploadSelectedBtn.disabled = false;
+
+                    // Begin uploading files (audio & covers) sequentially
+                    const successfulResults = (data.results || []).filter(r => r.success);
+                    uploadFilesSequentially(selectedEpisodes, successfulResults);
+                    // uploadFilesSequentially will re-enable the button when done
                 })
                 .catch(error => {
                     console.error('Upload error:', error);
@@ -1212,8 +1240,9 @@
                 batchMatchTableBody.innerHTML = '';
                 
                 // Заполнение таблицы
-                episodes.forEach(episode => {
+                episodes.forEach((episode, idx) => {
                     const row = document.createElement('tr');
+                    row.dataset.index = idx;
                     
                     // Чекбокс выбора
                     const checkboxCell = document.createElement('td');
@@ -1543,18 +1572,82 @@
                         const ep = episodes.find(e => e.number === result.number);
                         if (!ep) continue;
 
-                        uploadProgress.textContent += `\n▶️ Загрузка файлов для эпизода ${result.number}...`;
+                        // Создаём контейнер строки прогресса для данного эпизода
+const epLine = document.createElement('div');
+epLine.className = 'ep-progress';
+epLine.textContent = `▶️ Эпизод ${result.number}: подготовка...`;
+uploadProgress.appendChild(epLine);
+// Всегда скроллим вниз, чтобы был виден прогресс
+uploadProgress.scrollTop = uploadProgress.scrollHeight;
 
                         // 1. Аудио
                         if (ep.audioFile) {
-                            const fd = new FormData();
-                            fd.append('audio', ep.audioFile);
-                            const audioResp = await fetch(`/shows/${result.show_id}/episodes/${result.episode_id}/audio-upload`, {
-                                method: 'POST',
-                                body: fd
-                            });
-                            if (!audioResp.ok) {
-                                throw new Error(`Ошибка загрузки аудио для эпизода ${result.number}`);
+                            const fileSizeMB = ep.audioFile.size / (1024 * 1024);
+                            const chunkedEnabled = document.getElementById('chunked-upload-toggle')?.checked;
+                            const shouldUseChunk = chunkedEnabled && fileSizeMB > 100;
+
+                            if (shouldUseChunk) {
+    // --- Чанковая загрузка --- //
+    const progressBar = document.createElement('progress');
+    progressBar.className = 'upload-progress-bar';
+    progressBar.max = 100;
+    progressBar.value = 0;
+
+    const abortBtn = document.createElement('button');
+    abortBtn.textContent = '✖';
+    abortBtn.title = 'Отменить загрузку';
+    abortBtn.className = 'abort-btn';
+
+    epLine.appendChild(progressBar);
+    epLine.appendChild(abortBtn);
+
+    // Инициализируем загрузчик фрагментов
+    const chunkUploader = new ChunkedUploader({
+        chunkSize: 8 * 1024 * 1024, // 8MB
+        concurrentChunks: 3,
+        onProgress: (prog) => {
+            progressBar.value = prog.percent;
+        },
+        onError: (err) => {
+            progressBar.classList.add('aborted');
+            epLine.appendChild(document.createTextNode(` ⛔ ${err.message}`));
+        }
+    });
+
+    // Кнопка отмены
+    abortBtn.addEventListener('click', () => {
+        abortBtn.disabled = true;
+        chunkUploader.abort();
+    });
+
+    // Загружаем файл
+    const upResult = await chunkUploader.upload(ep.audioFile);
+
+    // Прикрепляем собранный файл к эпизоду
+    const audioResp = await fetch(`/shows/${result.show_id}/episodes/${result.episode_id}/audio-upload`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            tempFile: upResult.tempFile || upResult.path || upResult.file || upResult,
+            filename: ep.audioFile.name
+        })
+    });
+    if (!audioResp.ok) {
+        throw new Error(`Ошибка загрузки аудио (чанковая) для эпизода ${result.number}`);
+    }
+
+                            } else {
+                                // --- Обычная загрузка (single POST) --- //
+            epLine.textContent += ' ⏳';
+            const fd = new FormData();
+                                fd.append('audio', ep.audioFile);
+                                const audioResp = await fetch(`/shows/${result.show_id}/episodes/${result.episode_id}/audio-upload`, {
+                                    method: 'POST',
+                                    body: fd
+                                });
+                                if (!audioResp.ok) {
+                                    throw new Error(`Ошибка загрузки аудио для эпизода ${result.number}`);
+                                }
                             }
                         }
 

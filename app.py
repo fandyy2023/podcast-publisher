@@ -392,38 +392,6 @@ def get_episode_info_api(show_id, episode_id):
     return jsonify(response_data)
 
 
-@app.route("/api/episode_info/<show_id>/<episode_id>")
-def episode_info(show_id, episode_id):
-    show_dir = SHOWS_DIR / show_id
-    ep_dir = show_dir / "episodes" / episode_id
-    ep_dir = show_dir / "episodes" / ep_id
-    meta_path = ep_dir / "metadata.json"
-
-    if not meta_path.exists():
-        abort(404)
-
-    with meta_path.open("r", encoding="utf-8") as f:
-        episode_meta = json.load(f)
-
-    config_path = show_dir / "config.json"
-    with config_path.open("r", encoding="utf-8") as f:
-        show_meta = json.load(f)
-
-    if not episode_meta.get("audio"):
-        audio_exts = ("mp3", "wav", "m4a", "ogg", "flac", "aac")
-        for f in ep_dir.iterdir():
-            if f.is_file() and f.suffix.lower().lstrip('.') in audio_exts:
-                episode_meta["audio"] = f"/shows/{show_id}/episodes/{ep_id}/{f.name}"
-                break
-    
-    audio_info = {}
-    if episode_meta.get("audio"):
-        parts = episode_meta["audio"].split('/')
-        if len(parts) >= 6:
-            audio_path = Path(episode_meta["audio"]).name
-            audio_info = get_audio_info(ep_dir / audio_path)
-
-    return render_template("episode.html", show=show_meta, episode=episode_meta, audio_info=audio_info, show_id=show_id, ep_id=ep_id)
 
 
 @app.route("/shows/<show_id>/edit", methods=["GET", "POST"])
@@ -1313,6 +1281,24 @@ def upload_episode_cover(show_id, ep_id):
         app.logger.error("Failed to resize episode cover for %s/%s: %s", show_id, ep_id, exc)
         return jsonify({"error": "Failed to process image"}), 500
 
+    # Обновляем config.json эпизода, чтобы поле "image" содержало имя файла
+    config_path = ep_dir / "config.json"
+    if config_path.exists():
+        try:
+            with config_path.open("r", encoding="utf-8") as cf:
+                cfg = json.load(cf)
+        except Exception:
+            cfg = {}
+    else:
+        cfg = {}
+
+    cfg["image"] = img_name
+    try:
+        with config_path.open("w", encoding="utf-8") as cf:
+            json.dump(cfg, cf, ensure_ascii=False, indent=2)
+    except Exception as exc:
+        app.logger.error("Failed to update episode config %s: %s", config_path, exc)
+
     url = f"/shows/{show_id}/episodes/{ep_id}/{img_name}?v={int(file_path.stat().st_mtime)}"
     return jsonify({"image_url": url})
 
@@ -1323,6 +1309,79 @@ def upload_episode_audio(show_id, ep_id):
     if not ep_dir.exists():
         return jsonify({"error": "Episode not found"}), 404
 
+    # Support two modes:
+    # 1) Traditional multipart upload with key 'audio' in request.files
+    # 2) JSON payload {"tempFile": "relative/path/from/uploads", "filename": "desired_name.mp3"}
+    if request.is_json:
+        data = request.get_json(silent=True) or {}
+        temp_path_str = data.get('tempFile')
+        new_filename = secure_filename(data.get('filename', 'uploaded.mp3'))
+        if temp_path_str:
+            temp_path = BASE_DIR / temp_path_str
+            if not temp_path.exists():
+                return jsonify({"error": "Temp file not found"}), 400
+            # Remove existing mp3 files to keep directory clean
+            for existing in ep_dir.glob('*.mp3'):
+                try:
+                    existing.unlink()
+                except OSError:
+                    pass
+            dest_path = ep_dir / new_filename
+            try:
+                shutil.move(str(temp_path), str(dest_path))
+            except Exception as exc:
+                app.logger.error("Failed to move temp audio %s to %s: %s", temp_path, dest_path, exc)
+                return jsonify({"error": "Failed to move file"}), 500
+            # Обновляем config.json эпизода, чтобы поле "audio" содержало имя файла
+            config_path = ep_dir / "config.json"
+            if config_path.exists():
+                try:
+                    with config_path.open("r", encoding="utf-8") as cf:
+                        cfg = json.load(cf)
+                except Exception:
+                    cfg = {}
+            else:
+                cfg = {}
+
+            cfg["audio"] = new_filename
+            try:
+                with config_path.open("w", encoding="utf-8") as cf:
+                    json.dump(cfg, cf, ensure_ascii=False, indent=2)
+            except Exception as exc:
+                app.logger.error("Failed to update episode config %s: %s", config_path, exc)
+
+            # После успешного перемещения можно удалить временную директорию upload_id, если она пуста
+            try:
+                upload_dir_parent = temp_path.parent  # tmp_uploads/<upload_id>
+                if upload_dir_parent.exists():
+                    shutil.rmtree(upload_dir_parent, ignore_errors=True)
+            except Exception as exc:
+                app.logger.warning("Cannot remove temp upload dir %s: %s", upload_dir_parent, exc)
+
+            url = f"/shows/{show_id}/episodes/{ep_id}/{new_filename}?v={int(dest_path.stat().st_mtime)}"
+            # Update metadata.json and launch background processing
+            meta_path = ep_dir / "metadata.json"
+            meta = {}
+            if meta_path.exists():
+                try:
+                    with meta_path.open("r", encoding="utf-8") as mf:
+                        meta = json.load(mf)
+                except Exception:
+                    meta = {}
+            meta.update({
+                "audio": url.split("?v=")[0],
+                "conversion_status": "processing",
+            })
+            try:
+                with meta_path.open("w", encoding="utf-8") as mf:
+                    json.dump(meta, mf, ensure_ascii=False, indent=2)
+            except Exception as exc:
+                app.logger.error("Failed to update metadata for %s: %s", ep_dir, exc)
+            # Kick off transcoding / ID3 tagging in background
+            threading.Thread(target=process_audio_background, args=(str(dest_path), show_id, ep_id)).start()
+            return jsonify({"audio_url": url})
+    
+    # Fallback to multipart/form-data
     if 'audio' not in request.files:
         return jsonify({"error": "No file uploaded"}), 400
 
@@ -1342,6 +1401,26 @@ def upload_episode_audio(show_id, ep_id):
     file.save(str(file_path))
 
     url = f"/shows/{show_id}/episodes/{ep_id}/{filename}?v={int(file_path.stat().st_mtime)}"
+    # Update metadata.json and launch background processing
+    meta_path = ep_dir / "metadata.json"
+    meta = {}
+    if meta_path.exists():
+        try:
+            with meta_path.open("r", encoding="utf-8") as mf:
+                meta = json.load(mf)
+        except Exception:
+            meta = {}
+    meta.update({
+        "audio": url.split("?v=")[0],
+        "conversion_status": "processing",
+    })
+    try:
+        with meta_path.open("w", encoding="utf-8") as mf:
+            json.dump(meta, mf, ensure_ascii=False, indent=2)
+    except Exception as exc:
+        app.logger.error("Failed to update metadata for %s: %s", ep_dir, exc)
+    threading.Thread(target=process_audio_background, args=(str(file_path), show_id, ep_id)).start()
+
     return jsonify({"audio_url": url})
 
 
@@ -2017,7 +2096,82 @@ def batch_upload_episodes():
             with open(episode_dir / "config.json", "w", encoding="utf-8") as f:
                 json.dump(episode_config, f, ensure_ascii=False, indent=2)
                 
-            # Обработка и сохранение файлов будет реализована на следующем этапе
+            # --- Обработка медиафайлов и обновление метаданных ---
+            audio_temp = episode.get('audioFile') or episode.get('tempFile')
+            cover_temp = episode.get('coverFile')
+
+            # Базовая структура метаданных для metadata.json
+            meta = {
+                "title": title,
+                "summary": summary,
+                "description": plain_text_to_html(description) if description else "",
+                "number": number,
+                "genres": genres,
+                "published_at": episode_config["published_at"],
+                "conversion_status": "pending",
+            }
+
+            # === AUDIO ===
+            if audio_temp:
+                audio_src = (BASE_DIR / audio_temp.lstrip('/')).resolve()
+                if audio_src.exists():
+                    audio_filename = secure_filename(Path(audio_src).name)
+                    dest_audio_path = episode_dir / audio_filename
+                    try:
+                        shutil.move(str(audio_src), str(dest_audio_path))
+                    except Exception:
+                        # fall back to copy if move fails (e.g., cross-device)
+                        shutil.copy2(str(audio_src), str(dest_audio_path))
+                    # clean up tmp upload directory if applicable
+                    try:
+                        if audio_src.parent.parent == UPLOADS_DIR:
+                            shutil.rmtree(audio_src.parent, ignore_errors=True)
+                    except Exception:
+                        pass
+                    audio_url = f"/shows/{show_id}/episodes/{episode_id}/{audio_filename}"
+                    episode_config["audio"] = audio_url
+                    meta["audio"] = audio_url
+                    meta["conversion_status"] = "processing"
+                    # стартуем фоновую обработку (транскодирование, теги и т.д.)
+                    threading.Thread(target=process_audio_background, args=(str(dest_audio_path), show_id, episode_id)).start()
+                else:
+                    app.logger.error(f"[batch] Audio temp file not found: {audio_temp}")
+
+            # === COVER IMAGE ===
+            if cover_temp:
+                cover_src = (BASE_DIR / cover_temp.lstrip('/')).resolve()
+                if cover_src.exists():
+                    cover_filename = secure_filename(Path(cover_src).name)
+                    dest_cover_path = episode_dir / cover_filename
+                    try:
+                        shutil.move(str(cover_src), str(dest_cover_path))
+                    except Exception:
+                        shutil.copy2(str(cover_src), str(dest_cover_path))
+                    try:
+                        processed_path = resize_cover_image(dest_cover_path)
+                        dest_cover_path = processed_path
+                        cover_filename = processed_path.name
+                    except Exception as exc:
+                        app.logger.error(f"[batch] Failed to resize cover image for {episode_id}: {exc}")
+                    cover_url = f"/shows/{show_id}/episodes/{episode_id}/{cover_filename}"
+                    episode_config["image"] = cover_url
+                    meta["episode_image"] = cover_url
+                else:
+                    app.logger.error(f"[batch] Cover temp file not found: {cover_temp}")
+
+            # Сохраняем обновлённый config.json
+            try:
+                with open(episode_dir / "config.json", "w", encoding="utf-8") as f:
+                    json.dump(episode_config, f, ensure_ascii=False, indent=2)
+            except Exception as exc:
+                app.logger.error(f"[batch] Failed to write config.json for {episode_id}: {exc}")
+
+            # Сохраняем metadata.json (используется процессом обработки и фронтом)
+            try:
+                with open(episode_dir / "metadata.json", "w", encoding="utf-8") as mf:
+                    json.dump(meta, mf, ensure_ascii=False, indent=2)
+            except Exception as exc:
+                app.logger.error(f"[batch] Failed to write metadata.json for {episode_id}: {exc}")
             
             results.append({
                 'number': number,
