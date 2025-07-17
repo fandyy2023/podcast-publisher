@@ -5,3 +5,5 @@ python-dotenv>=1.0.0
 pydub>=0.25.0  # используется только если включён force_transcode
 bleach>=6.0.0
 Pillow>=10.0.0
+pandas>=2.0.0
+openpyxl>=3.1.2

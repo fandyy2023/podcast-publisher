@@ -1387,8 +1387,7 @@ def upload_episode_audio(show_id, ep_id):
 
     file = request.files['audio']
     filename = secure_filename(file.filename)
-    if not filename.lower().endswith('.mp3'):
-        return jsonify({"error": "Only MP3 files are allowed"}), 400
+
 
     # Remove existing mp3 files to keep directory clean
     for existing in ep_dir.glob('*.mp3'):
@@ -2236,6 +2235,57 @@ def create_episode_id(title):
     # Handle GET request (page)
     return render_template("settings.html", **current_settings)
 
+
+
+
+# === SIMPLE FILE UPLOAD (non-chunked) ===
+@app.route('/api/upload/simple', methods=['POST'])
+def upload_simple_file():
+    """Endpoint to upload a single (small <100 MB) file without chunking.
+    Saves the file in a temporary directory under ``tmp_uploads`` and returns
+    a payload compatible with further processing (e.g. ``tempFile`` used by
+    ``batch_upload_episodes``).
+    """
+    try:
+        if 'file' not in request.files:
+            app.logger.warning("Simple upload failed: no file part in request")
+            return jsonify({'error': 'No file part'}), 400
+        f = request.files['file']
+        if f.filename == '':
+            app.logger.warning("Simple upload failed: empty filename")
+            return jsonify({'error': 'Empty filename'}), 400
+
+        # Ensure filename is secure
+        filename = secure_filename(f.filename)
+        # Generate a unique upload ID similar to the chunked workflow
+        upload_id = f"simple_{uuid.uuid4().hex[:16]}"
+        dest_dir = UPLOADS_DIR / upload_id
+        dest_dir.mkdir(parents=True, exist_ok=True)
+        dest_path = dest_dir / filename
+        f.save(str(dest_path))
+
+        # Basic info about the uploaded file
+        size_bytes = dest_path.stat().st_size
+        app.logger.info(
+            "Simple upload %s saved: %s (%.1f MB)",
+            upload_id,
+            filename,
+            size_bytes / (1024 * 1024)
+        )
+
+        return jsonify({
+            'success': True,
+            'uploadId': upload_id,
+            'filename': filename,
+            'size': size_bytes,
+            # Path relative to BASE_DIR so that batch handlers can resolve it
+            'tempFile': str(dest_path.relative_to(BASE_DIR))
+        }), 201
+
+    except Exception as e:
+        app.logger.error("Unexpected error in upload_simple_file: %s", e)
+        app.logger.error(traceback.format_exc())
+        return jsonify({'error': 'Server error', 'details': str(e)}), 500
 
 # Initialize batch upload routes
 try:

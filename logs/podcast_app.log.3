@@ -1,119 +1,74 @@
-2025-07-17 09:15:59,594 ERROR: Traceback (most recent call last):
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/app.py", line 1402, in upload_chunk
-    if 'file' not in request.files:
-                     ^^^^^^^^^^^^^
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/venv/lib/python3.13/site-packages/werkzeug/utils.py", line 107, in __get__
-    value = self.fget(obj)  # type: ignore
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/venv/lib/python3.13/site-packages/werkzeug/wrappers/request.py", line 497, in files
-    self._load_form_data()
-    ~~~~~~~~~~~~~~~~~~~~^^
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/venv/lib/python3.13/site-packages/flask/wrappers.py", line 198, in _load_form_data
-    super()._load_form_data()
-    ~~~~~~~~~~~~~~~~~~~~~~~^^
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/venv/lib/python3.13/site-packages/werkzeug/wrappers/request.py", line 271, in _load_form_data
-    data = parser.parse(
-        self._get_stream_for_parsing(),
-    ...<2 lines>...
-        self.mimetype_params,
-    )
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/venv/lib/python3.13/site-packages/werkzeug/formparser.py", line 242, in parse
-    return parse_func(stream, mimetype, content_length, options)
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/venv/lib/python3.13/site-packages/werkzeug/formparser.py", line 267, in _parse_multipart
-    form, files = parser.parse(stream, boundary, content_length)
-                  ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/venv/lib/python3.13/site-packages/werkzeug/formparser.py", line 368, in parse
-    for data in _chunk_iter(stream.read, self.buffer_size):
-                ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/venv/lib/python3.13/site-packages/werkzeug/formparser.py", line 423, in _chunk_iter
-    data = read(size)
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/venv/lib/python3.13/site-packages/werkzeug/wsgi.py", line 562, in readinto
-    self.on_disconnect()
-    ~~~~~~~~~~~~~~~~~~^^
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/venv/lib/python3.13/site-packages/werkzeug/wsgi.py", line 499, in on_disconnect
-    raise ClientDisconnected()
-werkzeug.exceptions.ClientDisconnected: 400 Bad Request: The browser (or proxy) sent a request that this server could not understand.
- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1476]
-2025-07-17 09:15:59,604 ERROR: Unexpected error in upload_chunk: 400 Bad Request: The browser (or proxy) sent a request that this server could not understand. [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1475]
-2025-07-17 09:15:59,604 ERROR: Unexpected error in upload_chunk: 400 Bad Request: The browser (or proxy) sent a request that this server could not understand. [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1475]
-2025-07-17 09:15:59,621 ERROR: Traceback (most recent call last):
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/app.py", line 1402, in upload_chunk
-    if 'file' not in request.files:
-                     ^^^^^^^^^^^^^
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/venv/lib/python3.13/site-packages/werkzeug/utils.py", line 107, in __get__
-    value = self.fget(obj)  # type: ignore
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/venv/lib/python3.13/site-packages/werkzeug/wrappers/request.py", line 497, in files
-    self._load_form_data()
-    ~~~~~~~~~~~~~~~~~~~~^^
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/venv/lib/python3.13/site-packages/flask/wrappers.py", line 198, in _load_form_data
-    super()._load_form_data()
-    ~~~~~~~~~~~~~~~~~~~~~~~^^
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/venv/lib/python3.13/site-packages/werkzeug/wrappers/request.py", line 271, in _load_form_data
-    data = parser.parse(
-        self._get_stream_for_parsing(),
-    ...<2 lines>...
-        self.mimetype_params,
-    )
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/venv/lib/python3.13/site-packages/werkzeug/formparser.py", line 242, in parse
-    return parse_func(stream, mimetype, content_length, options)
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/venv/lib/python3.13/site-packages/werkzeug/formparser.py", line 267, in _parse_multipart
-    form, files = parser.parse(stream, boundary, content_length)
-                  ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/venv/lib/python3.13/site-packages/werkzeug/formparser.py", line 368, in parse
-    for data in _chunk_iter(stream.read, self.buffer_size):
-                ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/venv/lib/python3.13/site-packages/werkzeug/formparser.py", line 423, in _chunk_iter
-    data = read(size)
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/venv/lib/python3.13/site-packages/werkzeug/wsgi.py", line 562, in readinto
-    self.on_disconnect()
-    ~~~~~~~~~~~~~~~~~~^^
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/venv/lib/python3.13/site-packages/werkzeug/wsgi.py", line 499, in on_disconnect
-    raise ClientDisconnected()
-werkzeug.exceptions.ClientDisconnected: 400 Bad Request: The browser (or proxy) sent a request that this server could not understand.
- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1476]
-2025-07-17 09:15:59,625 ERROR: Traceback (most recent call last):
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/app.py", line 1402, in upload_chunk
-    if 'file' not in request.files:
-                     ^^^^^^^^^^^^^
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/venv/lib/python3.13/site-packages/werkzeug/utils.py", line 107, in __get__
-    value = self.fget(obj)  # type: ignore
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/venv/lib/python3.13/site-packages/werkzeug/wrappers/request.py", line 497, in files
-    self._load_form_data()
-    ~~~~~~~~~~~~~~~~~~~~^^
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/venv/lib/python3.13/site-packages/flask/wrappers.py", line 198, in _load_form_data
-    super()._load_form_data()
-    ~~~~~~~~~~~~~~~~~~~~~~~^^
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/venv/lib/python3.13/site-packages/werkzeug/wrappers/request.py", line 271, in _load_form_data
-    data = parser.parse(
-        self._get_stream_for_parsing(),
-    ...<2 lines>...
-        self.mimetype_params,
-    )
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/venv/lib/python3.13/site-packages/werkzeug/formparser.py", line 242, in parse
-    return parse_func(stream, mimetype, content_length, options)
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/venv/lib/python3.13/site-packages/werkzeug/formparser.py", line 267, in _parse_multipart
-    form, files = parser.parse(stream, boundary, content_length)
-                  ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/venv/lib/python3.13/site-packages/werkzeug/formparser.py", line 368, in parse
-    for data in _chunk_iter(stream.read, self.buffer_size):
-                ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/venv/lib/python3.13/site-packages/werkzeug/formparser.py", line 423, in _chunk_iter
-    data = read(size)
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/venv/lib/python3.13/site-packages/werkzeug/wsgi.py", line 562, in readinto
-    self.on_disconnect()
-    ~~~~~~~~~~~~~~~~~~^^
-  File "/Users/poolpooly/CascadeProjects/podcast-publisher/venv/lib/python3.13/site-packages/werkzeug/wsgi.py", line 499, in on_disconnect
-    raise ClientDisconnected()
-werkzeug.exceptions.ClientDisconnected: 400 Bad Request: The browser (or proxy) sent a request that this server could not understand.
- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1476]
-2025-07-17 09:16:09,387 INFO: Chunk 2/16 received for upload upload_ow9o3m9whui9ip3tii3p5a (1/16 complete) [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1461]
-2025-07-17 09:16:09,387 INFO: Chunk 3/16 received for upload upload_ow9o3m9whui9ip3tii3p5a (1/16 complete) [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1461]
-2025-07-17 09:16:09,428 INFO: Chunk 1/16 received for upload upload_ow9o3m9whui9ip3tii3p5a (2/16 complete) [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1461]
-2025-07-17 09:16:16,941 INFO: Chunk 5/16 received for upload upload_ow9o3m9whui9ip3tii3p5a (3/16 complete) [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1461]
-2025-07-17 09:16:16,961 INFO: Chunk 6/16 received for upload upload_ow9o3m9whui9ip3tii3p5a (4/16 complete) [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1461]
-2025-07-17 09:16:16,966 INFO: Chunk 4/16 received for upload upload_ow9o3m9whui9ip3tii3p5a (5/16 complete) [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1461]
-2025-07-17 09:16:24,935 INFO: Chunk 7/16 received for upload upload_ow9o3m9whui9ip3tii3p5a (6/16 complete) [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1461]
-2025-07-17 09:16:24,952 INFO: Chunk 8/16 received for upload upload_ow9o3m9whui9ip3tii3p5a (7/16 complete) [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1461]
-2025-07-17 09:16:25,018 INFO: Chunk 9/16 received for upload upload_ow9o3m9whui9ip3tii3p5a (8/16 complete) [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1461]
-2025-07-17 09:16:41,153 INFO: Chunk 10/16 received for upload upload_ow9o3m9whui9ip3tii3p5a (9/16 complete) [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1461]
-2025-07-17 09:16:41,196 INFO: Chunk 11/16 received for upload upload_ow9o3m9whui9ip3tii3p5a (10/16 complete) [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1461]
-2025-07-17 09:16:41,273 INFO: Chunk 12/16 received for upload upload_ow9o3m9whui9ip3tii3p5a (11/16 complete) [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1461]
+2025-07-17 09:56:00,905 INFO: Chunk 6/16 received for upload upload_n0wd0lv9yvimxf3kg0k9le (5/16 complete) [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1461]
+2025-07-17 09:56:00,907 INFO: Chunk 4/16 received for upload upload_n0wd0lv9yvimxf3kg0k9le (6/16 complete) [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1461]
+2025-07-17 09:56:05,239 INFO: Chunk 8/16 received for upload upload_n0wd0lv9yvimxf3kg0k9le (7/16 complete) [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1461]
+2025-07-17 09:56:05,240 INFO: Chunk 9/16 received for upload upload_n0wd0lv9yvimxf3kg0k9le (8/16 complete) [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1461]
+2025-07-17 09:56:05,240 INFO: Chunk 7/16 received for upload upload_n0wd0lv9yvimxf3kg0k9le (9/16 complete) [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1461]
+2025-07-17 09:56:09,645 INFO: Chunk 11/16 received for upload upload_n0wd0lv9yvimxf3kg0k9le (10/16 complete) [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1461]
+2025-07-17 09:56:09,651 INFO: Chunk 10/16 received for upload upload_n0wd0lv9yvimxf3kg0k9le (11/16 complete) [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1461]
+2025-07-17 09:56:09,655 INFO: Chunk 12/16 received for upload upload_n0wd0lv9yvimxf3kg0k9le (12/16 complete) [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1461]
+2025-07-17 09:56:14,235 INFO: Chunk 15/16 received for upload upload_n0wd0lv9yvimxf3kg0k9le (13/16 complete) [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1461]
+2025-07-17 09:56:14,246 INFO: Chunk 14/16 received for upload upload_n0wd0lv9yvimxf3kg0k9le (14/16 complete) [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1461]
+2025-07-17 09:56:14,247 INFO: Chunk 13/16 received for upload upload_n0wd0lv9yvimxf3kg0k9le (15/16 complete) [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1461]
+2025-07-17 09:56:14,433 INFO: Chunk 16/16 received for upload upload_n0wd0lv9yvimxf3kg0k9le (16/16 complete) [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1461]
+2025-07-17 09:56:14,470 INFO: Combining 16 chunks for upload upload_n0wd0lv9yvimxf3kg0k9le, filename: 104_The_Sound_of_Silence_and_Deaf_Culture.wav [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1528]
+2025-07-17 09:56:14,852 INFO: Successfully combined 16 chunks, total size: 126781484 bytes [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1551]
+2025-07-17 09:56:14,959 INFO: Upload upload_n0wd0lv9yvimxf3kg0k9le completed successfully: 104_The_Sound_of_Silence_and_Deaf_Culture.wav, size: 126781484 bytes, hash: 86936266... [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1565]
+2025-07-17 10:11:45,495 INFO: --- Podcast Publisher App Started --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:53]
+2025-07-17 10:11:45,867 INFO: Batch upload routes initialized successfully [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:2244]
+[2025-07-17 10:11:45,867] INFO in app: Batch upload routes initialized successfully
+2025-07-17 10:12:13,202 INFO: Received batch upload request for 1 episodes in english [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:2030]
+[2025-07-17 10:12:13,202] INFO in app: Received batch upload request for 1 episodes in english
+2025-07-17 10:12:13,207 ERROR: [batch] Audio temp file not found: 104_The Sound of Silence and Deaf Culture.wav [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:2138]
+[2025-07-17 10:12:13,207] ERROR in app: [batch] Audio temp file not found: 104_The Sound of Silence and Deaf Culture.wav
+2025-07-17 10:12:13,208 ERROR: [batch] Cover temp file not found: 104.png [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:2160]
+[2025-07-17 10:12:13,208] ERROR in app: [batch] Cover temp file not found: 104.png
+2025-07-17 10:12:17,699 INFO: Chunk 3/16 received for upload upload_bxl1pwm13tiktuxsugle (1/16 complete) [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1501]
+[2025-07-17 10:12:17,699] INFO in app: Chunk 3/16 received for upload upload_bxl1pwm13tiktuxsugle (1/16 complete)
+2025-07-17 10:12:17,720 INFO: Chunk 2/16 received for upload upload_bxl1pwm13tiktuxsugle (2/16 complete) [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1501]
+[2025-07-17 10:12:17,720] INFO in app: Chunk 2/16 received for upload upload_bxl1pwm13tiktuxsugle (2/16 complete)
+2025-07-17 10:12:17,723 INFO: Chunk 1/16 received for upload upload_bxl1pwm13tiktuxsugle (3/16 complete) [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1501]
+[2025-07-17 10:12:17,723] INFO in app: Chunk 1/16 received for upload upload_bxl1pwm13tiktuxsugle (3/16 complete)
+2025-07-17 10:12:22,195 INFO: Chunk 4/16 received for upload upload_bxl1pwm13tiktuxsugle (4/16 complete) [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1501]
+[2025-07-17 10:12:22,195] INFO in app: Chunk 4/16 received for upload upload_bxl1pwm13tiktuxsugle (4/16 complete)
+2025-07-17 10:12:22,382 INFO: Chunk 5/16 received for upload upload_bxl1pwm13tiktuxsugle (5/16 complete) [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1501]
+[2025-07-17 10:12:22,382] INFO in app: Chunk 5/16 received for upload upload_bxl1pwm13tiktuxsugle (5/16 complete)
+2025-07-17 10:12:22,419 INFO: Chunk 6/16 received for upload upload_bxl1pwm13tiktuxsugle (6/16 complete) [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1501]
+[2025-07-17 10:12:22,419] INFO in app: Chunk 6/16 received for upload upload_bxl1pwm13tiktuxsugle (6/16 complete)
+2025-07-17 10:12:26,295 INFO: Chunk 7/16 received for upload upload_bxl1pwm13tiktuxsugle (7/16 complete) [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1501]
+[2025-07-17 10:12:26,295] INFO in app: Chunk 7/16 received for upload upload_bxl1pwm13tiktuxsugle (7/16 complete)
+2025-07-17 10:12:27,998 INFO: Chunk 9/16 received for upload upload_bxl1pwm13tiktuxsugle (8/16 complete) [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1501]
+[2025-07-17 10:12:27,998] INFO in app: Chunk 9/16 received for upload upload_bxl1pwm13tiktuxsugle (8/16 complete)
+2025-07-17 10:12:28,001 INFO: Chunk 8/16 received for upload upload_bxl1pwm13tiktuxsugle (9/16 complete) [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1501]
+[2025-07-17 10:12:28,001] INFO in app: Chunk 8/16 received for upload upload_bxl1pwm13tiktuxsugle (9/16 complete)
+2025-07-17 10:12:29,014 INFO: Chunk 10/16 received for upload upload_bxl1pwm13tiktuxsugle (10/16 complete) [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1501]
+[2025-07-17 10:12:29,014] INFO in app: Chunk 10/16 received for upload upload_bxl1pwm13tiktuxsugle (10/16 complete)
+2025-07-17 10:12:32,339 INFO: Chunk 11/16 received for upload upload_bxl1pwm13tiktuxsugle (11/16 complete) [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1501]
+[2025-07-17 10:12:32,339] INFO in app: Chunk 11/16 received for upload upload_bxl1pwm13tiktuxsugle (11/16 complete)
+2025-07-17 10:12:32,342 INFO: Chunk 12/16 received for upload upload_bxl1pwm13tiktuxsugle (12/16 complete) [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1501]
+[2025-07-17 10:12:32,342] INFO in app: Chunk 12/16 received for upload upload_bxl1pwm13tiktuxsugle (12/16 complete)
+2025-07-17 10:12:32,494 INFO: Chunk 13/16 received for upload upload_bxl1pwm13tiktuxsugle (13/16 complete) [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1501]
+[2025-07-17 10:12:32,494] INFO in app: Chunk 13/16 received for upload upload_bxl1pwm13tiktuxsugle (13/16 complete)
+2025-07-17 10:12:35,243 INFO: Chunk 16/16 received for upload upload_bxl1pwm13tiktuxsugle (14/16 complete) [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1501]
+[2025-07-17 10:12:35,243] INFO in app: Chunk 16/16 received for upload upload_bxl1pwm13tiktuxsugle (14/16 complete)
+2025-07-17 10:12:35,552 INFO: Chunk 14/16 received for upload upload_bxl1pwm13tiktuxsugle (15/16 complete) [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1501]
+[2025-07-17 10:12:35,552] INFO in app: Chunk 14/16 received for upload upload_bxl1pwm13tiktuxsugle (15/16 complete)
+2025-07-17 10:12:35,552 INFO: Chunk 15/16 received for upload upload_bxl1pwm13tiktuxsugle (16/16 complete) [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1501]
+[2025-07-17 10:12:35,552] INFO in app: Chunk 15/16 received for upload upload_bxl1pwm13tiktuxsugle (16/16 complete)
+2025-07-17 10:12:35,590 INFO: Combining 16 chunks for upload upload_bxl1pwm13tiktuxsugle, filename: 104_The_Sound_of_Silence_and_Deaf_Culture.wav [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1568]
+[2025-07-17 10:12:35,590] INFO in app: Combining 16 chunks for upload upload_bxl1pwm13tiktuxsugle, filename: 104_The_Sound_of_Silence_and_Deaf_Culture.wav
+2025-07-17 10:12:35,860 INFO: Successfully combined 16 chunks, total size: 126781484 bytes [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1591]
+[2025-07-17 10:12:35,860] INFO in app: Successfully combined 16 chunks, total size: 126781484 bytes
+2025-07-17 10:12:35,944 INFO: Upload upload_bxl1pwm13tiktuxsugle completed successfully: 104_The_Sound_of_Silence_and_Deaf_Culture.wav, size: 126781484 bytes, hash: 86936266... [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:1605]
+[2025-07-17 10:12:35,944] INFO in app: Upload upload_bxl1pwm13tiktuxsugle completed successfully: 104_The_Sound_of_Silence_and_Deaf_Culture.wav, size: 126781484 bytes, hash: 86936266...
+2025-07-17 10:12:36,034 INFO: --- BG PROCESS START for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/4545/episodes/i-can-hear-you-whisper/104_The_Sound_of_Silence_and_Deaf_Culture.wav --- [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:859]
+[2025-07-17 10:12:36,034] INFO in app: --- BG PROCESS START for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/4545/episodes/i-can-hear-you-whisper/104_The_Sound_of_Silence_and_Deaf_Culture.wav ---
+2025-07-17 10:12:36,034 INFO: [BG] Loading metadata from /Users/poolpooly/CascadeProjects/podcast-publisher/shows/4545/episodes/i-can-hear-you-whisper/metadata.json [in /Users/poolpooly/CascadeProjects/podcast-publisher/app.py:868]
+[2025-07-17 10:12:36,034] INFO in app: [BG] Loading metadata from /Users/poolpooly/CascadeProjects/podcast-publisher/shows/4545/episodes/i-can-hear-you-whisper/metadata.json
+[2025-07-17 10:12:38,310] INFO in app: [BG] Checking transcoding for 104_The_Sound_of_Silence_and_Deaf_Culture.wav: needs_transcoding=True, reason='Файл не в формате MP3 (.wav)'
+[2025-07-17 10:12:38,313] INFO in app: [BG] Transcoding required for 104_The_Sound_of_Silence_and_Deaf_Culture.wav. Determining optimal bitrate…
+[2025-07-17 10:12:38,370] INFO in app: [BG] Selected target bitrate: 320k
+[2025-07-17 10:13:58,453] INFO in app: [BG] Transcoding successful. New file: /Users/poolpooly/CascadeProjects/podcast-publisher/shows/4545/episodes/i-can-hear-you-whisper/104_The_Sound_of_Silence_and_Deaf_Culture.mp3
+[2025-07-17 10:13:58,454] INFO in app: [BG] Getting audio info for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/4545/episodes/i-can-hear-you-whisper/104_The_Sound_of_Silence_and_Deaf_Culture.mp3
+[2025-07-17 10:13:58,559] INFO in app: [BG] Audio info obtained and updated in metadata.
+[2025-07-17 10:13:58,560] INFO in app: [BG] Metadata saved for episode i-can-hear-you-whisper with final status: success
+[2025-07-17 10:13:58,560] INFO in app: --- BG PROCESS END for /Users/poolpooly/CascadeProjects/podcast-publisher/shows/4545/episodes/i-can-hear-you-whisper/104_The_Sound_of_Silence_and_Deaf_Culture.wav ---
