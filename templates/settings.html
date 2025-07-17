@@ -414,6 +414,7 @@
                     <table id="match-table" class="match-table">
                         <thead>
                             <tr>
+                                <th><input type="checkbox" id="select-all-checkbox"></th>
                                 <th>№</th>
                                 <th>Аудиофайл</th>
                                 <th>Обложка</th>
@@ -499,6 +500,24 @@
             const batchUploadSelectedBtn = document.getElementById('upload-selected-btn');
             const batchUploadProgress = document.getElementById('upload-progress');
             const batchUploadStatusContainer = document.getElementById('upload-status');
+
+            // --- Select-all checkbox logic --- //
+            const selectAllCheckbox = document.getElementById('select-all-checkbox');
+            if (selectAllCheckbox) {
+                selectAllCheckbox.addEventListener('change', () => {
+                    const rowCheckboxes = batchMatchTableBody.querySelectorAll('input.row-checkbox');
+                    rowCheckboxes.forEach(cb => {
+                        cb.checked = selectAllCheckbox.checked;
+                        const rowIndex = cb.closest('tr')?.dataset.index;
+                        if (rowIndex !== undefined) {
+                            const idx = parseInt(rowIndex, 10);
+                            if (!isNaN(idx) && batchEpisodes[idx]) {
+                                batchEpisodes[idx].selected = cb.checked;
+                            }
+                        }
+                    });
+                });
+            }
             
             // Global data
             let batchSelectedLanguage = 'english';
@@ -1247,10 +1266,15 @@
                     // Чекбокс выбора
                     const checkboxCell = document.createElement('td');
                     const checkbox = document.createElement('input');
+        checkbox.classList.add('row-checkbox');
                     checkbox.type = 'checkbox';
                     checkbox.checked = episode.selected;
                     checkbox.addEventListener('change', () => {
                         episode.selected = checkbox.checked;
+            if (selectAllCheckbox) {
+                const anyUnchecked = batchMatchTableBody.querySelectorAll('input.row-checkbox:not(:checked)').length > 0;
+                selectAllCheckbox.checked = !anyUnchecked;
+            }
                     });
                     checkboxCell.appendChild(checkbox);
                     row.appendChild(checkboxCell);
