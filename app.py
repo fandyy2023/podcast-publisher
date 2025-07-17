@@ -1514,8 +1514,12 @@ def upload_chunk():
             return jsonify({'error': 'Missing required parameters', 'details': 'Both filename and uploadId are required'}), 400
         
         # Create upload directory for this upload
+        # Ensure base temp directory exists (may have been cleaned up by another process)
+        if not UPLOADS_DIR.exists():
+            UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
         upload_dir = UPLOADS_DIR / upload_id
-        upload_dir.mkdir(exist_ok=True)
+        # Create <tmp_uploads>/<upload_id>; allow nested creation in case base dir was re-created
+        upload_dir.mkdir(parents=True, exist_ok=True)
         
         try:
             # Save this chunk
